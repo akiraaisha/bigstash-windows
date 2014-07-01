@@ -27,6 +27,7 @@ namespace DeepfreezeSDK
     {
         #region fields
 
+        // Currently pointing to beta stage api.
         private readonly string _baseEndPoint = "https://stage.deepfreeze.io/";
         private readonly string _apiEndPoint = "api/v1/";
         private readonly string _tokenUri = "tokens/";
