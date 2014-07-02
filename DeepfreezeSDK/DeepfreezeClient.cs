@@ -285,7 +285,8 @@ namespace DeepfreezeSDK
             var httpClient = new HttpClient();
             var uriBuilder = new UriBuilder(_baseEndPoint + _apiEndPoint);
             httpClient.BaseAddress = uriBuilder.Uri;
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            // Add Accept Header with special deepfreeze mimetype.
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json; indent=4"));
             return httpClient;
         }
 
