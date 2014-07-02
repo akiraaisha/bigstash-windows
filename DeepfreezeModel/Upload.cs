@@ -14,6 +14,7 @@ namespace DeepfreezeModel
         public DateTime Created { get; set; }
         public Enumerations.Status Status { get; set; }
         public string Comment { get; set; }
+        public string S3 { get; set; }
 
         public string ToJson()
         {
