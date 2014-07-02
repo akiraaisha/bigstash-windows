@@ -22,6 +22,8 @@ namespace DeepfreezeModel
         /// Token creation date.
         /// </summary>
         public DateTime Created { get; set; }
+        public string User { get; set; }
+        public string Secret { get; set; }
 
         /// <summary>
         /// Serialize Token to JSON string

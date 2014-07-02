@@ -10,6 +10,7 @@ namespace DeepfreezeModel
     {
         public enum Status
         {
+            Creating,
             Pending,
             Resuming,
             InProgress,
@@ -28,7 +29,7 @@ namespace DeepfreezeModel
             switch(statusString)
             {
                 case "creating":
-                    status = Status.InProgress;
+                    status = Status.Creating;
                     break;
             }
 

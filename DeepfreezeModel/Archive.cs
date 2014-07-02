@@ -16,9 +16,7 @@ namespace DeepfreezeModel
         public DateTime Created { get; set; }
         public string Title { get; set; }
         public string Url { get; set; }
-        
-        
-        public IList<ArchiveFileInfo> Files { get; set; }
+        public string Upload { get; set; }
 
         public string ToJson()
         {
