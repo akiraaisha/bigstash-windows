@@ -9,7 +9,9 @@ namespace DeepfreezeModel
 {
     public class ArchivePostData
     {
+        [JsonProperty("size")]
         public long Size { get; set; }
+        [JsonProperty("title")]
         public string Title { get; set; }
 
         public string ToJson()
