@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 
+
 namespace DeepfreezeSDK
 {
     [Export(typeof(IDeepfreezeClient))]
@@ -27,14 +28,27 @@ namespace DeepfreezeSDK
     {
         #region fields
 
+        // strings representing http methods names in lower case;
+        private readonly string GET = "get";
+        private readonly string POST = "post";
+        private readonly string PUT = "put";
+        private readonly string PATCH = "patch";
+        private readonly string DELETE = "delete";
+
         // Currently pointing to beta stage api.
-        private readonly string _baseEndPoint = "https://stage.deepfreeze.io/";
-        private readonly string _apiEndPoint = "api/v1/";
-        private readonly string _tokenUri = "tokens/";
-        private readonly string _userUri = "user/";
-        private readonly string _uploadsUri = "uploads/";
-        private readonly string _archivesUri = "archives/";
-        private HttpClient _httpClient;
+        private readonly string HOST = "stage.deepfreeze.io";
+        private readonly string ACCEPT = "application/vnd.deepfreeze+json";
+        private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
+
+        private string SECRET;
+        private string KEY;
+
+        private readonly string _baseEndPoint = "https://stage.deepfreeze.io";
+        private readonly string _apiEndPoint = "/api/v1";
+        private readonly string _tokenUri = "/tokens/";
+        private readonly string _userUri = "/user/";
+        private readonly string _uploadsUri = "/uploads/";
+        private readonly string _archivesUri = "/archives/";
         
         #endregion
 
@@ -48,21 +62,25 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var response = await this._httpClient.GetAsync(_tokenUri);
-
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-                JObject json = JObject.Parse(content);
-
-                if ((int)json["count"] > 0)
+                using(var httpClient = new HttpClient())
                 {
-                    var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
-                    return tokens;
-                }
-                else
-                {
-                    throw new Exceptions.NoActiveTokenException();
+                    var request = CreateHttpRequestWithSignature(GET, _tokenUri);
+                    var response = await httpClient.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    JObject json = JObject.Parse(content);
+
+                    if ((int)json["count"] > 0)
+                    {
+                        var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
+                        return tokens;
+                    }
+                    else
+                    {
+                        throw new Exceptions.NoActiveTokenException();
+                    }
                 }
             }
             catch(AggregateException e)
@@ -75,24 +93,33 @@ namespace DeepfreezeSDK
         /// Create a Deepfreeze Token.
         /// </summary>
         /// <returns>TokenPostResponse</returns>
-        public async Task<TokenPostResponse> CreateTokenAsync()
+        public async Task<TokenPostResponse> CreateTokenAsync(string authorizationString)
         {
             try
             {
-                var response = await this._httpClient.PostAsync(_tokenUri, null);
-
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-
-                if (content != null)
+                // Only for this request, the client uses basic auth with user credentials.
+                // For every other authorized actions, a signed request should be sent.
+                using(var httpClient = new HttpClient())
                 {
-                    var tokenResponse = JsonConvert.DeserializeObject<TokenPostResponse>(content);
-                    return tokenResponse;
-                }
-                else
-                {
-                    throw new Exceptions.CreateTokenException();
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
+
+                    var requestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + _tokenUri).Uri;
+                    var response = await httpClient.PostAsync(requestUri, null);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null)
+                    {
+                        var tokenResponse = JsonConvert.DeserializeObject<TokenPostResponse>(content);
+                        return tokenResponse;
+                    }
+                    else
+                    {
+                        throw new Exceptions.CreateTokenException();
+                    }
                 }
             }
             catch (AggregateException e)
@@ -110,8 +137,6 @@ namespace DeepfreezeSDK
         {
             try
             {
-                this._httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", authorizationToken.Key);
-
                 var tokens = await this.GetTokensAsync();
 
                 return tokens.Select(x => x.Key).Contains(authorizationToken.Key);
@@ -132,9 +157,7 @@ namespace DeepfreezeSDK
         {
             try
             {
-                this._httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
-
-                var tokenResponse = await this.CreateTokenAsync();
+                var tokenResponse = await this.CreateTokenAsync(authorizationString);
 
                 var tokens = await this.GetTokensAsync();
 
@@ -154,22 +177,27 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var response = await this._httpClient.GetAsync(_userUri);
+                var request = CreateHttpRequestWithSignature(GET, _userUri);
 
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-                JObject json = JObject.Parse(content);
-
-                User user = new User()
+                using(var httpClient = new HttpClient())
                 {
-                    ID = (int)json["id"],
-                    Email = (string)json["email"],
-                    DateJoined = (DateTime)json["date_joined"],
-                    DisplayName = (string)json["displayname"]
-                };
+                    var response = await httpClient.SendAsync(request);
 
-                return user;
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    JObject json = JObject.Parse(content);
+
+                    User user = new User()
+                    {
+                        ID = (int)json["id"],
+                        Email = (string)json["email"],
+                        DateJoined = (DateTime)json["date_joined"],
+                        DisplayName = (string)json["displayname"]
+                    };
+
+                    return user;
+                }
             }
             catch(AggregateException e)
             { throw e; }
@@ -183,21 +211,25 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var response = await this._httpClient.GetAsync(_archivesUri);
-
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-                JObject json = JObject.Parse(content);
-
-                if ((int)json["count"] > 0)
+                using(var httpClient = new HttpClient())
                 {
-                    var archives = JsonConvert.DeserializeObject<List<Archive>>(json["results"].ToString());
-                    return archives;
-                }
-                else
-                {
-                    throw new Exceptions.NoArchivesFoundException();
+                    var request = CreateHttpRequestWithSignature(GET, _archivesUri);
+                    var response = await httpClient.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    JObject json = JObject.Parse(content);
+
+                    if ((int)json["count"] > 0)
+                    {
+                        var archives = JsonConvert.DeserializeObject<List<Archive>>(json["results"].ToString());
+                        return archives;
+                    }
+                    else
+                    {
+                        throw new Exceptions.NoArchivesFoundException();
+                    }
                 }
             }
             catch(AggregateException e)
@@ -221,21 +253,25 @@ namespace DeepfreezeSDK
                     Title = title
                 };
 
-                var httpContent = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
-                
-                var response = await this._httpClient.PostAsync(_archivesUri, httpContent);
+                var request = CreateHttpRequestWithSignature(POST, _archivesUri);
+                request.Content = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
 
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-
-                if (content != null)
+                using(var httpClient = new HttpClient())
                 {
-                    var archive = JsonConvert.DeserializeObject<Archive>(content);
-                    return archive;
+                    var response = await httpClient.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null)
+                    {
+                        var archive = JsonConvert.DeserializeObject<Archive>(content);
+                        return archive;
+                    }
+                    else
+                        throw new Exceptions.CreateArchiveException();
                 }
-                else
-                    throw new Exceptions.CreateArchiveException();
             }
             catch(AggregateException e)
             { throw e; }
@@ -249,21 +285,26 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var response = await this._httpClient.GetAsync(_uploadsUri);
+                var request = CreateHttpRequestWithSignature(GET, _uploadsUri);
 
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-                JObject json = JObject.Parse(content);
-
-                if ((int)json["count"] > 0)
+                using (var httpClient = new HttpClient())
                 {
-                    var uploads = JsonConvert.DeserializeObject<List<Upload>>(json["results"].ToString());
-                    return uploads;
-                }
-                else
-                {
-                    throw new Exceptions.NoUploadsFoundException();
+                    var response = await httpClient.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    JObject json = JObject.Parse(content);
+
+                    if ((int)json["count"] > 0)
+                    {
+                        var uploads = JsonConvert.DeserializeObject<List<Upload>>(json["results"].ToString());
+                        return uploads;
+                    }
+                    else
+                    {
+                        throw new Exceptions.NoUploadsFoundException();
+                    }
                 }
             }
             catch (AggregateException e)
@@ -280,21 +321,24 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var uri = archive.UploadUrl.Replace(this._httpClient.BaseAddress.ToString(), ""); //.Replace("http", "https");
+                var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
 
-                var response = await this._httpClient.PostAsync(uri, null);
-
-                response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
-
-                if (content != null)
+                using(var httpClient = new HttpClient())
                 {
-                    var upload = JsonConvert.DeserializeObject<Upload>(content);
-                    return upload;
+                    var response = await httpClient.SendAsync(request);
+
+                    //response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null)
+                    {
+                        var upload = JsonConvert.DeserializeObject<Upload>(content);
+                        return upload;
+                    }
+                    else
+                        throw new Exceptions.CreateUploadException();
                 }
-                else
-                    throw new Exceptions.CreateUploadException();
             }
             catch(AggregateException e)
             { throw e; }
@@ -309,13 +353,19 @@ namespace DeepfreezeSDK
         {
             try
             {
-                var uri = upload.Url.Replace(this._httpClient.BaseAddress.ToString(), "");//.Replace("http", "https");
+                var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
 
-                var response = await this._httpClient.DeleteAsync(uri);
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.SendAsync(request);
 
-                response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCode();
 
-                return true;
+                    // debug
+                    //var content = response.Content.ReadAsStringAsync();
+
+                    return true;
+                }
             }
             catch (AggregateException e)
             { throw e; }
@@ -339,27 +389,105 @@ namespace DeepfreezeSDK
 
         #endregion
 
-        #region constructor & initialization
+        #region private methods
 
-        public DeepfreezeClient()
+        /// <summary>
+        /// Create a HttpRequestMessage with Http-Signature authorization
+        /// and other HTTP headers as defined in the Deepfreeze API,
+        /// given a method name and a uri resource or complete url. The optional
+        /// isRelative parameter defines if a relative uri is given or a complete url.
+        /// Send the request using httpClient.SendAsync(request) method. If a content 
+        /// is needed, then costruct it in request.Content before sending it.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="resource"></param>
+        /// <param name="isRelative"></param>
+        /// <returns>HttpRequestMessage</returns>
+        private HttpRequestMessage CreateHttpRequestWithSignature(string method, string resource, bool isRelative = true)
         {
-            this._httpClient = InititializeHttpClient();
+            DateTimeOffset date = DateTime.Now;
+
+            // create a new Http request message.
+            HttpRequestMessage message = new HttpRequestMessage();
+            message.Method = new HttpMethod(method);
+
+            // if resource is relative, construct the request url.
+            if (isRelative)
+            {
+                message.RequestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + resource).Uri;
+            }
+            // else use only the resource variable since it already has the url value
+            else
+            {
+                message.RequestUri = new UriBuilder(resource).Uri;
+            }
+            
+            // set host header
+            message.Headers.Host = HOST;
+            // set accept header
+            message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
+
+            message.Headers.Add("X-Deepfreeze-Api-Key", KEY);
+
+            // set date header
+            message.Headers.Date = date;
+
+            var signature = CreateHMACSHA256Signature(method, resource, date, isRelative);
+
+            // add authorization header
+            message.Headers.Authorization = new AuthenticationHeaderValue("Signature", AUTHORIZATION + @",signature=""" + signature + @"""");
+
+            return message;
         }
 
-        public DeepfreezeClient(string authorization)
+        /// <summary>
+        /// Construct the text to sign and use HMACSHA256Sign method to return
+        /// the HMACSHA256 signature.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="resource"></param>
+        /// <param name="date"></param>
+        /// <param name="isRelative"></param>
+        /// <returns>string</returns>
+        private string CreateHMACSHA256Signature(string method, string resource, DateTimeOffset date, bool isRelative = true)
         {
-            this._httpClient = InititializeHttpClient();
-            this._httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorization);
+            // create string as source for the signature.
+            // use \n for LF (Unix format)
+            StringBuilder sb = new StringBuilder();
+
+            // if resource is relative, construct the request url.
+            if (isRelative)
+            {
+                sb.AppendFormat("(request-line): {0} {1}{2}\n", method, _apiEndPoint, resource);
+            }
+            // else use only the resource variable since it already has the url value
+            else
+            {
+                sb.AppendFormat("(request-line): {0} {1}\n", method, resource.Replace(_baseEndPoint, ""));
+            }
+
+            sb.AppendFormat("host: {0}\n", HOST);
+            sb.AppendFormat("accept: {0}\n", ACCEPT);
+            //sb.AppendFormat("x-deepfreeze-api-key: {0}\n", token); 
+            sb.AppendFormat("date: {0}", date.ToUniversalTime().ToString("r"));
+
+            // get signature
+            string signature = HelperMethods.HMACSHA256Sign(SECRET, sb.ToString());
+
+            return signature;
         }
 
-        private HttpClient InititializeHttpClient()
+        #endregion
+
+        #region constructor
+
+        public DeepfreezeClient() { }
+
+        [ImportingConstructor]
+        public DeepfreezeClient(string key, string secret)
         {
-            var httpClient = new HttpClient();
-            var uriBuilder = new UriBuilder(_baseEndPoint + _apiEndPoint);
-            httpClient.BaseAddress = uriBuilder.Uri;
-            // Add Accept Header with special deepfreeze mimetype.
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
-            return httpClient;
+            this.KEY = key;
+            this.SECRET = secret;
         }
 
         #endregion
