@@ -49,7 +49,8 @@
     <Compile Include="ArchivePostData.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="ArchiveFileInfo.cs" />
-    <Compile Include="S3.cs" />
+    <Compile Include="Quota.cs" />
+    <Compile Include="S3Info.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="TokenPostResponse.cs" />
     <Compile Include="Upload.cs" />
