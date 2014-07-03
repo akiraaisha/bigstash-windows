@@ -176,13 +176,42 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
+        /// Send a GET "archives/" request which returns all user's Deepfreeze archives.
+        /// </summary>
+        /// <returns>List of Archive</returns>
+        public async Task<List<Archive>> GetArchivesAsync()
+        {
+            try
+            {
+                var response = await this._httpClient.GetAsync(_archivesUri);
+
+                response.EnsureSuccessStatusCode();
+
+                string content = await response.Content.ReadAsStringAsync();
+                JObject json = JObject.Parse(content);
+
+                if ((int)json["count"] > 0)
+                {
+                    var archives = JsonConvert.DeserializeObject<List<Archive>>(json["results"].ToString());
+                    return archives;
+                }
+                else
+                {
+                    throw new Exceptions.NoArchivesFoundException();
+                }
+            }
+            catch(AggregateException e)
+            { throw e; }
+        }
+
+        /// <summary>
         /// Send a POST "archives/" request which returns a Deepfreeze archive.
         /// This request is responsible for creating a new archive given a size and a title.
         /// </summary>
         /// <param name="size"></param>
         /// <param name="title"></param>
         /// <returns>Archive</returns>
-        public async Task<Archive> PostNewArchiveAsync(long size, string title)
+        public async Task<Archive> CreateArchiveAsync(long size, string title)
         {
             try
             {
@@ -192,60 +221,103 @@ namespace DeepfreezeSDK
                     Title = title
                 };
 
-                var response = await this._httpClient.PostAsync(_archivesUri, new StringContent(data.ToJson()));
+                var httpContent = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
+                
+                var response = await this._httpClient.PostAsync(_archivesUri, httpContent);
 
                 response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync();
-                JObject json = JObject.Parse(content);
 
-                Archive archive = new Archive()
+                if (content != null)
                 {
-                    Status = Enumerations.GetStatusFromString((string)json["status"]),
-                    Size = (long)json["size"],
-                    Key = (string)json["key"],
-                    Checksum = (string)json["checksum"],
-                    Created = (DateTime)json["created"],
-                    Title = (string)json["title"],
-                    Url = (string)json["url"]
-                };
-
-                return archive;
+                    var archive = JsonConvert.DeserializeObject<Archive>(content);
+                    return archive;
+                }
+                else
+                    throw new Exceptions.CreateArchiveException();
             }
             catch(AggregateException e)
             { throw e; }
         }
 
         /// <summary>
-        /// Send a POST "archiveurl" request which returns a Deepfreeze upload.
-        /// This request is responsible for creating a new upload given an archive.
+        /// Send a GET "uploads/" request which returns all user's Deepfreeze uploads.
         /// </summary>
-        /// <param name="archive"></param>
-        /// <returns>Upload</returns>
-        public async Task<Upload> PostArchiveUrlAsync(Archive archive)
+        /// <returns>List of Upload</returns>
+        public async Task<List<Upload>> GetUploadsAsync()
         {
             try
             {
-                var id = archive.Key.Split('-').FirstOrDefault();
-                var response = await this._httpClient.PostAsync(_archivesUri + id, null);
+                var response = await this._httpClient.GetAsync(_uploadsUri);
 
                 response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync();
                 JObject json = JObject.Parse(content);
 
-                Upload upload = new Upload()
+                if ((int)json["count"] > 0)
                 {
-                    Url = (string)json["url"],
-                    ArchiveUrl = (string)json["archive"],
-                    Created = (DateTime)json["created"],
-                    Status = Enumerations.GetStatusFromString((string)json["status"]),
-                    Comment = (string)json["comment"]
-                };
+                    var uploads = JsonConvert.DeserializeObject<List<Upload>>(json["results"].ToString());
+                    return uploads;
+                }
+                else
+                {
+                    throw new Exceptions.NoUploadsFoundException();
+                }
+            }
+            catch (AggregateException e)
+            { throw e; }
+        }
 
-                return upload;
+        /// <summary>
+        /// Send a POST "Archive.Upload"-url request which returns a Deepfreeze upload.
+        /// This request is responsible for creating a new upload given an archive.
+        /// </summary>
+        /// <param name="archive"></param>
+        /// <returns>Upload</returns>
+        public async Task<Upload> CreateUploadAsync(Archive archive)
+        {
+            try
+            {
+                var uri = archive.UploadUrl.Replace(this._httpClient.BaseAddress.ToString(), ""); //.Replace("http", "https");
+
+                var response = await this._httpClient.PostAsync(uri, null);
+
+                response.EnsureSuccessStatusCode();
+
+                string content = await response.Content.ReadAsStringAsync();
+
+                if (content != null)
+                {
+                    var upload = JsonConvert.DeserializeObject<Upload>(content);
+                    return upload;
+                }
+                else
+                    throw new Exceptions.CreateUploadException();
             }
             catch(AggregateException e)
+            { throw e; }
+        }
+
+        /// <summary>
+        /// Send a DELETE "Upload.Url"-url request which deletes a Deepfreeze upload.
+        /// </summary>
+        /// <param name="archive"></param>
+        /// <returns>bool</returns>
+        public async Task<bool> DeleteUploadAsync(Upload upload)
+        {
+            try
+            {
+                var uri = upload.Url.Replace(this._httpClient.BaseAddress.ToString(), "");//.Replace("http", "https");
+
+                var response = await this._httpClient.DeleteAsync(uri);
+
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (AggregateException e)
             { throw e; }
         }
 
@@ -260,7 +332,7 @@ namespace DeepfreezeSDK
             {
                 archive.Size += file.Size;
             }
-            archive.Files = files;
+            
             string json = archive.ToJson();
             return archive;
         }
@@ -286,7 +358,7 @@ namespace DeepfreezeSDK
             var uriBuilder = new UriBuilder(_baseEndPoint + _apiEndPoint);
             httpClient.BaseAddress = uriBuilder.Uri;
             // Add Accept Header with special deepfreeze mimetype.
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json; indent=4"));
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
             return httpClient;
         }
 
