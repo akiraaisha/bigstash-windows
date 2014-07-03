@@ -357,6 +357,7 @@ namespace DeepfreezeSDK
 
                 using (var httpClient = new HttpClient())
                 {
+                    //var response = await httpClient.DeleteAsync(upload.Url);
                     var response = await httpClient.SendAsync(request);
 
                     response.EnsureSuccessStatusCode();
@@ -422,6 +423,10 @@ namespace DeepfreezeSDK
                 message.RequestUri = new UriBuilder(resource).Uri;
             }
             
+            // set use agent header
+            // TODO: should reflect the production version along with some platform information.
+            message.Headers.UserAgent.Add(new ProductInfoHeaderValue("deepfreeze-windows-desktop", "alpha"));
+
             // set host header
             message.Headers.Host = HOST;
             // set accept header
