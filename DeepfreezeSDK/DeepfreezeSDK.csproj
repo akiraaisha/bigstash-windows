@@ -52,7 +52,7 @@
   <ItemGroup>
     <Compile Include="DeepfreezeS3Client.cs" />
     <Compile Include="DeepfreezeClient.cs" />
-    <Compile Include="DeepfreezeSettings.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="HelperMethods.cs" />
     <Compile Include="IDeepfreezeS3Client.cs" />
