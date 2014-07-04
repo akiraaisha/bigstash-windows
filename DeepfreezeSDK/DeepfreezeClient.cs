@@ -87,11 +87,14 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Create a Deepfreeze Token.
+        /// Create a new Deepfreeze API token using user credentials.
         /// </summary>
-        /// <returns>TokenPostResponse</returns>
+        /// <param name="authorizationString"></param>
+        /// <returns>Token</returns>
         public async Task<Token> CreateTokenAsync(string authorizationString)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            Token token = new Token();
             try
             {
                 // Only for this request, the client uses basic auth with user credentials.
@@ -105,7 +108,7 @@ namespace DeepfreezeSDK
                     var name = @"{""name"":""Deepfreeze.io_for_Windows_on_" + Environment.MachineName + @"""}";
                     var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
                     
-                    var response = await httpClient.PostAsync(requestUri, requestContent);
+                    response = await httpClient.PostAsync(requestUri, requestContent);
 
                     response.EnsureSuccessStatusCode();
 
@@ -113,19 +116,28 @@ namespace DeepfreezeSDK
 
                     if (content != null)
                     {
-                        var tokenResponse = JsonConvert.DeserializeObject<Token>(content);
-                        return tokenResponse;
+                        token = JsonConvert.DeserializeObject<Token>(content);
+                        return token;
                     }
                     else
                     {
                         throw new Exceptions.CreateTokenException();
                     }
                 }
-            }
+            }   
             catch (AggregateException e)
-            {
-                throw e;
+            { throw e; }
+            catch(HttpRequestException e)
+            { 
+                if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    throw new UnauthorizedAccessException("Could not authenticate.");
+                }
+                else
+                    throw e; 
             }
+            catch(Exception e)
+            { throw e; }
         }
 
         /// <summary>
@@ -515,14 +527,14 @@ namespace DeepfreezeSDK
 
         #region constructor & public setters/getters
 
-        [ImportingConstructor]
+        //[ImportingConstructor]
         public DeepfreezeClient() { }
 
         
-        public DeepfreezeClient(Settings settings)
-        {
-            this.Settings = settings;
-        }
+        //public DeepfreezeClient(Settings settings)
+        //{
+        //    this.Settings = settings;
+        //}
 
         #endregion
     }
