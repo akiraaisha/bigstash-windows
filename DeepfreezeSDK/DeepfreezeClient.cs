@@ -40,7 +40,7 @@ namespace DeepfreezeSDK
         private readonly string ACCEPT = "application/vnd.deepfreeze+json";
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
-        private Token _TOKEN;
+        public Settings Settings { get; set; }
 
         private readonly string _baseEndPoint = "https://stage.deepfreeze.io";
         private readonly string _apiEndPoint = "/api/v1";
@@ -460,7 +460,7 @@ namespace DeepfreezeSDK
             // set accept header
             message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
 
-            message.Headers.Add("X-Deepfreeze-Api-Key", _TOKEN.Key);
+            message.Headers.Add("X-Deepfreeze-Api-Key", this.Settings.ActiveToken.Key);
 
             // set date header
             message.Headers.Date = date;
@@ -505,7 +505,7 @@ namespace DeepfreezeSDK
             sb.AppendFormat("date: {0}", date.ToUniversalTime().ToString("r"));
 
             // get signature
-            string signature = HelperMethods.HMACSHA256Sign(_TOKEN.Secret, sb.ToString());
+            string signature = HelperMethods.HMACSHA256Sign(this.Settings.ActiveToken.Secret, sb.ToString());
 
             return signature;
         }
@@ -517,14 +517,9 @@ namespace DeepfreezeSDK
         public DeepfreezeClient() { }
 
         [ImportingConstructor]
-        public DeepfreezeClient(Token token)
+        public DeepfreezeClient(Settings settings)
         {
-            this.SetClientToken(token);
-        }
-
-        public void SetClientToken(Token token)
-        {
-            this._TOKEN = token;
+            this.Settings = settings;
         }
 
         #endregion
