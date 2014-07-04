@@ -10,18 +10,18 @@ namespace DeepfreezeSDK
 {
     public interface IDeepfreezeClient
     {
-        void Setup(string accessKeyID, string secretAccessKey);
+        //void Setup(string accessKeyID, string secretAccessKey);
 
-        Task<List<S3Bucket>> ListBucketsAsync(CancellationToken token);
+        //Task<List<S3Bucket>> ListBucketsAsync(CancellationToken token);
 
-        Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName);
+        //Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName);
 
-        Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName, CancellationToken token);
+        //Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName, CancellationToken token);
 
-        Task UploadFileAsync(string existingBucketName, string keyName, string filePath, CancellationToken cts);
+        //Task UploadFileAsync(string existingBucketName, string keyName, string filePath, CancellationToken cts);
 
-        Task<List<MultipartUpload>> ListMultiPartUploadsAsync(string existingBucketName);
+        //Task<List<MultipartUpload>> ListMultiPartUploadsAsync(string existingBucketName);
 
-        Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadID, CancellationToken cts);
+        //Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadID, CancellationToken cts);
     }
 }
