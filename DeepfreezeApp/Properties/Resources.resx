@@ -117,20 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ApplicationName" xml:space="preserve">
-    <value>Deepfreeze</value>
-    <comment>Used for LOCALAPPDATA folder.</comment>
-  </data>
-  <data name="LoginResource" xml:space="preserve">
+  <data name="LoginButtonContent" xml:space="preserve">
     <value>Login</value>
-    <comment>Used for login button.</comment>
+    <comment>Used for login button content.</comment>
   </data>
   <data name="RememberPasswordURL" xml:space="preserve">
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
-  </data>
-  <data name="SettingsFileName" xml:space="preserve">
-    <value>preferences.json</value>
-    <comment>Used for preferences file in LOCALAPPDATA folder.</comment>
   </data>
 </root>

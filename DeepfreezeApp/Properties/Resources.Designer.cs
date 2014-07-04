@@ -61,20 +61,11 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.
-        /// </summary>
-        internal static string ApplicationName {
-            get {
-                return ResourceManager.GetString("ApplicationName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
-        internal static string LoginResource {
+        internal static string LoginButtonContent {
             get {
-                return ResourceManager.GetString("LoginResource", resourceCulture);
+                return ResourceManager.GetString("LoginButtonContent", resourceCulture);
             }
         }
         
@@ -84,15 +75,6 @@ namespace DeepfreezeApp.Properties {
         internal static string RememberPasswordURL {
             get {
                 return ResourceManager.GetString("RememberPasswordURL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to preferences.json.
-        /// </summary>
-        internal static string SettingsFileName {
-            get {
-                return ResourceManager.GetString("SettingsFileName", resourceCulture);
             }
         }
     }
