@@ -19,12 +19,10 @@ using Amazon.Runtime;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-
-
 namespace DeepfreezeSDK
 {
     [Export(typeof(IDeepfreezeClient))]
-    public class DeepfreezeClient
+    public class DeepfreezeClient : IDeepfreezeClient
     {
         #region fields
 
@@ -104,7 +102,10 @@ namespace DeepfreezeSDK
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
 
                     var requestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + _tokenUri).Uri;
-                    var response = await httpClient.PostAsync(requestUri, null);
+                    var name = @"{""name"":""Deepfreeze.io_for_Windows_on_" + Environment.MachineName + @"""}";
+                    var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
+                    
+                    var response = await httpClient.PostAsync(requestUri, requestContent);
 
                     response.EnsureSuccessStatusCode();
 
@@ -514,9 +515,10 @@ namespace DeepfreezeSDK
 
         #region constructor & public setters/getters
 
+        [ImportingConstructor]
         public DeepfreezeClient() { }
 
-        [ImportingConstructor]
+        
         public DeepfreezeClient(Settings settings)
         {
             this.Settings = settings;
