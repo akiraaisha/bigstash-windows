@@ -49,13 +49,13 @@
     <Compile Include="ArchivePostData.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="ArchiveFileInfo.cs" />
+    <Compile Include="LocalStorage.cs" />
+    <Compile Include="PartInfo.cs" />
     <Compile Include="Quota.cs" />
     <Compile Include="S3Info.cs" />
     <Compile Include="Token.cs" />
-    <Compile Include="TokenPostResponse.cs" />
     <Compile Include="Upload.cs" />
     <Compile Include="UploadOperation.cs" />
-    <Compile Include="PartInfo.cs" />
     <Compile Include="User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

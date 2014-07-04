@@ -1,34 +1,31 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DeepfreezeModel
 {
-    public class TokenPostResponse
+    public class PartInfo
     {
         /// <summary>
-        /// Authorization token for communicating with
-        /// the Deepfreeze API and Amazon S3 API.
-        /// </summary>
-        public string Key { get; set; }
-        /// <summary>
-        /// Unique token ID.
+        /// ID is the part number, used to identify each part
+        /// and keep track of the parts' order.
         /// </summary>
         public int ID { get; set; }
         /// <summary>
-        /// Secret key.
+        /// True if part has finished uploading
+        /// and received an etag value from the upload response.
         /// </summary>
-        public string Secret { get; set; }
+        public bool IsUploaded { get; set; }
         /// <summary>
-        /// Token creation date.
+        /// MD5 hash included in the UploadPartResponse.
         /// </summary>
-        public DateTime Created { get; set; }
+        public string Etag { get; set; }
 
         /// <summary>
-        /// Serialize TokenPostResponse to JSON string
+        /// Serialize UploadPartInfo to JSON string
         /// </summary>
         /// <returns></returns>
         public string ToJson()
