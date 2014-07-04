@@ -1,0 +1,11 @@
+﻿<Window x:Class="DeepfreezeApp.ShellView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cal="http://www.caliburnproject.org"
+        Title="ShellView" Height="300" Width="300">
+    <Grid>
+        <StackPanel>
+            <ContentControl cal:View.Model="{Binding LoginVM}" />
+        </StackPanel>
+    </Grid>
+</Window>
