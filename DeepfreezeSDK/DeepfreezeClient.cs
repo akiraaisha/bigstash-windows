@@ -29,11 +29,11 @@ namespace DeepfreezeSDK
         #region fields
 
         // strings representing http methods names in lower case;
-        private readonly string GET = "get";
-        private readonly string POST = "post";
-        private readonly string PUT = "put";
-        private readonly string PATCH = "patch";
-        private readonly string DELETE = "delete";
+        private readonly string GET = "GET";
+        private readonly string POST = "POST";
+        private readonly string PUT = "PUT";
+        private readonly string PATCH = "PATCH";
+        private readonly string DELETE = "DELETE";
 
         // Currently pointing to beta stage api.
         private readonly string HOST = "stage.deepfreeze.io";
@@ -253,7 +253,7 @@ namespace DeepfreezeSDK
                 };
 
                 var request = CreateHttpRequestWithSignature(POST, _archivesUri);
-                request.Content = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
+                request.Content = new StringContent(data.ToJson(), Encoding.ASCII, "application/json");
 
                 using(var httpClient = new HttpClient())
                 {
@@ -311,7 +311,7 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Send a POST "Archive.Upload"-url request which returns a Deepfreeze upload.
+        /// Send a POST "Upload.Url"-url request which returns a Deepfreeze upload.
         /// This request is responsible for creating a new upload given an archive.
         /// </summary>
         /// <param name="archive"></param>
@@ -326,7 +326,7 @@ namespace DeepfreezeSDK
                 {
                     var response = await httpClient.SendAsync(request);
 
-                    //response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCode();
 
                     string content = await response.Content.ReadAsStringAsync();
 
@@ -334,6 +334,35 @@ namespace DeepfreezeSDK
                     {
                         var upload = JsonConvert.DeserializeObject<Upload>(content);
                         return upload;
+                    }
+                    else
+                        throw new Exceptions.CreateUploadException();
+                }
+            }
+            catch(AggregateException e)
+            { throw e; }
+        }
+
+
+        public async Task<Upload> FinishUploadAsync(Upload upload)
+        {
+            try
+            {
+                var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
+                request.Content = new StringContent(@"{""status"": ""uploaded""}", Encoding.ASCII, "application/json");
+
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null)
+                    {
+                        var patchedUpload = JsonConvert.DeserializeObject<Upload>(content);
+                        return patchedUpload;
                     }
                     else
                         throw new Exceptions.CreateUploadException();
@@ -462,12 +491,12 @@ namespace DeepfreezeSDK
             // if resource is relative, construct the request url.
             if (isRelative)
             {
-                sb.AppendFormat("(request-line): {0} {1}{2}\n", method, _apiEndPoint, resource);
+                sb.AppendFormat("(request-line): {0} {1}{2}\n", method.ToLower(), _apiEndPoint, resource);
             }
             // else use only the resource variable since it already has the url value
             else
             {
-                sb.AppendFormat("(request-line): {0} {1}\n", method, resource.Replace(_baseEndPoint, ""));
+                sb.AppendFormat("(request-line): {0} {1}\n", method.ToLower(), resource.Replace(_baseEndPoint, ""));
             }
 
             sb.AppendFormat("host: {0}\n", HOST);
@@ -483,7 +512,7 @@ namespace DeepfreezeSDK
 
         #endregion
 
-        #region constructor
+        #region constructor & public setters/getters
 
         public DeepfreezeClient() { }
 
