@@ -16,6 +16,7 @@ namespace DeepfreezeModel
             InProgress,
             Pausing,
             Paused,
+            Uploaded,
             Completed,
             Frozen,
             Cancelling,
@@ -35,6 +36,9 @@ namespace DeepfreezeModel
                     break;
                 case "frozen":
                     status = Status.Frozen;
+                    break;
+                case "uploaded":
+                    status = Status.Uploaded;
                     break;
                 case "completed":
                     status = Status.Completed;
