@@ -40,8 +40,7 @@ namespace DeepfreezeSDK
         private readonly string ACCEPT = "application/vnd.deepfreeze+json";
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
-        private string SECRET;
-        private string KEY;
+        private Token _TOKEN;
 
         private readonly string _baseEndPoint = "https://stage.deepfreeze.io";
         private readonly string _apiEndPoint = "/api/v1";
@@ -93,7 +92,7 @@ namespace DeepfreezeSDK
         /// Create a Deepfreeze Token.
         /// </summary>
         /// <returns>TokenPostResponse</returns>
-        public async Task<TokenPostResponse> CreateTokenAsync(string authorizationString)
+        public async Task<Token> CreateTokenAsync(string authorizationString)
         {
             try
             {
@@ -113,7 +112,7 @@ namespace DeepfreezeSDK
 
                     if (content != null)
                     {
-                        var tokenResponse = JsonConvert.DeserializeObject<TokenPostResponse>(content);
+                        var tokenResponse = JsonConvert.DeserializeObject<Token>(content);
                         return tokenResponse;
                     }
                     else
@@ -432,7 +431,7 @@ namespace DeepfreezeSDK
             // set accept header
             message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
 
-            message.Headers.Add("X-Deepfreeze-Api-Key", KEY);
+            message.Headers.Add("X-Deepfreeze-Api-Key", _TOKEN.Key);
 
             // set date header
             message.Headers.Date = date;
@@ -477,7 +476,7 @@ namespace DeepfreezeSDK
             sb.AppendFormat("date: {0}", date.ToUniversalTime().ToString("r"));
 
             // get signature
-            string signature = HelperMethods.HMACSHA256Sign(SECRET, sb.ToString());
+            string signature = HelperMethods.HMACSHA256Sign(_TOKEN.Secret, sb.ToString());
 
             return signature;
         }
@@ -489,10 +488,14 @@ namespace DeepfreezeSDK
         public DeepfreezeClient() { }
 
         [ImportingConstructor]
-        public DeepfreezeClient(string key, string secret)
+        public DeepfreezeClient(Token token)
         {
-            this.KEY = key;
-            this.SECRET = secret;
+            this.SetClientToken(token);
+        }
+
+        public void SetClientToken(Token token)
+        {
+            this._TOKEN = token;
         }
 
         #endregion
