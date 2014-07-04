@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -61,7 +62,44 @@ namespace DeepfreezeApp
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            // Set Application local app data folder and file paths
+            // in Application.Properties for use in this application instance.
+            SetApplicationPathsProperties();
+
+            // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
+            CreateLocalApplicationDataDirectory();
+
             DisplayRootViewFor<IShell>();
+        }
+
+        private void CreateLocalApplicationDataDirectory()
+        {
+            // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
+            try
+            {
+                if (!Directory.Exists(Properties.Settings.Default.LocalAppDataDFFolder))
+                    Directory.CreateDirectory(Properties.Settings.Default.LocalAppDataDFFolder);
+            }
+            catch (Exception ex) { }
+        }
+
+        private void SetApplicationPathsProperties()
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            
+            // %APPDATA\Deepfreeze\
+            Properties.Settings.Default.LocalAppDataDFFolder =
+                Path.Combine(
+                    localAppData,
+                    Properties.Settings.Default.ApplicationName
+                );
+
+            // %APPDATA\Deepfreeze\preferences.json
+            Properties.Settings.Default.SettingsFilePath =
+                    Path.Combine(
+                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.SettingsFileName
+                    );
         }
     }
 }
