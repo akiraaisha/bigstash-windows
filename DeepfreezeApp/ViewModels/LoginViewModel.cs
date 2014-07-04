@@ -67,7 +67,7 @@ namespace DeepfreezeApp
 
         public string LoginString
         {
-            get { return Properties.Resources.LoginResource; }
+            get { return Properties.Resources.LoginButtonContent; }
         }
 
         public async Task Login()
@@ -98,13 +98,9 @@ namespace DeepfreezeApp
 
                 // Since ActiveToken and ActiveUser are not null, 
                 // the user is considered as logged into the DeepfreezeClient.
-                // So, the settings are saved in 
-                var savePath =
-                    Environment.SpecialFolder.LocalApplicationData + @"\" +
-                    Properties.Resources.ApplicationName + @"\" +
-                    Properties.Resources.SettingsFileName;
-
-                LocalStorage.WriteJson(savePath, settings);
+                
+                // Save preferences file.
+                LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings);
             }
             catch (Exception e) { }
         }
