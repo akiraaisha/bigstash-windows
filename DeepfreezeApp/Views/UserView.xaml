@@ -15,6 +15,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Controls.Gravatar;component/generic.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <local:LongSizeToStringConverter x:Key="LongSizeToStringConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -79,26 +81,35 @@
               
         <Label x:Name="QuotaHeader" 
                 Style="{DynamicResource DescriptionHeaderStyle}" 
-               Margin="5 10 0 0"
+               Margin="5 15 0 0"
                 />
-                
-            <!--<Button Height="30" Width="30" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" 
-                    HorizontalAlignment="Right" VerticalAlignment="Center" Style="{DynamicResource MetroCircleButtonStyle}"
-                    x:Name="RefreshStats" ToolTip="Refresh" >
-                <Rectangle Width="13" Height="13" Fill="Black">
-                    <Rectangle.OpacityMask>
-                        <VisualBrush Stretch="Uniform"  Visual="{DynamicResource appbar_refresh}" />
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-            </Button>-->
-                
 
-        <!--<Label Grid.Row="1" Grid.Column="2" x:Name="AvailableSpaceText" HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <ProgressBar Grid.Row="2" Grid.Column="2" Minimum="0" Maximum="100" 
-                        Value="{Binding UsedSpacePercentage}" ToolTip="{Binding UsedSpaceText}" />-->
-        
+        <Grid Margin="5 5 0 0"
+              HorizontalAlignment="Stretch">
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        
+            <Label Grid.Row="0"
+                   Grid.Column="0" 
+                   Grid.ColumnSpan="2"
+                   Content="{Binding SizeInformation}" />
+            
+            <ProgressBar Grid.Row="1"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2"
+                         Minimum="0" 
+                         Maximum="100" 
+                         Value="{Binding UsedPercentage, Mode=OneWay}" 
+                         ToolTip="{Binding UsedSpaceText}" />
+
+        </Grid>
 
     </StackPanel>
 </UserControl>

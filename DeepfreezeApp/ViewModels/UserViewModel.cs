@@ -47,6 +47,36 @@ namespace DeepfreezeApp
 
         public string LogoutString
         { get { return Properties.Resources.LogoutButtonContent; } }
+
+        public double UsedPercentage
+        {
+            get 
+            {
+                var percentage = (double)(this._deepfreezeClient.Settings.ActiveUser.Quota.Used /
+                     this._deepfreezeClient.Settings.ActiveUser.Quota.Size) * 100;
+                return percentage;    
+            }
+        }
+
+        public string SizeInformation
+        { 
+            get 
+            {
+                double used = (double)this._deepfreezeClient.Settings.ActiveUser.Quota.Used;
+                double total = (double)this._deepfreezeClient.Settings.ActiveUser.Quota.Size;
+
+                var sb = new StringBuilder();
+                sb.Append(LongToSizeString.ConvertToString(total - used));
+                sb.Append(@" Free / ");
+                sb.Append(LongToSizeString.ConvertToString(used));
+                sb.Append(@" Used / ");
+                sb.Append(LongToSizeString.ConvertToString(total));
+                sb.Append(@" Total");
+
+                return sb.ToString();
+            } 
+        }
+
         #endregion
 
         #region methods
