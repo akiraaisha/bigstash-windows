@@ -219,6 +219,7 @@ namespace DeepfreezeSDK
                     if (content != null)
                     {
                         User user = JsonConvert.DeserializeObject<User>(content);
+                        user.Archives = JsonConvert.DeserializeObject<IList<Archive>>(json["archives"]["results"].ToString());
                         return user;
                     }
                     else
