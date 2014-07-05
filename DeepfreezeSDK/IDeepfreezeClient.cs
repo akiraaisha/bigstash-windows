@@ -13,6 +13,14 @@ namespace DeepfreezeSDK
     public interface IDeepfreezeClient
     {
         Settings Settings { get; set; }
+
+        /// <summary>
+        /// Check if DeepfreezeClient has a Settings property instatiated,
+        /// and if the ActiveUser and ActiveToken are set. Return true if all stand.
+        /// </summary>
+        /// <returns>bool</returns>
+        bool IsLogged();
+
         /// <summary>
         /// Create a new Deepfreeze API token using user credentials.
         /// </summary>
