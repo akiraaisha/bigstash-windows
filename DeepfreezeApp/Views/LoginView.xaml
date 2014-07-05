@@ -4,22 +4,64 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cal="http://www.caliburnproject.org"
+             xmlns:local="clr-namespace:DeepfreezeApp"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    
+    <UserControl.Resources>
+        <local:InvertBool x:Key="InvertBoolConverter" />
+        <local:BoolToVisibility x:Key="BoolToVisibilityConverter" />
+        <local:ValueConverterGroup x:Key="InvertBoolToVisibilityConverter">
+            <local:InvertBool />
+            <local:BoolToVisibility />
+        </local:ValueConverterGroup>
+    </UserControl.Resources>
+    
     <Grid>
-        <StackPanel>
+        <StackPanel 
+            IsEnabled="{Binding IsBusy, Converter={StaticResource ResourceKey=InvertBoolConverter}}"
+            MinWidth="100"
+            MaxWidth="300"
+            >
+            
+            <TextBlock
+                x:Name="UsernameError"
+                Foreground="Red"
+                TextWrapping="Wrap"
+                Visibility="{Binding HasUsernameError, Converter={StaticResource BoolToVisibilityConverter}}"
+                />
+            
             <TextBox 
                 x:Name="UsernameInput" 
+                MinWidth="100"
                 />
-            
+
+            <TextBlock
+                x:Name="PasswordError"
+                Foreground="Red"
+                TextWrapping="Wrap"
+                Visibility="{Binding HasPasswordError, Converter={StaticResource BoolToVisibilityConverter}}"
+                />
+
             <PasswordBox 
                 cal:Message.Attach="[Event PasswordChanged] = [Action RetrievePassword($source)]"
+                MinWidth="100"
                 />
-            
+
             <Button 
                 x:Name="Login"
                 Content="{Binding LoginString}"
                 IsDefault="True"
+                Width="Auto"
+                MinWidth="70"
+                HorizontalAlignment="Left"
+                />
+            
+            <TextBlock
+                x:Name="LoginError"
+                Foreground="Red"
+                TextWrapping="Wrap"
+                Visibility="{Binding HasLoginError, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
             
         </StackPanel>
