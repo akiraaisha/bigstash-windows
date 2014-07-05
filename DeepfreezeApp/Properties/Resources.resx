@@ -117,9 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ActiveUserHeader" xml:space="preserve">
+    <value>Deepfreeze Account</value>
+    <comment>Used for active user header in preferences.</comment>
+  </data>
   <data name="LoginButtonContent" xml:space="preserve">
     <value>Login</value>
     <comment>Used for login button content.</comment>
+  </data>
+  <data name="LogoutButtonContent" xml:space="preserve">
+    <value>Logout</value>
+    <comment>Used for logout button content.</comment>
   </data>
   <data name="PasswordError" xml:space="preserve">
     <value>Please fill your password.</value>
@@ -128,6 +136,14 @@
   <data name="PasswordTextboxHelper" xml:space="preserve">
     <value>Password</value>
     <comment>Used for password login passwordbox.</comment>
+  </data>
+  <data name="PreferencesHeader" xml:space="preserve">
+    <value>Preferences</value>
+    <comment>Used for preferences flyout header.</comment>
+  </data>
+  <data name="QuotaHeader" xml:space="preserve">
+    <value>Storage</value>
+    <comment>Used for quota header in preferences.</comment>
   </data>
   <data name="RememberPasswordURL" xml:space="preserve">
     <value>https://stage.deepfreeze.io/o/password_reset/</value>

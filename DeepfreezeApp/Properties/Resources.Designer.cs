@@ -61,11 +61,29 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deepfreeze Account.
+        /// </summary>
+        internal static string ActiveUserHeader {
+            get {
+                return ResourceManager.GetString("ActiveUserHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
         internal static string LoginButtonContent {
             get {
                 return ResourceManager.GetString("LoginButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logout.
+        /// </summary>
+        internal static string LogoutButtonContent {
+            get {
+                return ResourceManager.GetString("LogoutButtonContent", resourceCulture);
             }
         }
         
@@ -84,6 +102,24 @@ namespace DeepfreezeApp.Properties {
         internal static string PasswordTextboxHelper {
             get {
                 return ResourceManager.GetString("PasswordTextboxHelper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preferences.
+        /// </summary>
+        internal static string PreferencesHeader {
+            get {
+                return ResourceManager.GetString("PreferencesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Storage.
+        /// </summary>
+        internal static string QuotaHeader {
+            get {
+                return ResourceManager.GetString("QuotaHeader", resourceCulture);
             }
         }
         
