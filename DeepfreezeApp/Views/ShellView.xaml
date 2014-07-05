@@ -21,6 +21,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/DeepfreezeApp;component/Styles/Clean.xaml" />
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="MyCleanWindowStyle" TargetType="{x:Type controls:MetroWindow}" BasedOn="{StaticResource CleanWindowStyleKey}" />
             
