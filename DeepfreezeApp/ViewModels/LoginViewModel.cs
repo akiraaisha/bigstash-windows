@@ -17,6 +17,7 @@ namespace DeepfreezeApp
     [Export(typeof(ILoginViewModel))]
     public class LoginViewModel : PropertyChangedBase, ILoginViewModel
     {
+        #region members
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -31,7 +32,9 @@ namespace DeepfreezeApp
         private string _usernameError;
         private string _passwordError;
         private string _loginError;
+        #endregion
 
+        #region constructors
         public LoginViewModel() { }
 
         [ImportingConstructor]
@@ -40,7 +43,9 @@ namespace DeepfreezeApp
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
         }
+        #endregion
 
+        #region properties
         public bool IsBusy
         {
             get { return _isBusy; }
@@ -134,7 +139,9 @@ namespace DeepfreezeApp
                 NotifyOfPropertyChange(() => LoginError);
             }
         }
+        #endregion
 
+        #region action methods
         public async Task Login()
         {
             if (!Validate())
@@ -198,7 +205,9 @@ namespace DeepfreezeApp
         {
             Process.Start(Properties.Resources.RememberPasswordURL);
         }
+        #endregion
 
+        #region private methods
         private bool Validate()
         {
             ClearErrors();
@@ -228,5 +237,6 @@ namespace DeepfreezeApp
             PasswordError = null;
             LoginError = null;
         }
+        #endregion
     }
 }
