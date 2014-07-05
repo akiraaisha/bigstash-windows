@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="DeepfreezeApp.UserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:local="clr-namespace:DeepfreezeApp"
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:gravatar="clr-namespace:Controls;assembly=Controls.Gravatar"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Controls.Gravatar;component/generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+
+        <Label x:Name="ActiveUserHeader"
+               Style="{DynamicResource DescriptionHeaderStyle}" />
+        <StackPanel>
+            <StackPanel
+                Orientation="Horizontal"
+                >
+                <gravatar:Gravatar Email="{Binding ActiveUser.Email}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                <StackPanel>
+                    <Label 
+                        Content="{Binding ActiveUser.DisplayName}" 
+                        FontSize="14" 
+                        HorizontalAlignment="Left" 
+                        />
+
+                    <Label 
+                        Content="{Binding ActiveUser.Email}" 
+                        FontSize="14" 
+                        HorizontalAlignment="Left"
+                        />
+                </StackPanel>  
+            </StackPanel>
+            
+            <Button 
+                x:Name="Logout" 
+                Content="{Binding LogoutString}"
+                Width="70"
+                HorizontalAlignment="Left"
+                Style="{DynamicResource SquareButtonStyle}"
+                />
+            
+            <Label x:Name="QuotaHeader" 
+                   Style="{DynamicResource DescriptionHeaderStyle}" 
+                   />
+                
+            <!--<Button Height="30" Width="30" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" 
+                    HorizontalAlignment="Right" VerticalAlignment="Center" Style="{DynamicResource MetroCircleButtonStyle}"
+                    x:Name="RefreshStats" ToolTip="Refresh" >
+                <Rectangle Width="13" Height="13" Fill="Black">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Uniform"  Visual="{DynamicResource appbar_refresh}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>-->
+                
+        </StackPanel>
+        <!--<Label Grid.Row="1" Grid.Column="2" x:Name="AvailableSpaceText" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <ProgressBar Grid.Row="2" Grid.Column="2" Minimum="0" Maximum="100" 
+                        Value="{Binding UsedSpacePercentage}" ToolTip="{Binding UsedSpaceText}" />-->
+        
+
+        
+
+    </StackPanel>
+</UserControl>
