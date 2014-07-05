@@ -7,7 +7,10 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
+
+using Newtonsoft.Json;
 
 namespace DeepfreezeApp
 {
@@ -69,6 +72,9 @@ namespace DeepfreezeApp
             // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
             CreateLocalApplicationDataDirectory();
 
+            // Read local settings.json and set DeepfreezeClient settings.
+            SetDeepfreezeClientSettings();
+
             DisplayRootViewFor<IShell>();
         }
 
@@ -100,6 +106,24 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.LocalAppDataDFFolder,
                         Properties.Settings.Default.SettingsFileName
                     );
+        }
+
+        private void SetDeepfreezeClientSettings()
+        {
+            try
+            {
+                var client = IoC.Get<IDeepfreezeClient>();
+
+                // try to read %APPDATA\Deepfreeze\settings.json
+                // to instatiate client settings for last user and token.
+                var content = File.ReadAllText(Properties.Settings.Default.SettingsFilePath, Encoding.ASCII);
+
+                if (content != null)
+                    client.Settings = JsonConvert.DeserializeObject<Settings>(content);
+
+            }
+            catch (FileNotFoundException e) { } // do nothing, client has null settings.
+            catch (JsonReaderException e) { } // do nothing, client has null settings.
         }
     }
 }
