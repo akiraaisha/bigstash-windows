@@ -20,9 +20,17 @@ namespace DeepfreezeApp
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
-        private bool _isBusy;
+        private bool _isBusy = false;
+        private bool _hasUsernameError = false;
+        private bool _hasPasswordError = false;
+        private bool _hasLoginError = false;
+
         private string _usernameInput;
         private string _passwordInput;
+
+        private string _usernameError;
+        private string _passwordError;
+        private string _loginError;
 
         public LoginViewModel() { }
 
@@ -37,6 +45,24 @@ namespace DeepfreezeApp
         {
             get { return _isBusy; }
             set { _isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
+        }
+
+        public bool HasUsernameError
+        {
+            get { return _hasUsernameError; }
+            set { _hasUsernameError = value; NotifyOfPropertyChange(() => HasUsernameError); }
+        }
+
+        public bool HasPasswordError
+        {
+            get { return _hasPasswordError; }
+            set { _hasPasswordError = value; NotifyOfPropertyChange(() => HasPasswordError); }
+        }
+
+        public bool HasLoginError
+        {
+            get { return _hasLoginError; }
+            set { _hasLoginError = value; NotifyOfPropertyChange(() => HasLoginError); }
         }
 
         public string UsernameInput
@@ -70,10 +96,54 @@ namespace DeepfreezeApp
             get { return Properties.Resources.LoginButtonContent; }
         }
 
+        public string UsernameError
+        {
+            get
+            {
+                return _usernameError;
+            }
+            set
+            {
+                _usernameError = value;
+                NotifyOfPropertyChange(() => UsernameError);
+            }
+        }
+
+        public string PasswordError
+        {
+            get
+            {
+                return _passwordError;
+            }
+            set
+            {
+                _passwordError = value;
+                NotifyOfPropertyChange(() => PasswordError);
+            }
+        }
+
+        public string LoginError
+        {
+            get
+            {
+                return _loginError;
+            }
+            set
+            {
+                _loginError = value;
+                NotifyOfPropertyChange(() => LoginError);
+            }
+        }
+
         public async Task Login()
         {
+            if (!Validate())
+                return;
+
             try
             {
+                IsBusy = true;
+
                 var authorizationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
                 var token = await _deepfreezeClient.CreateTokenAsync(authorizationString);
 
@@ -102,7 +172,20 @@ namespace DeepfreezeApp
                 // Save preferences file.
                 LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings);
             }
-            catch (Exception e) { }
+            catch (UnauthorizedAccessException e)
+            {
+                HasLoginError = true;
+                LoginError = Properties.Resources.UnauthorizedExceptionMessage;
+            }
+            catch (Exception e) 
+            {
+                HasLoginError = true;
+                LoginError = e.Message;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         public void RetrievePassword(PasswordBox pwdBox)
@@ -114,6 +197,36 @@ namespace DeepfreezeApp
         public void Remember()
         {
             Process.Start(Properties.Resources.RememberPasswordURL);
+        }
+
+        private bool Validate()
+        {
+            ClearErrors();
+
+            if (String.IsNullOrEmpty(UsernameInput))
+            {
+                HasUsernameError = true;
+                UsernameError = Properties.Resources.UsernameError;
+            }
+
+            if (String.IsNullOrEmpty(PasswordInput))
+            {
+                HasPasswordError = true;
+                PasswordError = Properties.Resources.PasswordError;
+            }
+
+            return !(HasUsernameError || HasPasswordError);
+        }
+
+        private void ClearErrors()
+        {
+            HasUsernameError = false;
+            HasPasswordError = false;
+            HasLoginError = false;
+
+            UsernameError = null;
+            PasswordError = null;
+            LoginError = null;
         }
     }
 }
