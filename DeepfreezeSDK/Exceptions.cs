@@ -22,6 +22,20 @@ namespace DeepfreezeSDK
             { }
         }
 
+        public class NoUserFoundException : Exception
+        {
+            public NoUserFoundException()
+                : base("No user found. Please login with your Deepfreeze acount.") { }
+
+            public NoUserFoundException(string message)
+                : base(message)
+            { }
+
+            public NoUserFoundException(string message, Exception inner)
+                : base(message, inner)
+            { }
+        }
+
         public class NoArchivesFoundException : Exception
         {
             public NoArchivesFoundException()
