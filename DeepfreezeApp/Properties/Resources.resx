@@ -121,8 +121,20 @@
     <value>Login</value>
     <comment>Used for login button content.</comment>
   </data>
+  <data name="PasswordError" xml:space="preserve">
+    <value>Please fill your password.</value>
+    <comment>Used for empty password textblock text.</comment>
+  </data>
   <data name="RememberPasswordURL" xml:space="preserve">
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
+  </data>
+  <data name="UnauthorizedExceptionMessage" xml:space="preserve">
+    <value>Could not authenticate. Please enter your Deepfreeze account credentials.</value>
+    <comment>Used for informing the user about wrong username/password combination.</comment>
+  </data>
+  <data name="UsernameError" xml:space="preserve">
+    <value>Please fill your email.</value>
+    <comment>Used for empty username/email textblock text.</comment>
   </data>
 </root>

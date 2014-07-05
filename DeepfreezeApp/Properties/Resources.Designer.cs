@@ -70,11 +70,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please fill your password..
+        /// </summary>
+        internal static string PasswordError {
+            get {
+                return ResourceManager.GetString("PasswordError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://stage.deepfreeze.io/o/password_reset/.
         /// </summary>
         internal static string RememberPasswordURL {
             get {
                 return ResourceManager.GetString("RememberPasswordURL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze account credentials..
+        /// </summary>
+        internal static string UnauthorizedExceptionMessage {
+            get {
+                return ResourceManager.GetString("UnauthorizedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please fill your email..
+        /// </summary>
+        internal static string UsernameError {
+            get {
+                return ResourceManager.GetString("UsernameError", resourceCulture);
             }
         }
     }
