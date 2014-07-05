@@ -39,6 +39,8 @@ namespace DeepfreezeSDK
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
         public Settings Settings { get; set; }
+        public bool IsLoggedIn
+        { get { return Settings.IsLogged(); } }
 
         private readonly string _baseEndPoint = "https://stage.deepfreeze.io";
         private readonly string _apiEndPoint = "/api/v1";
@@ -131,13 +133,12 @@ namespace DeepfreezeSDK
             { 
                 if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    throw new UnauthorizedAccessException("Could not authenticate.");
+                    throw new UnauthorizedAccessException();
                 }
                 else
                     throw e; 
             }
-            catch(Exception e)
-            { throw e; }
+            catch(Exception e) { throw e; }
         }
 
         /// <summary>
