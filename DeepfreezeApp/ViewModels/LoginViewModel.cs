@@ -184,6 +184,9 @@ namespace DeepfreezeApp
                 
                 // Save preferences file.
                 LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings);
+
+                // Publish LoginSuccess Message
+                this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
             }
             catch (UnauthorizedAccessException e)
             {
