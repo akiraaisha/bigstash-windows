@@ -16,21 +16,30 @@ namespace DeepfreezeModel
         /// </summary>
         [JsonProperty("key")]
         public string Key { get; set; }
+
         /// <summary>
-        /// Unique token ID.
+        /// Unique token name.
         /// </summary>
-        [JsonProperty("id")]
-        public int ID { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
         /// <summary>
         /// Secret key.
         /// </summary>
         [JsonProperty("secret")]
         public string Secret { get; set; }
+
         /// <summary>
         /// Token creation date.
         /// </summary>
         [JsonProperty("created")]
         public DateTime CreatedDate { get; set; }
+
+        /// <summary>
+        /// Token url.
+        /// </summary>
+        [JsonProperty("url")]
+        public string Url { get; set; }
 
         /// <summary>
         /// Serialize TokenPostResponse to JSON string
