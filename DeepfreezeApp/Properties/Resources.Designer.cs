@@ -70,6 +70,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  Free / .
+        /// </summary>
+        internal static string FreeText {
+            get {
+                return ResourceManager.GetString("FreeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
         internal static string LoginButtonContent {
@@ -133,11 +142,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Total Archives: .
+        /// </summary>
+        internal static string TotalArchivesText {
+            get {
+                return ResourceManager.GetString("TotalArchivesText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  Total.
+        /// </summary>
+        internal static string TotalText {
+            get {
+                return ResourceManager.GetString("TotalText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze account credentials..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {
                 return ResourceManager.GetString("UnauthorizedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  Used / .
+        /// </summary>
+        internal static string UsedText {
+            get {
+                return ResourceManager.GetString("UsedText", resourceCulture);
             }
         }
         

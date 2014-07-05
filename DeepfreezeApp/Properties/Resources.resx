@@ -121,6 +121,9 @@
     <value>Deepfreeze Account</value>
     <comment>Used for active user header in preferences.</comment>
   </data>
+  <data name="FreeText" xml:space="preserve">
+    <value> Free / </value>
+  </data>
   <data name="LoginButtonContent" xml:space="preserve">
     <value>Login</value>
     <comment>Used for login button content.</comment>
@@ -149,9 +152,18 @@
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
   </data>
+  <data name="TotalArchivesText" xml:space="preserve">
+    <value>Total Archives: </value>
+  </data>
+  <data name="TotalText" xml:space="preserve">
+    <value> Total</value>
+  </data>
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
     <value>Could not authenticate. Please enter your Deepfreeze account credentials.</value>
     <comment>Used for informing the user about wrong username/password combination.</comment>
+  </data>
+  <data name="UsedText" xml:space="preserve">
+    <value> Used / </value>
   </data>
   <data name="UsernameError" xml:space="preserve">
     <value>Please fill your email.</value>
