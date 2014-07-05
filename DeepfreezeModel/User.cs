@@ -45,6 +45,9 @@ namespace DeepfreezeModel
         [JsonProperty("quota")]
         public Quota Quota { get; set; }
 
+        [JsonProperty("avatar")]
+        public AvatarUrl AvatarUrl { get; set; }
+
         /// <summary>
         /// Serialize User to JSON string
         /// </summary>

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Archive.cs" />
     <Compile Include="ArchivePostData.cs" />
+    <Compile Include="AvatarUrl.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="ArchiveFileInfo.cs" />
     <Compile Include="LocalStorage.cs" />
