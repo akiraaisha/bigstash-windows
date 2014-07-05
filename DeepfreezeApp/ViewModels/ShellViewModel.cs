@@ -92,7 +92,8 @@ namespace DeepfreezeApp
         public void Handle(ILoginSuccessMessage message)
         {
             NotifyOfPropertyChange(() => IsLoggedIn);
-            GetLoggedInViewModels();
+            InstatiateArchiveViewModel();
+            InstatiatePreferencesViewModel();
         }
         #endregion
 
@@ -114,11 +115,16 @@ namespace DeepfreezeApp
             {
                 if (IsLoggedIn)
                 {
-                    GetLoggedInViewModels();
+                    InstatiateArchiveViewModel();
+
                     var user = await this._deepfreezeClient.GetUserAsync();
-                    
+
                     if (user != null)
+                    {
                         this._deepfreezeClient.Settings.ActiveUser = user;
+
+                        InstatiatePreferencesViewModel();
+                    }
                 }
 
             }
@@ -133,13 +139,16 @@ namespace DeepfreezeApp
 
         #region private methods
 
-        private void GetLoggedInViewModels()
+        private void InstatiateArchiveViewModel()
         {
             if (ArchiveVM == null)
             {
                 ArchiveVM = IoC.Get<IArchiveViewModel>() as ArchiveViewModel;
             }
+        }
 
+        private void InstatiatePreferencesViewModel()
+        {
             if (PreferencesVM == null)
             {
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
