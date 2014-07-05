@@ -96,6 +96,12 @@ namespace DeepfreezeApp
             }
         }
 
+        public string UsernameHelper
+        { get { return Properties.Resources.UsernameTextboxHelper; } }
+
+        public string PasswordHelper
+        { get { return Properties.Resources.PasswordTextboxHelper; } }
+
         public string LoginString
         {
             get { return Properties.Resources.LoginButtonContent; }

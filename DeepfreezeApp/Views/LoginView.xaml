@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:DeepfreezeApp"
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     
@@ -34,6 +35,7 @@
             <TextBox 
                 x:Name="UsernameInput" 
                 MinWidth="100"
+                controls:TextboxHelper.Watermark="{Binding UsernameHelper}"
                 />
 
             <TextBlock
@@ -46,6 +48,7 @@
             <PasswordBox 
                 cal:Message.Attach="[Event PasswordChanged] = [Action RetrievePassword($source)]"
                 MinWidth="100"
+                controls:TextboxHelper.Watermark="{Binding PasswordHelper}"
                 />
 
             <Button 
@@ -55,6 +58,7 @@
                 Width="Auto"
                 MinWidth="70"
                 HorizontalAlignment="Left"
+                Style="{DynamicResource AccentedSquareButtonStyle}"
                 />
             
             <TextBlock
