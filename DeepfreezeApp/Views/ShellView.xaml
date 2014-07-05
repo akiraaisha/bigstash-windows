@@ -3,9 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        Title="Deepfreeze.io" 
+        Title="Deepfreeze" 
+        Icon="deepfreeze.ico"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResizeWithGrip"
+        Background="WhiteSmoke"
+        GlowBrush="{DynamicResource GrayBrush7}"
+        Style="{DynamicResource MyCleanWindowStyle}"           
         Height="300" 
-        Width="300">
+        Width="300"
+        >
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/CleanWindow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="MyCleanWindowStyle" TargetType="{x:Type controls:MetroWindow}" BasedOn="{StaticResource CleanWindowStyleKey}" />
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid>
         <StackPanel>
             <ContentControl cal:View.Model="{Binding LoginVM}" />
