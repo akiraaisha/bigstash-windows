@@ -19,11 +19,12 @@ namespace DeepfreezeApp
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
-        private IArchiveViewModel _archiveVM = IoC.Get<IArchiveViewModel>();
-        private ILoginViewModel _loginVM = IoC.Get<ILoginViewModel>();
-        private IPreferencesViewModel _preferencesVM = IoC.Get<IPreferencesViewModel>();
+        private ArchiveViewModel _archiveVM;
+        private LoginViewModel _loginVM = IoC.Get<ILoginViewModel>() as LoginViewModel;
+        private PreferencesViewModel _preferencesVM;
 
         private MetroWindow _shellWindow;
+        private bool _isPreferencesFlyoutOpen = false;
         #endregion
 
         #region properties
@@ -36,23 +37,25 @@ namespace DeepfreezeApp
         
         public ArchiveViewModel ArchiveVM
         {
-            get { return this._archiveVM as ArchiveViewModel; }
+            get { return this._archiveVM; }
+            set { this._archiveVM = value; NotifyOfPropertyChange(() => ArchiveVM); }
         }
         
         public LoginViewModel LoginVM
         {
-            get { return this._loginVM as LoginViewModel; }
+            get { return this._loginVM; }
         }
 
         public PreferencesViewModel PreferencesVM
         {
-            get { return this._preferencesVM as PreferencesViewModel; }
+            get { return this._preferencesVM; }
+            set { this._preferencesVM = value; NotifyOfPropertyChange(() => PreferencesVM); }
         }
 
         public bool IsPreferencesFlyoutOpen
         {
-            get { return this.PreferencesVM.IsOpen; }
-            set { this.PreferencesVM.IsOpen = value; NotifyOfPropertyChange(() => IsPreferencesFlyoutOpen); }
+            get { return this._isPreferencesFlyoutOpen; }
+            set { this._isPreferencesFlyoutOpen = value; NotifyOfPropertyChange(() => IsPreferencesFlyoutOpen); }
         }
 
         public string PreferencesHeader
@@ -89,6 +92,7 @@ namespace DeepfreezeApp
         public void Handle(ILoginSuccessMessage message)
         {
             NotifyOfPropertyChange(() => IsLoggedIn);
+            GetLoggedInViewModels();
         }
         #endregion
 
@@ -97,11 +101,51 @@ namespace DeepfreezeApp
         {
             var v = view as MetroWindow;
             v.Title = Properties.Settings.Default.ApplicationName;
+
             if (v != null)
                 _shellWindow = v;
 
             base.OnViewLoaded(view);
         }
+
+        protected override async void OnActivate()
+        {
+            try
+            {
+                if (IsLoggedIn)
+                {
+                    GetLoggedInViewModels();
+                    var user = await this._deepfreezeClient.GetUserAsync();
+                    
+                    if (user != null)
+                        this._deepfreezeClient.Settings.ActiveUser = user;
+                }
+
+            }
+            catch(Exception e)
+            {
+
+            }
+
+            base.OnActivate();
+        }
+        #endregion
+
+        #region private methods
+
+        private void GetLoggedInViewModels()
+        {
+            if (ArchiveVM == null)
+            {
+                ArchiveVM = IoC.Get<IArchiveViewModel>() as ArchiveViewModel;
+            }
+
+            if (PreferencesVM == null)
+            {
+                PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
+            }
+        }
+
         #endregion
     }
 }

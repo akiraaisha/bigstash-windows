@@ -41,7 +41,8 @@
                     FontFamily="Segoe UI Symbol"
                     FontSize="16"
                     Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="TogglePreferencesFlyout">
+                    cal:Message.Attach="TogglePreferencesFlyout"
+                    >
                 
                 <Rectangle Width="15"
                            Height="15">
