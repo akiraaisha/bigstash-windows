@@ -125,6 +125,10 @@
     <value>Please fill your password.</value>
     <comment>Used for empty password textblock text.</comment>
   </data>
+  <data name="PasswordTextboxHelper" xml:space="preserve">
+    <value>Password</value>
+    <comment>Used for password login passwordbox.</comment>
+  </data>
   <data name="RememberPasswordURL" xml:space="preserve">
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
@@ -136,5 +140,9 @@
   <data name="UsernameError" xml:space="preserve">
     <value>Please fill your email.</value>
     <comment>Used for empty username/email textblock text.</comment>
+  </data>
+  <data name="UsernameTextboxHelper" xml:space="preserve">
+    <value>someone@example.com</value>
+    <comment>Used for username login textbox.</comment>
   </data>
 </root>

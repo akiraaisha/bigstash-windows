@@ -79,6 +79,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        internal static string PasswordTextboxHelper {
+            get {
+                return ResourceManager.GetString("PasswordTextboxHelper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://stage.deepfreeze.io/o/password_reset/.
         /// </summary>
         internal static string RememberPasswordURL {
@@ -102,6 +111,15 @@ namespace DeepfreezeApp.Properties {
         internal static string UsernameError {
             get {
                 return ResourceManager.GetString("UsernameError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to someone@example.com.
+        /// </summary>
+        internal static string UsernameTextboxHelper {
+            get {
+                return ResourceManager.GetString("UsernameTextboxHelper", resourceCulture);
             }
         }
     }
