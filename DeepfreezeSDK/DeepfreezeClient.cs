@@ -54,6 +54,21 @@ namespace DeepfreezeSDK
         #region methods
 
         /// <summary>
+        /// Check if DeepfreezeClient has a Settings property instatiated,
+        /// and if the ActiveUser and ActiveToken are set. Return true if all stand.
+        /// </summary>
+        /// <returns>bool</returns>
+        public bool IsLogged()
+        {
+            if (this.Settings == null)
+                return false;
+            else
+            {
+                return this.Settings.ActiveUser != null && this.Settings.ActiveToken != null;
+            }
+        }
+
+        /// <summary>
         /// Return all active Deepfreeze authorization Tokens for the authorized user.
         /// </summary>
         /// <returns>Token</returns>
@@ -107,7 +122,7 @@ namespace DeepfreezeSDK
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
 
                     var requestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + _tokenUri).Uri;
-                    var name = @"{""name"":""Deepfreeze.io_for_Windows_on_" + Environment.MachineName + @"""}";
+                    var name = @"{""name"":""Deepfreeze.io for Windows on " + Environment.MachineName + @"""}";
                     var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
                     
                     response = await httpClient.PostAsync(requestUri, requestContent);
@@ -201,15 +216,15 @@ namespace DeepfreezeSDK
                     string content = await response.Content.ReadAsStringAsync();
                     JObject json = JObject.Parse(content);
 
-                    User user = new User()
+                    if (content != null)
                     {
-                        ID = (int)json["id"],
-                        Email = (string)json["email"],
-                        DateJoined = (DateTime)json["date_joined"],
-                        DisplayName = (string)json["displayname"]
-                    };
-
-                    return user;
+                        User user = JsonConvert.DeserializeObject<User>(content);
+                        return user;
+                    }
+                    else
+                    {
+                        throw new Exceptions.NoUserFoundException();
+                    }
                 }
             }
             catch(AggregateException e)
