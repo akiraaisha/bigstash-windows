@@ -63,7 +63,7 @@ namespace DeepfreezeApp
         #region action methods
         public void TogglePreferencesFlyout()
         {
-            ShellWindow.ShowWindowCommandsOnTop = IsPreferencesFlyoutOpen;
+            //ShellWindow.ShowWindowCommandsOnTop = IsPreferencesFlyoutOpen;
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
             
         }
