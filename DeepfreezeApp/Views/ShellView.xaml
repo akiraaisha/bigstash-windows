@@ -35,55 +35,66 @@
         </ResourceDictionary>
     </Window.Resources>
     
-        <controls:MetroWindow.RightWindowCommands>
-            <controls:WindowCommands>
-            <Button 
-                FontSize="20"
-                Content="Preferences" 
-                cal:Message.Attach="TogglePreferencesFlyout"
-                />
+    <controls:MetroWindow.RightWindowCommands>
+        <controls:WindowCommands>
+            <Button ToolTip="{Binding PreferencesHeader}" 
+                    FontFamily="Segoe UI Symbol"
+                    FontSize="16"
+                    Style="{DynamicResource MetroWindowButtonStyle}"
+                    cal:Message.Attach="TogglePreferencesFlyout">
+                
+                <Rectangle Width="15"
+                           Height="15">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Fill"
+                                     Visual="{StaticResource appbar_settings}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+                
+            </Button>
+            
         </controls:WindowCommands>
-        </controls:MetroWindow.RightWindowCommands>
+    </controls:MetroWindow.RightWindowCommands>
 
-        <controls:MetroWindow.Flyouts>
-            <controls:FlyoutsControl x:Name="Flytouts">
-                <controls:Flyout 
-                    x:Name="PreferencesFlyout" 
-                    Header="{Binding PreferencesHeader}"
-                    AnimateOnPositionChange="{Binding AnimateOnPositionChange}"
-                    Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
-                    IsModal="True"
-                    Theme="Adapt"
-                    >
+    <controls:MetroWindow.Flyouts>
+        <controls:FlyoutsControl x:Name="Flytouts">
+            <controls:Flyout 
+                x:Name="PreferencesFlyout" 
+                Header="{Binding PreferencesHeader}"
+                AnimateOnPositionChange="{Binding AnimateOnPositionChange}"
+                Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
+                IsModal="True"
+                Theme="Adapt"
+                >
 
-                    <StackPanel>
-                        <ContentControl cal:View.Model="{Binding PreferencesVM}" />
-                    </StackPanel>
+                <StackPanel>
+                    <ContentControl cal:View.Model="{Binding PreferencesVM}" />
+                </StackPanel>
 
-            </controls:Flyout>
-            </controls:FlyoutsControl>
-        </controls:MetroWindow.Flyouts>
+        </controls:Flyout>
+        </controls:FlyoutsControl>
+    </controls:MetroWindow.Flyouts>
 
-        <Grid>
+    <Grid>
         
         
         
         
-        <StackPanel
-            Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-            >
+    <StackPanel
+        Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+        >
             
-            <ContentControl cal:View.Model="{Binding LoginVM}" />
+        <ContentControl cal:View.Model="{Binding LoginVM}" />
             
-        </StackPanel>
+    </StackPanel>
 
-        <StackPanel
-            Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-            >
+    <StackPanel
+        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+        >
 
-            <ContentControl cal:View.Model="{Binding ArchiveVM}" />
+        <ContentControl cal:View.Model="{Binding ArchiveVM}" />
 
-        </StackPanel>
+    </StackPanel>
 
-    </Grid>
+</Grid>
 </controls:MetroWindow>
