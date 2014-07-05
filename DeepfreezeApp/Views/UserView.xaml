@@ -81,9 +81,14 @@
               
         <Label x:Name="QuotaHeader" 
                 Style="{DynamicResource DescriptionHeaderStyle}" 
-               Margin="5 15 0 0"
+               Margin="5 20 0 0"
                 />
 
+        <Label Margin="5 5 0 0" 
+               Content="{Binding ArchivesNum}"
+               FontSize="14"
+               />
+        
         <Grid Margin="5 5 0 0"
               HorizontalAlignment="Stretch">
             
@@ -99,6 +104,7 @@
             <Label Grid.Row="0"
                    Grid.Column="0" 
                    Grid.ColumnSpan="2"
+                   FontSize="14" 
                    Content="{Binding SizeInformation}" />
             
             <ProgressBar Grid.Row="1"
@@ -110,6 +116,6 @@
                          ToolTip="{Binding UsedSpaceText}" />
 
         </Grid>
-
+        
     </StackPanel>
 </UserControl>

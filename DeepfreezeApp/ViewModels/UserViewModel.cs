@@ -52,8 +52,7 @@ namespace DeepfreezeApp
         {
             get 
             {
-                var percentage = (double)(this._deepfreezeClient.Settings.ActiveUser.Quota.Used /
-                     this._deepfreezeClient.Settings.ActiveUser.Quota.Size) * 100;
+                var percentage = (double)(this.ActiveUser.Quota.Used / this.ActiveUser.Quota.Size) * 100;
                 return percentage;    
             }
         }
@@ -62,18 +61,29 @@ namespace DeepfreezeApp
         { 
             get 
             {
-                double used = (double)this._deepfreezeClient.Settings.ActiveUser.Quota.Used;
-                double total = (double)this._deepfreezeClient.Settings.ActiveUser.Quota.Size;
+                double used = (double)this.ActiveUser.Quota.Used;
+                double total = (double)this.ActiveUser.Quota.Size;
 
                 var sb = new StringBuilder();
                 sb.Append(LongToSizeString.ConvertToString(total - used));
-                sb.Append(@" Free / ");
+                sb.Append(Properties.Resources.FreeText);
                 sb.Append(LongToSizeString.ConvertToString(used));
-                sb.Append(@" Used / ");
+                sb.Append(Properties.Resources.UsedText);
                 sb.Append(LongToSizeString.ConvertToString(total));
-                sb.Append(@" Total");
+                sb.Append(Properties.Resources.TotalText);
 
                 return sb.ToString();
+            } 
+        }
+
+        public string ArchivesNum
+        { 
+            get 
+            {
+                if (this.ActiveUser.Archives != null)
+                    return Properties.Resources.TotalArchivesText + this.ActiveUser.Archives.Count.ToString();
+                else
+                    return null;
             } 
         }
 
