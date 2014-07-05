@@ -36,8 +36,8 @@ namespace DeepfreezeModel
         /// <summary>
         /// User's Archives.
         /// </summary>
-        [JsonProperty("archives")]
-        public List<Archive> Archives { get; set; }
+        [JsonIgnore]
+        public IList<Archive> Archives { get; set; }
 
         /// <summary>
         /// User's Quota.
