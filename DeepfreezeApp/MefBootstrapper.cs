@@ -106,6 +106,13 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.LocalAppDataDFFolder,
                         Properties.Settings.Default.SettingsFileName
                     );
+
+            // %APPDATA\Deepfreeze\uploads.json
+            Properties.Settings.Default.UploadsFilePath =
+                    Path.Combine(
+                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.UploadsFileName
+                    );
         }
 
         private void SetDeepfreezeClientSettings()
