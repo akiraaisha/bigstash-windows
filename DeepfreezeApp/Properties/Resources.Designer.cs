@@ -160,6 +160,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There aren&apos;t any pending uploads from this app..
+        /// </summary>
+        internal static string NoUploadsHeaderText {
+            get {
+                return ResourceManager.GetString("NoUploadsHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please fill your password..
         /// </summary>
         internal static string PasswordError {
@@ -228,6 +237,15 @@ namespace DeepfreezeApp.Properties {
         internal static string TotalText {
             get {
                 return ResourceManager.GetString("TotalText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total Uploads: .
+        /// </summary>
+        internal static string TotalUploadsText {
+            get {
+                return ResourceManager.GetString("TotalUploadsText", resourceCulture);
             }
         }
         

@@ -95,6 +95,10 @@
 
         <ContentControl cal:View.Model="{Binding ArchiveVM}" />
 
+        <Border BorderThickness="1" BorderBrush="WhiteSmoke" />
+
+        <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
+
     </StackPanel>
 
 </Grid>

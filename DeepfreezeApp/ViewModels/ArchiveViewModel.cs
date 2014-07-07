@@ -228,11 +228,14 @@ namespace DeepfreezeApp
 
             try
             {
-                throw new Exception("Something went wrong!!!");
                 // create a new archive using DF API.
                 var archive = await this._deepfreezeClient.CreateArchiveAsync(this._archiveSize, ArchiveTitle);
 
-                // create a new upload using DF API.
+                // publish a message to UploadManager to initiate the upload.
+                var message = IoC.Get<IInitiateUploadMessage>();
+                message.Archive = archive;
+                message.Paths = _paths;
+                this._eventAggregator.PublishOnUIThread(message);
 
                 // reset the view
                 this.Cancel(); 

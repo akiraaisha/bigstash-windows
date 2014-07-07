@@ -158,6 +158,9 @@
   <data name="FreeText" xml:space="preserve">
     <value> Free / </value>
   </data>
+  <data name="NoUploadsHeaderText" xml:space="preserve">
+    <value>There aren't any pending uploads from this app.</value>
+  </data>
   <data name="PasswordError" xml:space="preserve">
     <value>Please fill your password.</value>
     <comment>Used for empty password textblock text.</comment>
@@ -187,6 +190,9 @@
   </data>
   <data name="TotalText" xml:space="preserve">
     <value> Total</value>
+  </data>
+  <data name="TotalUploadsText" xml:space="preserve">
+    <value>Total Uploads: </value>
   </data>
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
     <value>Could not authenticate. Please enter your Deepfreeze account credentials.</value>

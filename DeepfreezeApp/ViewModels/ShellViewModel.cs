@@ -12,7 +12,7 @@ using MahApps.Metro.Controls;
 namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Screen, IShell, IHandle<ILoginSuccessMessage>
+    public class ShellViewModel : Conductor<Screen>, IShell, IHandle<ILoginSuccessMessage>
     {
         #region fields
         private readonly IWindowManager _windowManager;
@@ -22,6 +22,7 @@ namespace DeepfreezeApp
         private ArchiveViewModel _archiveVM;
         private LoginViewModel _loginVM = IoC.Get<ILoginViewModel>() as LoginViewModel;
         private PreferencesViewModel _preferencesVM;
+        private UploadManagerViewModel _uploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
 
         private MetroWindow _shellWindow;
         private bool _isPreferencesFlyoutOpen = false;
@@ -50,6 +51,12 @@ namespace DeepfreezeApp
         {
             get { return this._preferencesVM; }
             set { this._preferencesVM = value; NotifyOfPropertyChange(() => PreferencesVM); }
+        }
+
+        public UploadManagerViewModel UploadManagerVM
+        {
+            get { return this._uploadManagerVM; }
+            set { this._uploadManagerVM = value; NotifyOfPropertyChange(() => UploadManagerVM); }
         }
 
         public bool IsPreferencesFlyoutOpen
@@ -124,6 +131,7 @@ namespace DeepfreezeApp
                         this._deepfreezeClient.Settings.ActiveUser = user;
 
                         InstatiatePreferencesViewModel();
+                        await InstatiateUploadManagerViewModel();
                     }
                 }
 
@@ -153,6 +161,17 @@ namespace DeepfreezeApp
             {
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
             }
+        }
+
+        private async Task InstatiateUploadManagerViewModel()
+        {
+            if (UploadManagerVM == null)
+            {
+                UploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
+            }   
+
+            var fetchUploadsMessage = IoC.Get<IFetchUploadsMessage>();
+            await this._eventAggregator.PublishOnUIThreadAsync(fetchUploadsMessage);
         }
 
         #endregion

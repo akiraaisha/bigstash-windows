@@ -81,6 +81,10 @@
     <Compile Include="Converters\BoolToVisibility.cs" />
     <Compile Include="Converters\LongSizeToStringConverter.cs" />
     <Compile Include="Converters\LongToSizeString.cs" />
+    <Compile Include="Messages\FetchUploadsMessage.cs" />
+    <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
+    <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
+    <Compile Include="Messages\InitiateUploadMessage.cs" />
     <Compile Include="Interfaces\ILoginViewModel.cs" />
     <Compile Include="Converters\InvertBool.cs" />
     <Compile Include="Converters\ValueConverterGroup.cs" />
