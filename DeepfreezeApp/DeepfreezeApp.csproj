@@ -87,16 +87,16 @@
     <Compile Include="Interfaces\ILoginSuccessMessage.cs" />
     <Compile Include="Interfaces\IPreferencesViewModel.cs" />
     <Compile Include="Interfaces\IUserViewModel.cs" />
+    <Compile Include="Interfaces\INewUploadMessage.cs" />
     <Compile Include="Messages\LoginSuccessMessage.cs" />
+    <Compile Include="Converters\EmptyStringToBool.cs" />
+    <Compile Include="Messages\NewUploadMessage.cs" />
     <Compile Include="Views\UserView.xaml.cs">
       <DependentUpon>UserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\UserViewModel.cs" />
     <Compile Include="ViewModels\PreferencesViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
-    <Compile Include="Views\ArchiveView.xaml.cs">
-      <DependentUpon>ArchiveView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ViewModels\ArchiveViewModel.cs" />
     <Compile Include="Interfaces\IArchiveViewModel.cs" />
     <Compile Include="Interfaces\IShell.cs" />
