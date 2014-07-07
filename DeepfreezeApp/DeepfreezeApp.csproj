@@ -88,9 +88,13 @@
     <Compile Include="Interfaces\IPreferencesViewModel.cs" />
     <Compile Include="Interfaces\IUserViewModel.cs" />
     <Compile Include="Interfaces\INewUploadMessage.cs" />
+    <Compile Include="Interfaces\IUploadManagerViewModel.cs" />
+    <Compile Include="Interfaces\IUploadViewModel.cs" />
     <Compile Include="Messages\LoginSuccessMessage.cs" />
     <Compile Include="Converters\EmptyStringToBool.cs" />
     <Compile Include="Messages\NewUploadMessage.cs" />
+    <Compile Include="ViewModels\UploadManagerViewModel.cs" />
+    <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="Views\UserView.xaml.cs">
       <DependentUpon>UserView.xaml</DependentUpon>
     </Compile>
@@ -144,6 +148,14 @@
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UploadManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UploadView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PreferencesView.xaml">
       <SubType>Designer</SubType>
