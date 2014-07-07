@@ -51,6 +51,7 @@
     <Compile Include="Enumerations.cs" />
     <Compile Include="ArchiveFileInfo.cs" />
     <Compile Include="LocalStorage.cs" />
+    <Compile Include="LocalUploads.cs" />
     <Compile Include="PartInfo.cs" />
     <Compile Include="Quota.cs" />
     <Compile Include="S3Info.cs" />
