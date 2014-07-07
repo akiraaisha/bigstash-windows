@@ -46,7 +46,7 @@ namespace DeepfreezeApp
         { get { return Properties.Resources.QuotaHeader; } }
 
         public string LogoutString
-        { get { return Properties.Resources.LogoutButtonContent; } }
+        { get { return Properties.Resources.DisconnectButtonContent; } }
 
         public double UsedPercentage
         {
