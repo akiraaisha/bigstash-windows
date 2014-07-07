@@ -70,29 +70,92 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter a title for your new Archive..
+        /// </summary>
+        internal static string ArchiveTitleHelperText {
+            get {
+                return ResourceManager.GetString("ArchiveTitleHelperText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Calculating total archive size....
+        /// </summary>
+        internal static string CalculatingTotalArchiveSizeText {
+            get {
+                return ResourceManager.GetString("CalculatingTotalArchiveSizeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        internal static string CancelButtonContent {
+            get {
+                return ResourceManager.GetString("CancelButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to or choose a folder.
+        /// </summary>
+        internal static string ChooseFolderText {
+            get {
+                return ResourceManager.GetString("ChooseFolderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        internal static string ConnectButtonContent {
+            get {
+                return ResourceManager.GetString("ConnectButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating new archive.
+        /// </summary>
+        internal static string CreatingArchiveText {
+            get {
+                return ResourceManager.GetString("CreatingArchiveText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        internal static string DisconnectButtonContent {
+            get {
+                return ResourceManager.GetString("DisconnectButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drag files here to start uploading a new archive.
+        /// </summary>
+        internal static string DragAndDropText {
+            get {
+                return ResourceManager.GetString("DragAndDropText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The folder you selected is empty..
+        /// </summary>
+        internal static string EmptyFolderSelection {
+            get {
+                return ResourceManager.GetString("EmptyFolderSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  Free / .
         /// </summary>
         internal static string FreeText {
             get {
                 return ResourceManager.GetString("FreeText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Login.
-        /// </summary>
-        internal static string LoginButtonContent {
-            get {
-                return ResourceManager.GetString("LoginButtonContent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Logout.
-        /// </summary>
-        internal static string LogoutButtonContent {
-            get {
-                return ResourceManager.GetString("LogoutButtonContent", resourceCulture);
             }
         }
         
@@ -142,6 +205,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Total Archive Size: .
+        /// </summary>
+        internal static string TotalArchiveSizeText {
+            get {
+                return ResourceManager.GetString("TotalArchiveSizeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Total Archives: .
         /// </summary>
         internal static string TotalArchivesText {
@@ -165,6 +237,15 @@ namespace DeepfreezeApp.Properties {
         internal static string UnauthorizedExceptionMessage {
             get {
                 return ResourceManager.GetString("UnauthorizedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload.
+        /// </summary>
+        internal static string UploadButtonContent {
+            get {
+                return ResourceManager.GetString("UploadButtonContent", resourceCulture);
             }
         }
         

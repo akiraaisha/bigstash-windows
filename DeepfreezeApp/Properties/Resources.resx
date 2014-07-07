@@ -121,16 +121,42 @@
     <value>Deepfreeze Account</value>
     <comment>Used for active user header in preferences.</comment>
   </data>
+  <data name="ArchiveTitleHelperText" xml:space="preserve">
+    <value>Enter a title for your new Archive.</value>
+    <comment>Used for archive title textbox's TextBoxHelper Text.</comment>
+  </data>
+  <data name="CalculatingTotalArchiveSizeText" xml:space="preserve">
+    <value>Calculating total archive size...</value>
+  </data>
+  <data name="CancelButtonContent" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Used for cancel button content.</comment>
+  </data>
+  <data name="ChooseFolderText" xml:space="preserve">
+    <value>or choose a folder</value>
+    <comment>Used for choose folder textblock text.</comment>
+  </data>
+  <data name="ConnectButtonContent" xml:space="preserve">
+    <value>Connect</value>
+    <comment>Used for connect button content.</comment>
+  </data>
+  <data name="CreatingArchiveText" xml:space="preserve">
+    <value>Creating new archive</value>
+  </data>
+  <data name="DisconnectButtonContent" xml:space="preserve">
+    <value>Disconnect</value>
+    <comment>Used for disconnect button content.</comment>
+  </data>
+  <data name="DragAndDropText" xml:space="preserve">
+    <value>Drag files here to start uploading a new archive</value>
+    <comment>Used for drag and drop textblock text.</comment>
+  </data>
+  <data name="EmptyFolderSelection" xml:space="preserve">
+    <value>The folder you selected is empty.</value>
+    <comment>Used for exception message when the user selects an empty folder to archive.</comment>
+  </data>
   <data name="FreeText" xml:space="preserve">
     <value> Free / </value>
-  </data>
-  <data name="LoginButtonContent" xml:space="preserve">
-    <value>Login</value>
-    <comment>Used for login button content.</comment>
-  </data>
-  <data name="LogoutButtonContent" xml:space="preserve">
-    <value>Logout</value>
-    <comment>Used for logout button content.</comment>
   </data>
   <data name="PasswordError" xml:space="preserve">
     <value>Please fill your password.</value>
@@ -152,6 +178,10 @@
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
   </data>
+  <data name="TotalArchiveSizeText" xml:space="preserve">
+    <value>Total Archive Size: </value>
+    <comment>Used for archive size textblock text.</comment>
+  </data>
   <data name="TotalArchivesText" xml:space="preserve">
     <value>Total Archives: </value>
   </data>
@@ -161,6 +191,10 @@
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
     <value>Could not authenticate. Please enter your Deepfreeze account credentials.</value>
     <comment>Used for informing the user about wrong username/password combination.</comment>
+  </data>
+  <data name="UploadButtonContent" xml:space="preserve">
+    <value>Upload</value>
+    <comment>Used for upload button content.</comment>
   </data>
   <data name="UsedText" xml:space="preserve">
     <value> Used / </value>
