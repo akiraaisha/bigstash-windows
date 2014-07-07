@@ -104,7 +104,7 @@ namespace DeepfreezeApp
 
         public string LoginString
         {
-            get { return Properties.Resources.LoginButtonContent; }
+            get { return Properties.Resources.ConnectButtonContent; }
         }
 
         public string UsernameError
