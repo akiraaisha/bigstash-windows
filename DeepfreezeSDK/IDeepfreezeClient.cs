@@ -34,6 +34,15 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         Task<User> GetUserAsync();
 
+        /// <summary>
+        /// Send a POST "archives/" request which returns a Deepfreeze archive.
+        /// This request is responsible for creating a new archive given a size and a title.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="title"></param>
+        /// <returns>Archive</returns>
+        Task<Archive> CreateArchiveAsync(long size, string title);
+
         //void Setup(string accessKeyID, string secretAccessKey);
 
         //Task<List<S3Bucket>> ListBucketsAsync(CancellationToken token);
