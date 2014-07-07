@@ -346,7 +346,7 @@ namespace DeepfreezeSDK
         /// </summary>
         /// <param name="archive"></param>
         /// <returns>Upload</returns>
-        public async Task<Upload> CreateUploadAsync(Archive archive)
+        public async Task<Upload> InitiateUploadAsync(Archive archive)
         {
             try
             {
@@ -373,13 +373,12 @@ namespace DeepfreezeSDK
             { throw e; }
         }
 
-
-        public async Task<Upload> FinishUploadAsync(Upload upload)
+        public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
             try
             {
                 var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
-                request.Content = new StringContent(@"{""status"": ""uploaded""}", Encoding.ASCII, "application/json");
+                request.Content = new StringContent(patchContent, Encoding.ASCII, "application/json");
 
                 using (var httpClient = new HttpClient())
                 {
@@ -398,7 +397,19 @@ namespace DeepfreezeSDK
                         throw new Exceptions.CreateUploadException();
                 }
             }
-            catch(AggregateException e)
+            catch (Exception e)
+            { throw e; }
+        }
+
+        public async Task<Upload> FinishUploadAsync(Upload upload)
+        {
+            try
+            {
+                var patchedUpload = await this.PatchUploadAsync(upload, @"{""status"": ""uploaded""}");
+
+                return patchedUpload;
+            }
+            catch (Exception e)
             { throw e; }
         }
 
