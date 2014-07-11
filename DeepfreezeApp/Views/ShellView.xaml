@@ -62,7 +62,6 @@
             <controls:Flyout 
                 x:Name="PreferencesFlyout" 
                 Header="{Binding PreferencesHeader}"
-                AnimateOnPositionChange="{Binding AnimateOnPositionChange}"
                 Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
                 IsModal="True"
                 Theme="Adapt"
