@@ -14,16 +14,18 @@ using DeepfreezeModel;
 namespace DeepfreezeApp
 {
     [Export(typeof(IArchiveViewModel))]
-    public class ArchiveViewModel : PropertyChangedBase, IArchiveViewModel
+    public class ArchiveViewModel : Screen, IArchiveViewModel
     {
         #region fields
 
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
+        private static readonly long PART_SIZE = 10 * 1024 * 1024; // in bytes.
+        private static readonly long MAX_ALLOWED_FILE_SIZE = PART_SIZE * 10000; // max parts is 10000, so max size is part size * 10000.
 
         private bool _isReset = true;
         private bool _hasChosenFiles = false;
-        private List<string> _paths = new List<string>();
+
         private string _errorSelectingFiles;
         private string _busyMessageText;
         private string _errorCreatingArchive;
@@ -33,6 +35,10 @@ namespace DeepfreezeApp
         private string _archiveSizeText;
 
         private bool _isBusy = false;
+
+        private List<ArchiveFileInfo> _archiveInfo = new List<ArchiveFileInfo>();
+
+        private string _baseDirectory;
 
         #endregion
 
@@ -126,8 +132,8 @@ namespace DeepfreezeApp
 
         public async Task ChooseFolder()
         {
-            // Clear list with paths.
-            _paths.Clear();
+            // Clear list with archive files info.
+            this._archiveInfo.Clear();
             // Clear errors
             ErrorSelectingFiles = null;
 
@@ -145,10 +151,12 @@ namespace DeepfreezeApp
                 try
                 {
                     var dir = dialog.SelectedPath;
+                    this._baseDirectory = Path.GetDirectoryName(dir) + "\\";
 
-                    _paths.Add(dir);
+                    var paths = new List<string>();
+                    paths.Add(dir);
 
-                    this._archiveSize = await this.PrepareArchivePathsAndSize(_paths);
+                    this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
 
                     ArchiveSizeText = Properties.Resources.TotalArchiveSizeText +
                     LongToSizeString.ConvertToString((double)this._archiveSize);
@@ -178,22 +186,26 @@ namespace DeepfreezeApp
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 // Clear list with paths.
-                _paths.Clear();
+                this._archiveInfo.Clear();
                 // Clear errors
                 ErrorSelectingFiles = null;
 
+                var paths = new List<string>();
                 // get paths from drop action.
-                _paths.AddRange((string[])e.Data.GetData(DataFormats.FileDrop));
+                paths.AddRange((string[])e.Data.GetData(DataFormats.FileDrop));
 
-                if (_paths.Count() > 0)
+                if (paths.Count() > 0)
                 {
                     IsReset = false;
                     IsBusy = true;
                     BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
 
+                    // get the base directory of the selection.
+                    this._baseDirectory = Path.GetDirectoryName(paths.SingleOrDefault()) + "\\";
+
                     try
                     {
-                        this._archiveSize = await this.PrepareArchivePathsAndSize(_paths);
+                        this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
 
                         ArchiveSizeText = Properties.Resources.TotalArchiveSizeText +
                             LongToSizeString.ConvertToString((double)this._archiveSize);
@@ -234,7 +246,7 @@ namespace DeepfreezeApp
                 // publish a message to UploadManager to initiate the upload.
                 var message = IoC.Get<IInitiateUploadMessage>();
                 message.Archive = archive;
-                message.Paths = _paths;
+                message.ArchiveFilesInfo = this._archiveInfo;
                 this._eventAggregator.PublishOnUIThread(message);
 
                 // reset the view
@@ -255,12 +267,12 @@ namespace DeepfreezeApp
         {
             IsBusy = false;
             HasChosenFiles = false;
-            _paths.Clear();
             ArchiveTitle = null;
             ArchiveSizeText = null;
             this._archiveSize = 0;
             ErrorSelectingFiles = null;
             ErrorCreatingArchive = null;
+            this._archiveInfo.Clear();
             IsReset = true;
         }
 
@@ -268,15 +280,15 @@ namespace DeepfreezeApp
 
         #region private methods
 
-        private async Task PrepareArchivePathsAndSize(string dir)
-        {
-            try
-            {
-                _paths.Add(dir);
-                await PrepareArchivePathsAndSize(_paths);
-            }
-            catch (Exception e) { throw e; }
-        }
+        //private async Task PrepareArchivePathsAndSize(string dir)
+        //{
+        //    try
+        //    {
+        //        _paths.Add(dir);
+        //        await PrepareArchivePathsAndSize(_paths);
+        //    }
+        //    catch (Exception e) { throw e; }
+        //}
 
         private async Task<long> PrepareArchivePathsAndSize(IEnumerable<string> paths)
         {
@@ -298,8 +310,7 @@ namespace DeepfreezeApp
                         files.Add(p);
                 }
 
-                // for each selected directory, compute its size and add all its file paths
-                // in _paths.
+                // for each selected directory, add all files in _archiveFileInfo.
                 foreach (var dir in directories)
                 {
                     var dirFiles = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
@@ -310,22 +321,63 @@ namespace DeepfreezeApp
                             {
                                 foreach (var f in dirFiles)
                                 {
-                                    // calculate file size and add its path in _paths to upload.
-                                    size += new FileInfo(f).Length;
-                                    _paths.Add(f);
+                                    var info = new FileInfo(f);
 
+                                    // Check that the archive size does not exceed the maximum allowed file size.
+                                    // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
+                                    // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
+                                    if (info.Length > MAX_ALLOWED_FILE_SIZE)
+                                        throw new Exception("The file " + f + " exceeds the maximum allowed archive size of 100 GB.");
+
+                                    var archiveFileInfo = new ArchiveFileInfo()
+                                    {
+                                        FileName = info.Name,
+                                        KeyName = f.Replace(this._baseDirectory, "").Replace('\\', '/'),
+                                        FilePath = f,
+                                        Size = info.Length,
+                                        LastModified = info.LastWriteTimeUtc,
+                                        IsUploaded = false
+                                    };
+
+                                    this._archiveInfo.Add(archiveFileInfo);
+
+                                    size += archiveFileInfo.Size;
                                 }
                             }
                         );
                     }
                 }
                 
-                foreach(var file in files)
+                // do the same for each individually selected files.
+                foreach(var f in files)
                 {
-                    size += new FileInfo(file).Length;
-                    _paths.Add(file);
+                    var info = new FileInfo(f);
+
+                    // Check that the archive size does not exceed the maximum allowed file size.
+                    // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
+                    // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
+                    if (info.Length > MAX_ALLOWED_FILE_SIZE)
+                        throw new Exception("The file " + info + " exceeds the maximum allowed archive size of 100 GB.");
+
+                    var archiveFileInfo = new ArchiveFileInfo()
+                    {
+                        FileName = info.Name,
+                        KeyName = info.Name,
+                        FilePath = f,
+                        Size = info.Length,
+                        LastModified = info.LastWriteTimeUtc,
+                        IsUploaded = false
+                    };
+
+                    this._archiveInfo.Add(archiveFileInfo);
+
+                    size += archiveFileInfo.Size;
                 }
 
+                if (this._archiveInfo.Count == 0)
+                    throw new Exception("Your selection doesn't contain any files. Nothing to upload.");
+
+                // check that the archive size fits in user's DF storage.
                 if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
                     throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
 
@@ -342,5 +394,10 @@ namespace DeepfreezeApp
         }
 
         #endregion
+
+        protected override void OnActivate()
+        {
+            base.OnActivate();
+        }
     }
 }
