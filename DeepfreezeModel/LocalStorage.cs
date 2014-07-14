@@ -17,12 +17,12 @@ namespace DeepfreezeModel
         /// <param name="path"></param>
         /// <param name="json"></param>
         /// <returns>bool</returns>
-        public static bool WriteJson(string path, object json)
+        public static bool WriteJson(string path, object json, Encoding encoding)
         {
             try
             {
                 using (FileStream fs = File.Open(path, FileMode.Create))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.ASCII))
+                using (StreamWriter sw = new StreamWriter(fs, encoding))
                 using (JsonWriter jw = new JsonTextWriter(sw))
                 {
                     jw.Formatting = Formatting.Indented;
