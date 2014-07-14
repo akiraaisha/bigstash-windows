@@ -183,7 +183,7 @@ namespace DeepfreezeApp
                 // the user is considered as logged into the DeepfreezeClient.
                 
                 // Save preferences file.
-                LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings);
+                LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings, Encoding.ASCII);
 
                 // Publish LoginSuccess Message
                 this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
