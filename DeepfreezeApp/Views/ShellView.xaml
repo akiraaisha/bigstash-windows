@@ -42,6 +42,8 @@
                     FontSize="16"
                     Style="{DynamicResource MetroWindowButtonStyle}"
                     cal:Message.Attach="TogglePreferencesFlyout"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
                     >
                 
                 <Rectangle Width="15"
@@ -75,12 +77,9 @@
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
-    <Grid>
+    <Grid Margin="0 0 0 10">
         
-        
-        
-        
-    <StackPanel
+        <StackPanel
         Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
         >
             
@@ -88,17 +87,37 @@
             
     </StackPanel>
 
-    <StackPanel
-        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-        >
+        <WrapPanel HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"
+                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                   >
+            
+            <Label Content="{Binding BusyMessage}" />
+            
+            <controls:ProgressRing IsActive="{Binding IsBusy}" 
+                                   Width="20" 
+                                   Height="20" 
+                                   />
+            
+        </WrapPanel>
 
-        <ContentControl cal:View.Model="{Binding ArchiveVM}" />
+        <DockPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
+            
+            <ContentControl cal:View.Model="{Binding ArchiveVM}"
+                            DockPanel.Dock="Top"
+                            />
 
-        <Border BorderThickness="1" BorderBrush="WhiteSmoke" />
+            <ScrollViewer DockPanel.Dock="Top"
+                          VerticalScrollBarVisibility="Auto"
+                          >
 
-        <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
+                <!--<Border BorderThickness="1" BorderBrush="WhiteSmoke" />-->
 
-    </StackPanel>
+                <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
 
-</Grid>
+            </ScrollViewer>
+            
+        </DockPanel>
+
+    </Grid>
 </controls:MetroWindow>
