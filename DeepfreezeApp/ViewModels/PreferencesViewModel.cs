@@ -11,7 +11,7 @@ using DeepfreezeSDK;
 namespace DeepfreezeApp
 {
     [Export(typeof(IPreferencesViewModel))]
-    public class PreferencesViewModel : PropertyChangedBase, IPreferencesViewModel
+    public class PreferencesViewModel : Screen, IPreferencesViewModel
     {
         #region members
         private readonly IEventAggregator _eventAggregator;
@@ -48,5 +48,10 @@ namespace DeepfreezeApp
         #region methods
 
         #endregion
+
+        protected override void OnActivate()
+        {
+            base.OnActivate();
+        }
     }
 }
