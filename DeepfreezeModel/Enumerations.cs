@@ -14,6 +14,7 @@ namespace DeepfreezeModel
             Pending,
             Resuming,
             InProgress,
+            Uploading,
             Pausing,
             Paused,
             Uploaded,
@@ -22,7 +23,8 @@ namespace DeepfreezeModel
             Cancelling,
             Cancelled,
             Failed,
-            Aborted
+            Aborted,
+            UnableToStart
         }
 
         public static Status GetStatusFromString(string statusString)
@@ -42,6 +44,15 @@ namespace DeepfreezeModel
                     break;
                 case "completed":
                     status = Status.Completed;
+                    break;
+                case "failed":
+                    status = Status.Failed;
+                    break;
+                case "paused":
+                    status = Status.Paused;
+                    break;
+                case "uploading":
+                    status = Status.Uploading;
                     break;
             }
 
