@@ -187,6 +187,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to % of .
+        /// </summary>
+        internal static string PercentageOfText {
+            get {
+                return ResourceManager.GetString("PercentageOfText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Preferences.
         /// </summary>
         internal static string PreferencesHeader {
@@ -210,6 +219,78 @@ namespace DeepfreezeApp.Properties {
         internal static string RememberPasswordURL {
             get {
                 return ResourceManager.GetString("RememberPasswordURL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completed.
+        /// </summary>
+        internal static string StatusCompletedText {
+            get {
+                return ResourceManager.GetString("StatusCompletedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating.
+        /// </summary>
+        internal static string StatusCreatingText {
+            get {
+                return ResourceManager.GetString("StatusCreatingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        internal static string StatusFailedText {
+            get {
+                return ResourceManager.GetString("StatusFailedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paused.
+        /// </summary>
+        internal static string StatusPausedText {
+            get {
+                return ResourceManager.GetString("StatusPausedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pending.
+        /// </summary>
+        internal static string StatusPendingText {
+            get {
+                return ResourceManager.GetString("StatusPendingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to start.
+        /// </summary>
+        internal static string StatusUnableToStartText {
+            get {
+                return ResourceManager.GetString("StatusUnableToStartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploaded.
+        /// </summary>
+        internal static string StatusUploadedText {
+            get {
+                return ResourceManager.GetString("StatusUploadedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading.
+        /// </summary>
+        internal static string StatusUploadingText {
+            get {
+                return ResourceManager.GetString("StatusUploadingText", resourceCulture);
             }
         }
         

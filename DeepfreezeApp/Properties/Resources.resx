@@ -169,6 +169,9 @@
     <value>Password</value>
     <comment>Used for password login passwordbox.</comment>
   </data>
+  <data name="PercentageOfText" xml:space="preserve">
+    <value>% of </value>
+  </data>
   <data name="PreferencesHeader" xml:space="preserve">
     <value>Preferences</value>
     <comment>Used for preferences flyout header.</comment>
@@ -180,6 +183,30 @@
   <data name="RememberPasswordURL" xml:space="preserve">
     <value>https://stage.deepfreeze.io/o/password_reset/</value>
     <comment>Change this for production.</comment>
+  </data>
+  <data name="StatusCompletedText" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="StatusCreatingText" xml:space="preserve">
+    <value>Creating</value>
+  </data>
+  <data name="StatusFailedText" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="StatusPausedText" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="StatusPendingText" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="StatusUnableToStartText" xml:space="preserve">
+    <value>Unable to start</value>
+  </data>
+  <data name="StatusUploadedText" xml:space="preserve">
+    <value>Uploaded</value>
+  </data>
+  <data name="StatusUploadingText" xml:space="preserve">
+    <value>Uploading</value>
   </data>
   <data name="TotalArchiveSizeText" xml:space="preserve">
     <value>Total Archive Size: </value>
