@@ -113,6 +113,13 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.LocalAppDataDFFolder,
                         Properties.Settings.Default.UploadsFileName
                     );
+
+            // %APPDATA\Deepfreeze\uploads\
+            Properties.Settings.Default.UploadsFolderPath =
+                    Path.Combine(
+                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.UploadsFolderName
+                    );
         }
 
         private void SetDeepfreezeClientSettings()
@@ -127,6 +134,13 @@ namespace DeepfreezeApp
 
                 if (content != null)
                     client.Settings = JsonConvert.DeserializeObject<Settings>(content);
+
+                //var user = client.GetUserAsync().Result;
+
+                //if (user != null)
+                //{
+                //    client.Settings.ActiveUser = user;
+                //}
 
             }
             catch (FileNotFoundException e) { } // do nothing, client has null settings.
