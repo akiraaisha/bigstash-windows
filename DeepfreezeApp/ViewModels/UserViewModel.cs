@@ -52,7 +52,7 @@ namespace DeepfreezeApp
         {
             get 
             {
-                var percentage = (double)(this.ActiveUser.Quota.Used / this.ActiveUser.Quota.Size) * 100;
+                var percentage = ((double)this.ActiveUser.Quota.Used / this.ActiveUser.Quota.Size) * 100;
                 return percentage;    
             }
         }
