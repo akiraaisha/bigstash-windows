@@ -199,7 +199,7 @@ namespace DeepfreezeApp
             this._localUploads.Add(newUploadVM.LocalUpload);
 
             // final step: automatically start uploading.
-            await newUploadVM.Start();
+            await newUploadVM.StartUpload();
         }
 
         #endregion
