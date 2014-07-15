@@ -20,12 +20,15 @@ namespace DeepfreezeSDK
     public class DeepfreezeS3Client : IDeepfreezeS3Client
     {
         protected static readonly long PART_SIZE = 1024 * 1024;
+        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount - 1;
 
-        static IAmazonS3 s3Client;
+        public IAmazonS3 s3Client;
 
         private static AmazonS3Config _s3Config;
         private static string _accessKeyID;
         private static string _secretAccessKey;
+
+        public event EventHandler<StreamTransferProgressArgs> ProgressChanged;
 
         public DeepfreezeS3Client()
         { }
@@ -43,6 +46,21 @@ namespace DeepfreezeSDK
             _secretAccessKey = secretAccessKey;
         }
 
+        public void Setup(string accessKeyID, string secretAccessKey, string sessionToken)
+        {
+            try
+            {
+                // set the standard us region endpoint.
+                _s3Config = new AmazonS3Config();
+                _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USEast1;
+
+                s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
+            }
+            catch (Exception e) { throw e; }
+        }
+
+
+        #region examples
         /// <summary>
         /// Lists buckets.
         /// </summary>
@@ -138,23 +156,103 @@ namespace DeepfreezeSDK
                 }
             }
         }
+        #endregion
+
+
+
+
+
 
         /// <summary>
-        /// Returns an InitiateMultipartUploadRequest to an existing Bucket for a new object with key = keyName.
+        /// Send a InitiateMultipartUploadRequest request and return the response.
         /// </summary>
         /// <param name="existingBucketName"></param>
         /// <param name="keyName"></param>
         /// <returns></returns>
-        public InitiateMultipartUploadRequest CreateInitiateMutlipartUploadRequest(string existingBucketName, string keyName)
+        public async Task<InitiateMultipartUploadResponse> InitiateMultipartUpload(string existingBucketName, string keyName, CancellationToken token)
         {
-            InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest
+            try
             {
-                BucketName = existingBucketName,
-                Key = keyName
-            };
-
-            return initiateRequest;
+                InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest
+                {
+                    BucketName = existingBucketName,
+                    Key = keyName
+                };
+                
+                InitiateMultipartUploadResponse initResponse = await s3Client.InitiateMultipartUploadAsync(initiateRequest, token).ConfigureAwait(false);
+                return initResponse;
+            }
+            catch (Exception e) { throw e; }
         }
+
+        /// <summary>
+        /// Send a ListPartsRequest request and return the response.
+        /// </summary>
+        /// <param name="existingBucketName"></param>
+        /// <param name="keyName"></param>
+        /// <param name="uploadID"></param>
+        /// <param name="token"></param>
+        /// <returns>Task<ListPartsResponse></returns>
+        public async Task<ListPartsResponse> ListPartsAsync(string existingBucketName, string keyName, string uploadID, CancellationToken token)
+        {
+            try
+            {
+                ListPartsRequest request = new ListPartsRequest();
+                request.BucketName = existingBucketName;
+                request.Key = keyName;
+                request.UploadId = uploadID;
+
+                ListPartsResponse response = await this.s3Client.ListPartsAsync(request, token).ConfigureAwait(false);
+
+                return response;
+            }
+            catch (Exception e) 
+            { 
+                throw e; 
+            }
+        }
+
+        /// <summary>
+        /// Send a CompleteMultipartUploadRequest request and return the response.
+        /// </summary>
+        /// <param name="existingBucketName"></param>
+        /// <param name="keyName"></param>
+        /// <param name="uploadID"></param>
+        /// <returns>Task<CompleteMultipartUploadRequest></returns>
+        public async Task<CompleteMultipartUploadRequest> CompleteMultipartUpload(string existingBucketName, string keyName, string uploadId, 
+            CancellationToken token)
+        {
+            try
+            {
+                CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest
+                {
+                    BucketName = existingBucketName,
+                    Key = keyName,
+                    UploadId = uploadId,
+                };
+
+                // in any case request list parts to send etags for each part.
+                var partsResponse = await this.ListPartsAsync(existingBucketName, keyName, uploadId, token).ConfigureAwait(false);
+                List<PartETag> eTags = new List<PartETag>();
+
+                foreach(var part in partsResponse.Parts)
+                {
+                    eTags.Add(new PartETag(part.PartNumber, part.ETag));
+                }
+
+                completeRequest.AddPartETags(eTags);
+
+                CompleteMultipartUploadResponse completeResponse = await s3Client.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
+
+                return completeRequest;
+            }
+            catch (Exception e) { throw e; }
+        }
+
+
+
+
+
 
         /// <summary>
         /// Create an UploadPartRequest.
@@ -185,175 +283,187 @@ namespace DeepfreezeSDK
             return uploadRequest;
         }
 
-        public async Task<UploadPartResponse> BeginPartUploadAsync(string existingBucketName, string keyName, string uploadID,
-                                                         int partNumber, long partSize, long filePosition, string filePath,
-                                                         CancellationToken token)
+        /// <summary>
+        /// Send an UploadPartRequest request and return its response. This call uploads part data.
+        /// </summary>
+        /// <param name="uploadPartRequest"></param>
+        /// <param name="token"></param>
+        /// <returns>Task<UploadPartResponse></returns>
+        public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, CancellationToken token)
         {
             try
             {
-                // Create request to upload a part.
-                var uploadPartRequest = CreateUploadPartRequest(existingBucketName, keyName, uploadID, partNumber, partSize, filePosition, filePath);
+                token.ThrowIfCancellationRequested();
 
-                // Upload part and add response to our list.
-                uploadPartRequest.StreamTransferProgress +=
-                    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
+                // Subscribe to progress event.
+                //uploadPartRequest.StreamTransferProgress +=
+                //    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
 
-                var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token);
+                // Upload part and return response.
+                var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
+
+                Console.WriteLine("Finished part " + uploadPartRequest.PartNumber);
 
                 return uploadPartResponse;
             }
-            catch(Exception e)
+            catch (AggregateException ex)
             {
-                throw e;
+                ex.Handle(e =>
+                {
+                    return e is OperationCanceledException;
+                });
+
+                throw ex;
             }
         }
 
         /// <summary>
-        /// Returns a CompleteMultipartUploadRequest with set properties for Bucket name, Key name and UploadID.
+        /// Single file upload to S3 bucket. Used only for file size less than 5 MB.
         /// </summary>
         /// <param name="existingBucketName"></param>
-        /// <param name="keyName"></param>
-        /// <param name="uploadID"></param>
+        /// <param name="info"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        public CompleteMultipartUploadRequest CreateCompleteMultipartUploadRequest(string existingBucketName, string keyName, string uploadID)
+        public async Task<bool> UploadSingleFileAsync(string existingBucketName, ArchiveFileInfo info, CancellationToken token)
         {
-            CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest
-            {
-                BucketName = existingBucketName,
-                Key = keyName,
-                UploadId = uploadID,
-            };
-
-            return completeRequest;
-        }
-
-        
-
-        public async Task<UploadOperation> CreateUploadOperation(Archive archive, string existingBucketName)
-        {
-            var upload = new UploadOperation();
-
-            upload.BucketName = existingBucketName;
-            upload.CreationDate = DateTime.Now;
-            upload.PartSize = PART_SIZE;
-            upload.Status = Enumerations.Status.Pending;
-
-            InitiateMultipartUploadRequest initiateRequest = CreateInitiateMutlipartUploadRequest(existingBucketName, "");
-            InitiateMultipartUploadResponse initResponse = await s3Client.InitiateMultipartUploadAsync(initiateRequest);
-
-            return upload;
-        }
-
-        public async Task UploadFileAsync(string existingBucketName, string keyName, string filePath, CancellationToken token)
-        {
-            bool hasException = false;
-
-            // List to store upload part responses.
-            List<UploadPartResponse> uploadResponses = new List<UploadPartResponse>();
-
-            // 1. Initialize.
-            InitiateMultipartUploadRequest initiateRequest = CreateInitiateMutlipartUploadRequest(existingBucketName, keyName);
-            InitiateMultipartUploadResponse initResponse = await s3Client.InitiateMultipartUploadAsync(initiateRequest, token);
-
-            // 2. Upload Parts.
-            long contentLength = new FileInfo(filePath).Length;
-            long partSize = 1048576; // 5 MB
-            int coreCount = Environment.ProcessorCount;
-            var parallelOptions = new ParallelOptions();
-            //parallelOptions.MaxDegreeOfParallelism = 1;
-            parallelOptions.CancellationToken = token;
-
             try
             {
-                long filePosition = 0;
-                var uploadPartTasks = new List<Task<UploadPartResponse>>();
+                token.ThrowIfCancellationRequested();
 
-                Console.WriteLine("Creating upload part tasks.");
-
-                for (int i = 1; filePosition < contentLength; i++)
-                {
-                    var uploadPartTask =
-                        BeginPartUploadAsync(existingBucketName, keyName, initResponse.UploadId, i, partSize, filePosition, filePath, token);
-
-                    uploadPartTasks.Add(uploadPartTask);
-
-                    filePosition += partSize;
-                }
-
-                Console.WriteLine("Finished creating upload part tasks.");
-
-                Parallel.ForEach(uploadPartTasks, parallelOptions, async item =>
-                    {
-                        if (!token.IsCancellationRequested)
-                        {
-                            var uploadPartResponse = await item;
-
-                            Console.WriteLine("Finished " + uploadPartResponse.PartNumber);
-
-                            uploadResponses.Add(uploadPartResponse);
-                        }
-                    });
-
-                //Parallel.For(1, coreCount, parallelOptions, async i =>
-                //    {
-                //        var relativeCounter = 0;
-
-                //        while (filePosition < contentLength)
-                //        {
-                //            Console.WriteLine("Started uploading part " + (relativeCounter + i));
-
-                //            var uploadPartResponse =
-                //                await BeginUploadPartTask(existingBucketName, keyName, initResponse.UploadId, relativeCounter + i, partSize, filePosition, filePath, token);
-
-                //            Console.WriteLine("Finished uploading part " + (relativeCounter + i));
-
-                //            uploadResponses.Add(uploadPartResponse);
-
-                //            filePosition += partSize;
-                //            relativeCounter += 3;
-                //        }
-                //    });
-
-                //for (int i = 1; filePosition < contentLength; i++)
-                //{
-                //    // Create request to upload a part.
-                //    var uploadPartRequest = CreateUploadPartRequest(existingBucketName, keyName, initResponse.UploadId, i, partSize, filePosition, filePath);
-
-                //    // Upload part and add response to our list.
-                //    uploadPartRequest.StreamTransferProgress +=
-                //        new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
-
-                //    var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token);
-                //    uploadResponses.Add(uploadPartResponse);
-
-                //    filePosition += partSize;
-                //}
-
-                // Step 3: complete.
-                CompleteMultipartUploadRequest completeRequest = CreateCompleteMultipartUploadRequest(existingBucketName, keyName, initResponse.UploadId);
-
-                CompleteMultipartUploadResponse completeUploadResponse = await s3Client.CompleteMultipartUploadAsync(completeRequest, token);
-
-            }
-            catch(TaskCanceledException e)
-            {
-                hasException = true;
-                Console.WriteLine("Task cancelled");
-            }
-            catch (Exception exception)
-            {
-                hasException = true;
-                //throw exception; // caller should handle and abort multipart upload
-
-                Console.WriteLine("Exception occurred: {0}", exception.Message);
-                AbortMultipartUploadRequest abortMPURequest = new AbortMultipartUploadRequest
+                var putRequest = new PutObjectRequest()
                 {
                     BucketName = existingBucketName,
-                    Key = keyName,
-                    UploadId = initResponse.UploadId
+                    Key = info.KeyName,
+                    FilePath = info.FilePath
                 };
-                s3Client.AbortMultipartUpload(abortMPURequest);
+
+                //putRequest.StreamTransferProgress += 
+                //    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
+
+                var putResponse = await this.s3Client.PutObjectAsync(putRequest, token).ConfigureAwait(false);
+
+                return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
             }
+            catch (OperationCanceledException e) { throw e; }
+            catch (Exception e) { throw e; }
+        }
+
+        public Queue<UploadPartRequest> PreparePartRequests(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, List<PartDetail> uploadedParts, CancellationToken token)
+        {
+            long filePosition = 0;
+            long partSize = PART_SIZE; // 5 MB
+            Queue<UploadPartRequest> partRequests = new Queue<UploadPartRequest>();
+
+            if (fileInfo.Size < partSize)
+                partSize = fileInfo.Size;
+
+            for (int i = 1; filePosition < fileInfo.Size; i++)
+            {
+                if (uploadedParts.Select(x => x.PartNumber).Contains(i))
+                {
+                    filePosition += partSize;
+                    continue;
+                }
+
+                bool isLastPart = false;
+
+                // check remaining size and if it's smalled than partSize
+                // then set partSize = remainingSize and this as the last part in its request.
+                long remainingSize = fileInfo.Size - filePosition;
+                if (remainingSize <= partSize)
+                {
+                    isLastPart = true;
+                    partSize = remainingSize;
+                }
+
+                // Create request to upload a part.
+                var uploadPartRequest =
+                    CreateUploadPartRequest(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, i, partSize, filePosition, fileInfo.FilePath);
+
+                // Now check if this is the last part and mark the request.
+                if (isLastPart)
+                    uploadPartRequest.IsLastPart = true;
+
+                partRequests.Enqueue(uploadPartRequest);
+
+                // increment position by partSize
+                filePosition += partSize;
+            }
+
+            return partRequests;
+        }
+
+        public async Task<bool> UploadFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, CancellationToken token)
+        {
+            bool hasException = false;
+            ListPartsResponse partsResponse = new ListPartsResponse();
+
+            var uploadPartTasks = new List<Task<UploadPartResponse>>();
+            Queue<UploadPartRequest> partRequests = new Queue<UploadPartRequest>();
+            List<Task<UploadPartResponse>> runningTasks = new List<Task<UploadPartResponse>>();
+
+            // if this isn't a new file upload (resuming a past upload)
+            // then we have to get the uploaded parts so the upload continues
+            // where it's stopped.
+            if (!isNewFileUpload)
+                partsResponse = await this.ListPartsAsync(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token).ConfigureAwait(false);
+
+            token.ThrowIfCancellationRequested();
+
+            Console.WriteLine("Creating upload part tasks.");
+
+            // create all part requests.
+            partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, token);
+
+            Console.WriteLine("Finished creating upload part tasks.");
+
+            token.ThrowIfCancellationRequested();
+
+            // initialize first tasks to run.
+            while (runningTasks.Count < PARALLEL_NUM && partRequests.Count > 0)
+            {
+                var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), token);
+                runningTasks.Add(uploadTask);
+                Console.WriteLine("New task.");
+            }
+
+            while (runningTasks.Count > 0)
+            {
+                try
+                {
+                    var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
+
+                    runningTasks.Remove(finishedTask);
+                    finishedTask.Dispose();
+
+                    if (partRequests.Count > 0)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), token);
+                        runningTasks.Add(uploadTask);
+                        Console.WriteLine("New task.");
+                    }
+                }
+                catch(AggregateException ex)
+                {
+                    ex.Handle(e =>
+                    {
+                        return e is OperationCanceledException;
+                    });
+
+                    partRequests.Clear();
+                    runningTasks.Clear();
+
+                    throw ex;
+                }
+            }
+
+            // send a complete request to finish the s3 upload.
+            //await this.CompleteMultipartUpload(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token);
+
+            // if all goes well, return true
+            return true; 
         }
 
         /// <summary>
@@ -367,12 +477,16 @@ namespace DeepfreezeSDK
             {
                 BucketName = existingBucketName
             };
+            
+            try
+            {
+                ListMultipartUploadsResponse response = await s3Client.ListMultipartUploadsAsync(request).ConfigureAwait(false);
 
-            ListMultipartUploadsResponse response = await s3Client.ListMultipartUploadsAsync(request);
+                List<MultipartUpload> pendingUploads = response.MultipartUploads;
 
-            List<MultipartUpload> pendingUploads = response.MultipartUploads;
-
-            return pendingUploads;
+                return pendingUploads;
+            }
+            catch (Exception e) { throw e; }
         }
 
         /// <summary>
@@ -392,24 +506,14 @@ namespace DeepfreezeSDK
                 UploadId = uploadID
             };
 
-            await s3Client.AbortMultipartUploadAsync(request, cts);
-        }
-
-        public void TrackUploadProgress()
-        {
-            UploadPartRequest uploadRequest = new UploadPartRequest
+            try
             {
-                
-            };
-
-            uploadRequest.StreamTransferProgress += 
-                new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
-        }
-
-        public static void UploadPartProgressEventCallback(object sender, StreamTransferProgressArgs e)
-        {
-            // Process event. 
-            Console.WriteLine("{0}/{1}", e.TransferredBytes, e.TotalBytes);
+                await s3Client.AbortMultipartUploadAsync(request, cts).ConfigureAwait(false);
+            }
+            catch(AggregateException ex)
+            {
+                throw ex;
+            }
         }
     }
 }
