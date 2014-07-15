@@ -24,12 +24,7 @@ namespace DeepfreezeApp
                 
                     buttonVisibility = Visibility.Visible;
                     break;
-
-                case Enumerations.Status.Paused:
-                case Enumerations.Status.Failed:
-                case Enumerations.Status.UnableToStart:
-                case Enumerations.Status.Uploaded:
-                case Enumerations.Status.Completed:
+                default:
                     buttonVisibility = Visibility.Collapsed;
                     break;
             }

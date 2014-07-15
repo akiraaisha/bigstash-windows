@@ -21,6 +21,7 @@ namespace DeepfreezeApp
             switch(status)
             {
                 case Enumerations.Status.Completed:
+                case Enumerations.Status.Uploaded:
                     buttonVisibility = Visibility.Visible;
                     break;
                 default:
