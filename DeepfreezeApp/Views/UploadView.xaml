@@ -113,7 +113,7 @@
                    Margin="0 5 0 5"
                    FontSize="11"
                    Text="{Binding CurrentFileInfo.FileName}"
-                   Visibility="{Binding ElementName=Pause, Path=Visibility}"
+                   Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
                    />
 
             <TextBlock Grid.Row="3" Grid.Column="0" 
