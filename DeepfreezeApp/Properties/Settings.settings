@@ -26,5 +26,8 @@
     <Setting Name="UploadsFolderPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ServerBaseAddress" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://www.deepfreeze.io/api/v1/</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

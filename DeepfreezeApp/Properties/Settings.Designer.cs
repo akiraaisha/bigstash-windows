@@ -109,5 +109,14 @@ namespace DeepfreezeApp.Properties {
                 this["UploadsFolderPath"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.deepfreeze.io/api/v1/")]
+        public string ServerBaseAddress {
+            get {
+                return ((string)(this["ServerBaseAddress"]));
+            }
+        }
     }
 }
