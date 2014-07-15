@@ -135,12 +135,8 @@ namespace DeepfreezeApp
                 if (content != null)
                     client.Settings = JsonConvert.DeserializeObject<Settings>(content);
 
-                //var user = client.GetUserAsync().Result;
-
-                //if (user != null)
-                //{
-                //    client.Settings.ActiveUser = user;
-                //}
+                if (String.IsNullOrEmpty(client.Settings.ApiEndpoint))
+                    client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
 
             }
             catch (FileNotFoundException e) { } // do nothing, client has null settings.
