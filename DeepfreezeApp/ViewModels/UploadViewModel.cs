@@ -352,7 +352,9 @@ namespace DeepfreezeApp
                 IsBusy = true;
                 this.PauseUpload();
 
-                if (this.Upload != null)
+                if (this.Upload != null && 
+                    this.Upload.Status != Enumerations.Status.Completed &&
+                    this.Upload.Status != Enumerations.Status.Uploaded)
                 {
                     var abortSuccess = await this.Abort();
 
