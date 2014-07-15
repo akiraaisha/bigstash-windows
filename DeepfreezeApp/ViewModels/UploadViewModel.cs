@@ -143,8 +143,6 @@ namespace DeepfreezeApp
             { 
                 this._upload = value;
                 NotifyOfPropertyChange(() => this.Upload);
-                //SetS3Info();
-                //SetupS3Client();
                 SetS3Info(this.Upload.S3);
                 SetupS3Client(this.Upload.S3);
             }
@@ -244,8 +242,7 @@ namespace DeepfreezeApp
 
         #region action_methods
 
-
-        public async Task Start()
+        public async Task StartUpload()
         {
             this.IsBusy = false;
             this.OperationStatus = Enumerations.Status.Uploading;
@@ -255,10 +252,6 @@ namespace DeepfreezeApp
 
             // skip files with IsUploaded = true entirely.
             var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
-
-            // Subscribe to progress event;
-            //this._s3Client.ProgressChanged +=
-            //    new EventHandler<StreamTransferProgressArgs>(_s3Client_OnProgressChanged);
 
             this._refreshTimer.Start();
 
@@ -338,7 +331,7 @@ namespace DeepfreezeApp
             this.OperationStatus = this.Upload.Status;
         }
 
-        public void Pause()
+        public void PauseUpload()
         {
             if (this.OperationStatus == Enumerations.Status.Uploading)
             {
@@ -352,12 +345,12 @@ namespace DeepfreezeApp
             }
         }
 
-        public async Task Delete()
+        public async Task DeleteUpload()
         {
             try
             {
                 IsBusy = true;
-                this.Pause();
+                this.PauseUpload();
 
                 if (this.Upload != null)
                 {
@@ -380,7 +373,7 @@ namespace DeepfreezeApp
             { this.IsBusy = false; }
         }
 
-        public async Task Refresh()
+        public async Task RefreshUpload()
         {
             try
             {
@@ -434,21 +427,10 @@ namespace DeepfreezeApp
             }
         }
 
-        private void SetS3Info()
-        {
-            this._s3Info.Bucket = "tokas";
-            this._s3Info.TokenAccessKey = "AKIAJTWDMVXTYHVUTGRQ";
-            this._s3Info.TokenSecretKey = "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";
-        }
-
         /// <summary>
-        /// Set DeepfreezeS3Client attributes.
+        /// Set DeepfreezeS3Client's amazon s3 client credentials and session token.
         /// </summary>
-        private void SetupS3Client()
-        {
-            this._s3Client.Setup(this._s3Info.TokenAccessKey, this._s3Info.TokenSecretKey);
-        }
-
+        /// <param name="s3"></param>
         private void SetupS3Client(S3Info s3)
         {
             this._s3Client.Setup(s3.TokenAccessKey, s3.TokenSecretKey, s3.TokenSession);
@@ -610,7 +592,7 @@ namespace DeepfreezeApp
                 {
                     // if it's a new upload, start it automatically
                     // and let it do its job :)
-                    await Start();
+                    await StartUpload();
                 }
             }
             catch (Exception e)
