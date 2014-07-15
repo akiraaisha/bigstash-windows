@@ -149,7 +149,7 @@
                 
                 <Button Margin="0 0 5 0"
                         Width="70"
-                        x:Name="Start" 
+                        x:Name="StartUpload" 
                         Content="Start"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
@@ -159,7 +159,7 @@
 
                 <Button Margin="0 0 5 0"
                         Width="70"
-                        x:Name="Pause" 
+                        x:Name="PauseUpload" 
                         Content="Pause"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
@@ -169,7 +169,7 @@
 
                 <Button Margin="0 0 5 0"
                         Width="70"
-                        x:Name="Delete" 
+                        x:Name="DeleteUpload" 
                         Content="Delete"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
@@ -184,7 +184,7 @@
                         VerticalAlignment="Center"
                         Style="{DynamicResource SquareButtonStyle}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToRemoveButtonVisibilityConverter}}"
-                        cal:Message.Attach="Delete"
+                        cal:Message.Attach="DeleteUpload"
                         />
 
             </StackPanel>
