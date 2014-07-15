@@ -232,20 +232,11 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creating.
+        ///   Looks up a localized string similar to Error.
         /// </summary>
-        internal static string StatusCreatingText {
+        internal static string StatusErrorText {
             get {
-                return ResourceManager.GetString("StatusCreatingText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed.
-        /// </summary>
-        internal static string StatusFailedText {
-            get {
-                return ResourceManager.GetString("StatusFailedText", resourceCulture);
+                return ResourceManager.GetString("StatusErrorText", resourceCulture);
             }
         }
         
@@ -264,15 +255,6 @@ namespace DeepfreezeApp.Properties {
         internal static string StatusPendingText {
             get {
                 return ResourceManager.GetString("StatusPendingText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to start.
-        /// </summary>
-        internal static string StatusUnableToStartText {
-            get {
-                return ResourceManager.GetString("StatusUnableToStartText", resourceCulture);
             }
         }
         

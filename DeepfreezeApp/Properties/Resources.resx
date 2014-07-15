@@ -187,20 +187,14 @@
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>
   </data>
-  <data name="StatusCreatingText" xml:space="preserve">
-    <value>Creating</value>
-  </data>
-  <data name="StatusFailedText" xml:space="preserve">
-    <value>Failed</value>
+  <data name="StatusErrorText" xml:space="preserve">
+    <value>Error</value>
   </data>
   <data name="StatusPausedText" xml:space="preserve">
     <value>Paused</value>
   </data>
   <data name="StatusPendingText" xml:space="preserve">
     <value>Pending</value>
-  </data>
-  <data name="StatusUnableToStartText" xml:space="preserve">
-    <value>Unable to start</value>
   </data>
   <data name="StatusUploadedText" xml:space="preserve">
     <value>Uploaded</value>
