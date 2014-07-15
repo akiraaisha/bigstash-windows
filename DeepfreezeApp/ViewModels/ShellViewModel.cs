@@ -12,7 +12,7 @@ using MahApps.Metro.Controls;
 namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<Screen>, IShell, IHandle<ILoginSuccessMessage>
+    public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>
     {
         #region fields
         private readonly IWindowManager _windowManager;
@@ -22,10 +22,13 @@ namespace DeepfreezeApp
         private ArchiveViewModel _archiveVM;
         private LoginViewModel _loginVM = IoC.Get<ILoginViewModel>() as LoginViewModel;
         private PreferencesViewModel _preferencesVM;
-        private UploadManagerViewModel _uploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
+        private UploadManagerViewModel _uploadManagerVM;
 
         private MetroWindow _shellWindow;
         private bool _isPreferencesFlyoutOpen = false;
+
+        private bool _isBusy = false;
+        private string _busyMessage;
         #endregion
 
         #region properties
@@ -33,6 +36,19 @@ namespace DeepfreezeApp
         {
             get { return this._shellWindow; }
         }
+
+        public bool IsBusy
+        {
+            get { return this._isBusy; }
+            set { this._isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
+        }
+
+        public string BusyMessage
+        {
+            get { return this._busyMessage; }
+            set { this._busyMessage = value; NotifyOfPropertyChange(() => BusyMessage); }
+        }
+
         public bool IsLoggedIn
         { get { return this._deepfreezeClient.IsLogged(); } }
         
@@ -122,16 +138,20 @@ namespace DeepfreezeApp
             {
                 if (IsLoggedIn)
                 {
-                    InstatiateArchiveViewModel();
+                    this.IsBusy = true;
+                    this.BusyMessage = "Validating user...";
 
                     var user = await this._deepfreezeClient.GetUserAsync();
 
                     if (user != null)
                     {
-                        this._deepfreezeClient.Settings.ActiveUser = user;
+                        this.IsBusy = false;
+                        this.BusyMessage = null;
 
+                        this._deepfreezeClient.Settings.ActiveUser = user;
+                        InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();
-                        await InstatiateUploadManagerViewModel();
+                        InstatiateUploadManagerViewModel();
                     }
                 }
 
@@ -152,6 +172,7 @@ namespace DeepfreezeApp
             if (ArchiveVM == null)
             {
                 ArchiveVM = IoC.Get<IArchiveViewModel>() as ArchiveViewModel;
+                this.ActivateItem(ArchiveVM);
             }
         }
 
@@ -160,18 +181,17 @@ namespace DeepfreezeApp
             if (PreferencesVM == null)
             {
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
+                this.ActivateItem(PreferencesVM);
             }
         }
 
-        private async Task InstatiateUploadManagerViewModel()
+        private void InstatiateUploadManagerViewModel()
         {
             if (UploadManagerVM == null)
             {
                 UploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
-            }   
-
-            var fetchUploadsMessage = IoC.Get<IFetchUploadsMessage>();
-            await this._eventAggregator.PublishOnUIThreadAsync(fetchUploadsMessage);
+                this.ActivateItem(UploadManagerVM);
+            }
         }
 
         #endregion
