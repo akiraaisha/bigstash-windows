@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Amazon.S3.Model;
 using DeepfreezeModel;
 
 namespace DeepfreezeSDK
@@ -70,18 +69,11 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         Task<bool> DeleteUploadAsync(Upload upload);
 
-        //void Setup(string accessKeyID, string secretAccessKey);
-
-        //Task<List<S3Bucket>> ListBucketsAsync(CancellationToken token);
-
-        //Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName);
-
-        //Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName, CancellationToken token);
-
-        //Task UploadFileAsync(string existingBucketName, string keyName, string filePath, CancellationToken cts);
-
-        //Task<List<MultipartUpload>> ListMultiPartUploadsAsync(string existingBucketName);
-
-        //Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadID, CancellationToken cts);
+        /// <summary>
+        /// Send a PATCH request with status = uploaded to mark this upload as finished from the client's perspective.
+        /// </summary>
+        /// <param name="upload"></param>
+        /// <returns></returns>
+        Task<Upload> FinishUploadAsync(Upload upload);
     }
 }
