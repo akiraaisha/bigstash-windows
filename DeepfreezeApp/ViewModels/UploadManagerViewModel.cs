@@ -218,8 +218,13 @@ namespace DeepfreezeApp
         public void Handle(IRemoveUploadViewModel message)
         {
             this.FilteredUploads.Remove(message.UploadVMToRemove);
+            message.UploadVMToRemove = null;
             NotifyOfPropertyChange(() => TotalUploadsText);
         }
+
+        #endregion
+
+        #region events
 
         protected override void OnActivate()
         {
