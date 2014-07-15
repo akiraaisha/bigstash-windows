@@ -91,9 +91,6 @@
     <Compile Include="Converters\StatusToRemoveButtonVisibility.cs" />
     <Compile Include="Converters\StatusToStartButtonVisibility.cs" />
     <Compile Include="Converters\UploadStatusToText.cs" />
-    <Compile Include="Interfaces\IRemoveUploadViewModelMessage.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Messages\FetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
