@@ -329,32 +329,37 @@ namespace DeepfreezeSDK
         /// <returns>List of Upload</returns>
         public async Task<List<Upload>> GetUploadsAsync()
         {
+            var request = CreateHttpRequestWithSignature(GET, _uploadsUri);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                var request = CreateHttpRequestWithSignature(GET, _uploadsUri);
-
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
+                response.EnsureSuccessStatusCode();
 
-                    response.EnsureSuccessStatusCode();
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                JObject json = JObject.Parse(content);
 
-                    string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    JObject json = JObject.Parse(content);
-
-                    if ((int)json["count"] > 0)
-                    {
-                        var uploads = JsonConvert.DeserializeObject<List<Upload>>(json["results"].ToString());
-                        return uploads;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoUploadsFoundException();
-                    }
+                if ((int)json["count"] > 0)
+                {
+                    var uploads = JsonConvert.DeserializeObject<List<Upload>>(json["results"].ToString());
+                    return uploads;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
-            catch (AggregateException e)
-            { throw e; }
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
