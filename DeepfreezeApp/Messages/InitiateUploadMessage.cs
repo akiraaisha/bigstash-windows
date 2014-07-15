@@ -14,6 +14,6 @@ namespace DeepfreezeApp
     {
         public Archive Archive { get; set; }
 
-        public IList<string> Paths { get; set; }
+        public IList<ArchiveFileInfo> ArchiveFilesInfo { get; set; }
     }
 }
