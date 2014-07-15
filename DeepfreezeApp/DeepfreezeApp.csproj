@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK, Version=2.1.8.0, Culture=neutral, PublicKeyToken=9f476d3089b52be3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AWSSDK.2.1.8.0\lib\net45\AWSSDK.dll</HintPath>
+    </Reference>
     <Reference Include="Caliburn.Micro">
       <HintPath>..\packages\Caliburn.Micro.Core.2.0.0\lib\net45\Caliburn.Micro.dll</HintPath>
     </Reference>
@@ -55,6 +59,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.0.13.1.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
@@ -81,6 +86,12 @@
     <Compile Include="Converters\BoolToVisibility.cs" />
     <Compile Include="Converters\LongSizeToStringConverter.cs" />
     <Compile Include="Converters\LongToSizeString.cs" />
+    <Compile Include="Converters\StatusToDeleteButtonVisibility.cs" />
+    <Compile Include="Converters\StatusToPauseButtonVisibility.cs" />
+    <Compile Include="Converters\StatusToRemoveButtonVisibility.cs" />
+    <Compile Include="Converters\StatusToStartButtonVisibility.cs" />
+    <Compile Include="Converters\UploadStatusToText.cs" />
+    <Compile Include="Interfaces\IRemoveUploadViewModelMessage.cs" />
     <Compile Include="Messages\FetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
@@ -97,6 +108,7 @@
     <Compile Include="Messages\LoginSuccessMessage.cs" />
     <Compile Include="Converters\EmptyStringToBool.cs" />
     <Compile Include="Messages\NewUploadMessage.cs" />
+    <Compile Include="Messages\RemoveUploadViewModelMessage.cs" />
     <Compile Include="ViewModels\UploadManagerViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="Views\UserView.xaml.cs">
@@ -136,7 +148,9 @@
     <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DeepfreezeModel\DeepfreezeModel.csproj">
