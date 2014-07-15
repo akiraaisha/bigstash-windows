@@ -13,6 +13,8 @@ namespace DeepfreezeSDK
 {
     public class Settings
     {
+        private string _apiEndpoint;
+
         /// <summary>
         /// Current active Deepfreeze user.
         /// </summary>
@@ -26,13 +28,23 @@ namespace DeepfreezeSDK
         public Token ActiveToken { get; set; }
 
         /// <summary>
-        /// Check if a used is logged in the Deepfreeze client.
-        /// ActiveUser and ActiveToken must be set for a positive reply.
+        /// Current api endpoint. Change this to connect to stage DF server or production DF server.
+        /// URL should be like "https://www.deepfreeze.io/api/v1/". If the url misses the ending
+        /// "/" character, the public setter takes care of it. :)
         /// </summary>
-        /// <returns>bool</returns>
-        public bool IsLogged()
+        [JsonProperty("api_endpoint")]
+        public string ApiEndpoint
         {
-            return this.ActiveUser != null && this.ActiveToken != null;
+            get { return this._apiEndpoint; }
+            set
+            {
+                var endpoint = value;
+
+                if (endpoint.EndsWith("/"))
+                    this._apiEndpoint = endpoint;
+                else
+                    this._apiEndpoint = endpoint + "/";
+            }
         }
 
         /// <summary>
