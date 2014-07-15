@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.IO;
 
 using DeepfreezeModel;
 
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using System.IO;
+
 using Amazon.Runtime;
 
 using Newtonsoft.Json;
@@ -38,20 +39,17 @@ namespace DeepfreezeSDK
         private readonly string ACCEPT = "application/vnd.deepfreeze+json";
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
-        public Settings Settings { get; set; }
-        public bool IsLoggedIn
-        { get { return Settings.IsLogged(); } }
+        private readonly string _tokenUri = "tokens/";
+        private readonly string _userUri = "user/";
+        private readonly string _uploadsUri = "uploads/";
+        private readonly string _archivesUri = "archives/";
 
-        private readonly string _baseEndPoint = "https://stage.deepfreeze.io";
-        private readonly string _apiEndPoint = "/api/v1";
-        private readonly string _tokenUri = "/tokens/";
-        private readonly string _userUri = "/user/";
-        private readonly string _uploadsUri = "/uploads/";
-        private readonly string _archivesUri = "/archives/";
-        
+        private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
         #endregion
 
-        #region methods
+        public Settings Settings { get; set; }
+
+        #region methods_for_consuming_DF_API
 
         /// <summary>
         /// Check if DeepfreezeClient has a Settings property instatiated,
@@ -74,32 +72,37 @@ namespace DeepfreezeSDK
         /// <returns>Token</returns>
         public async Task<List<Token>> GetTokensAsync()
         {
+            var request = CreateHttpRequestWithSignature(GET, _tokenUri);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
                 using(var httpClient = new HttpClient())
                 {
-                    var request = CreateHttpRequestWithSignature(GET, _tokenUri);
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
-                    JObject json = JObject.Parse(content);
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                JObject json = JObject.Parse(content);
 
-                    if ((int)json["count"] > 0)
-                    {
-                        var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
-                        return tokens;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoActiveTokenException();
-                    }
+                if ((int)json["count"] > 0)
+                {
+                    var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
+                    return tokens;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
-            catch(AggregateException e)
+            catch (Exception e)
             {
-                throw e;
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
             }
         }
 
@@ -110,90 +113,46 @@ namespace DeepfreezeSDK
         /// <returns>Token</returns>
         public async Task<Token> CreateTokenAsync(string authorizationString)
         {
+            // Only for this request, the client uses basic auth with user credentials.
+            // For every other authorized actions, a signed request should be sent.
+
             HttpResponseMessage response = new HttpResponseMessage();
             Token token = new Token();
+
+            var requestUri = new UriBuilder(this.Settings.ApiEndpoint + _tokenUri).Uri;
+            var name = @"{""name"":""Deepfreeze.io for Windows on " + Environment.MachineName + @"""}";
+            var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
+
             try
             {
-                // Only for this request, the client uses basic auth with user credentials.
-                // For every other authorized actions, a signed request should be sent.
                 using(var httpClient = new HttpClient())
                 {
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
 
-                    var requestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + _tokenUri).Uri;
-                    var name = @"{""name"":""Deepfreeze.io for Windows on " + Environment.MachineName + @"""}";
-                    var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
-                    
-                    response = await httpClient.PostAsync(requestUri, requestContent);
-
-                    response.EnsureSuccessStatusCode();
-
-                    string content = await response.Content.ReadAsStringAsync();
-
-                    if (content != null)
-                    {
-                        token = JsonConvert.DeserializeObject<Token>(content);
-                        return token;
-                    }
-                    else
-                    {
-                        throw new Exceptions.CreateTokenException();
-                    }
+                    response = await httpClient.PostAsync(requestUri, requestContent).ConfigureAwait(false);
                 }
-            }   
-            catch (AggregateException e)
-            { throw e; }
-            catch(HttpRequestException e)
-            { 
-                if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+
+                response.EnsureSuccessStatusCode();
+
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (content != null)
                 {
-                    throw new UnauthorizedAccessException();
+                    token = JsonConvert.DeserializeObject<Token>(content);
+                    return token;
                 }
                 else
-                    throw e; 
-            }
-            catch(Exception e) { throw e; }
-        }
-
-        /// <summary>
-        /// Login user using a Deepfreeze Token.
-        /// </summary>
-        /// <param name="authorizationToken"></param>
-        /// <returns>Boolean</returns>
-        public async Task<bool> LoginAsync(Token authorizationToken)
-        {
-            try
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                }
+            }   
+            catch (Exception e)
             {
-                var tokens = await this.GetTokensAsync();
-
-                return tokens.Select(x => x.Key).Contains(authorizationToken.Key);
-            }
-            catch(AggregateException e)
-            {
-                throw e;
-            }
-        }
-
-        /// <summary>
-        /// Login user using account credentials and create a Deepfreeze Token.
-        /// This method also validates the new Token.
-        /// </summary>
-        /// <param name="authorizationString"></param>
-        /// <returns></returns>
-        public async Task<bool> LoginAsync(string authorizationString)
-        {
-            try
-            {
-                var tokenResponse = await this.CreateTokenAsync(authorizationString);
-
-                var tokens = await this.GetTokensAsync();
-
-                return tokens.Select(x => x.Key).Contains(tokenResponse.Key);
-            }
-            catch (AggregateException e)
-            {
-                throw e;
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
             }
         }
 
@@ -203,33 +162,39 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<User> GetUserAsync()
         {
+            var request = CreateHttpRequestWithSignature(GET, _userUri);
+            HttpResponseMessage response = new HttpResponseMessage();
+                
             try
             {
-                var request = CreateHttpRequestWithSignature(GET, _userUri);
-
                 using(var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
-                    JObject json = JObject.Parse(content);
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                JObject json = JObject.Parse(content);
 
-                    if (content != null)
-                    {
-                        User user = JsonConvert.DeserializeObject<User>(content);
-                        user.Archives = JsonConvert.DeserializeObject<IList<Archive>>(json["archives"]["results"].ToString());
-                        return user;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoUserFoundException();
-                    }
+                if (content != null)
+                {
+                    User user = JsonConvert.DeserializeObject<User>(content);
+                    user.Archives = JsonConvert.DeserializeObject<IList<Archive>>(json["archives"]["results"].ToString());
+                    return user;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
-            catch(AggregateException e)
-            { throw e; }
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
@@ -238,31 +203,38 @@ namespace DeepfreezeSDK
         /// <returns>List of Archive</returns>
         public async Task<List<Archive>> GetArchivesAsync()
         {
+            var request = CreateHttpRequestWithSignature(GET, _archivesUri);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
                 using(var httpClient = new HttpClient())
                 {
-                    var request = CreateHttpRequestWithSignature(GET, _archivesUri);
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
-                    JObject json = JObject.Parse(content);
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                JObject json = JObject.Parse(content);
 
-                    if ((int)json["count"] > 0)
-                    {
-                        var archives = JsonConvert.DeserializeObject<List<Archive>>(json["results"].ToString());
-                        return archives;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoArchivesFoundException();
-                    }
+                if ((int)json["count"] > 0)
+                {
+                    var archives = JsonConvert.DeserializeObject<List<Archive>>(json["results"].ToString());
+                    return archives;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
-            catch(AggregateException e)
-            { throw e; }
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
@@ -271,30 +243,37 @@ namespace DeepfreezeSDK
         /// <returns>List of Archive</returns>
         public async Task<Archive> GetArchiveAsync(string url)
         {
+            var request = CreateHttpRequestWithSignature(GET, url, false);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
                 using (var httpClient = new HttpClient())
                 {
-                    var request = CreateHttpRequestWithSignature(GET, url, false);
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    if (content != null)
-                    {
-                        var archive = JsonConvert.DeserializeObject<Archive>(content);
-                        return archive;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoArchivesFoundException();
-                    }
+                if (content != null)
+                {
+                    var archive = JsonConvert.DeserializeObject<Archive>(content);
+                    return archive;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
             catch (Exception e)
-            { throw e; }
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
@@ -306,36 +285,42 @@ namespace DeepfreezeSDK
         /// <returns>Archive</returns>
         public async Task<Archive> CreateArchiveAsync(long size, string title)
         {
+            ArchivePostData data = new ArchivePostData()
+            {
+                Size = size,
+                Title = title
+            };
+
+            var request = CreateHttpRequestWithSignature(POST, _archivesUri);
+            request.Content = new StringContent(data.ToJson(), Encoding.ASCII, "application/json");
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                ArchivePostData data = new ArchivePostData()
-                {
-                    Size = size,
-                    Title = title
-                };
-
-                var request = CreateHttpRequestWithSignature(POST, _archivesUri);
-                request.Content = new StringContent(data.ToJson(), Encoding.ASCII, "application/json");
-
                 using(var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
-
-                    response.EnsureSuccessStatusCode();
-
-                    string content = await response.Content.ReadAsStringAsync();
-
-                    if (content != null)
-                    {
-                        var archive = JsonConvert.DeserializeObject<Archive>(content);
-                        return archive;
-                    }
-                    else
-                        throw new Exceptions.CreateArchiveException();
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
+
+                response.EnsureSuccessStatusCode();
+
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (content != null)
+                {
+                    var archive = JsonConvert.DeserializeObject<Archive>(content);
+                    return archive;
+                }
+                else
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
             }
-            catch(AggregateException e)
-            { throw e; }
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
@@ -350,11 +335,11 @@ namespace DeepfreezeSDK
 
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
+                    var response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
                     response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
+                    string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     JObject json = JObject.Parse(content);
 
                     if ((int)json["count"] > 0)
@@ -378,31 +363,37 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> GetUploadAsync(string url)
         {
+            var request = CreateHttpRequestWithSignature(GET, url, false);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                var request = CreateHttpRequestWithSignature(GET, url, false);
-
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
 
-                    if (content != null)
-                    {
-                        var upload = JsonConvert.DeserializeObject<Upload>(content);
-                        return upload;
-                    }
-                    else
-                    {
-                        throw new Exceptions.NoUploadsFoundException();
-                    }
+                if (content != null)
+                {
+                    var upload = JsonConvert.DeserializeObject<Upload>(content);
+                    return upload;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
             catch (Exception e)
-            { throw e; }
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         /// <summary>
@@ -413,64 +404,85 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> InitiateUploadAsync(Archive archive)
         {
+            var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
-
                 using(var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    if (content != null)
-                    {
-                        var upload = JsonConvert.DeserializeObject<Upload>(content);
-                        return upload;
-                    }
-                    else
-                        throw new Exceptions.CreateUploadException();
+                if (content != null)
+                {
+                    var upload = JsonConvert.DeserializeObject<Upload>(content);
+                    return upload;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
-            catch(Exception e)
-            { throw e; }
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
+            var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
+            request.Content = new StringContent(patchContent, Encoding.ASCII, "application/json");
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
-                request.Content = new StringContent(patchContent, Encoding.ASCII, "application/json");
-
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
 
-                    response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-                    string content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    if (content != null)
-                    {
-                        var patchedUpload = JsonConvert.DeserializeObject<Upload>(content);
-                        return patchedUpload;
-                    }
-                    else
-                        throw new Exceptions.CreateUploadException();
+                if (content != null)
+                {
+                    var patchedUpload = JsonConvert.DeserializeObject<Upload>(content);
+                    return patchedUpload;
+                }
+                else
+                {
+                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
             }
             catch (Exception e)
-            { throw e; }
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
+        /// <summary>
+        /// Send a PATCH request with status = uploaded to mark this upload as finished from the client's perspective.
+        /// </summary>
+        /// <param name="upload"></param>
+        /// <returns></returns>
         public async Task<Upload> FinishUploadAsync(Upload upload)
         {
             try
             {
-                var patchedUpload = await this.PatchUploadAsync(upload, @"{""status"": ""uploaded""}");
+                var patchedUpload = await this.PatchUploadAsync(upload, @"{""status"": ""uploaded""}").ConfigureAwait(false);
 
                 return patchedUpload;
             }
@@ -485,41 +497,27 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         public async Task<bool> DeleteUploadAsync(Upload upload)
         {
+            var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
+            HttpResponseMessage response = new HttpResponseMessage();
+
             try
             {
-                var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
-
                 using (var httpClient = new HttpClient())
                 {
-                    //var response = await httpClient.DeleteAsync(upload.Url);
-                    var response = await httpClient.SendAsync(request);
-
-                    response.EnsureSuccessStatusCode();
-
-                    // debug
-                    //var content = response.Content.ReadAsStringAsync();
-
-                    return true;
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
-            }
-            catch (AggregateException e)
-            { throw e; }
-        }
 
-        public Archive PrepareArchive(string title, IList<ArchiveFileInfo> files)
-        {
-            var archive = new Archive();
-            archive.Title = title;
-            // TODO: consume DF API 
-            // archive.ID = 
-            archive.Size = 0;
-            foreach (var file in files)
-            {
-                archive.Size += file.Size;
+                response.EnsureSuccessStatusCode();
+
+                return true;
             }
-            
-            string json = archive.ToJson();
-            return archive;
+            catch (Exception e)
+            {
+                if (e is HttpRequestException)
+                    throw new Exceptions.DfApiException(e.Message, e, response);
+                else
+                    throw e;
+            }
         }
 
         #endregion
@@ -545,11 +543,11 @@ namespace DeepfreezeSDK
             // create a new Http request message.
             HttpRequestMessage message = new HttpRequestMessage();
             message.Method = new HttpMethod(method);
-
+            
             // if resource is relative, construct the request url.
             if (isRelative)
             {
-                message.RequestUri = new UriBuilder(_baseEndPoint + _apiEndPoint + resource).Uri;
+                message.RequestUri = new UriBuilder(this.Settings.ApiEndpoint + resource).Uri;
             }
             // else use only the resource variable since it already has the url value
             else
@@ -562,7 +560,7 @@ namespace DeepfreezeSDK
             message.Headers.UserAgent.Add(new ProductInfoHeaderValue("deepfreeze-windows-desktop", "alpha"));
 
             // set host header
-            message.Headers.Host = HOST;
+            message.Headers.Host = message.RequestUri.Host;
             // set accept header
             message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
 
@@ -571,7 +569,7 @@ namespace DeepfreezeSDK
             // set date header
             message.Headers.Date = date;
 
-            var signature = CreateHMACSHA256Signature(method, resource, date, isRelative);
+            var signature = CreateHMACSHA256Signature(method, message.RequestUri, date, isRelative);
 
             // add authorization header
             message.Headers.Authorization = new AuthenticationHeaderValue("Signature", AUTHORIZATION + @",signature=""" + signature + @"""");
@@ -588,26 +586,19 @@ namespace DeepfreezeSDK
         /// <param name="date"></param>
         /// <param name="isRelative"></param>
         /// <returns>string</returns>
-        private string CreateHMACSHA256Signature(string method, string resource, DateTimeOffset date, bool isRelative = true)
+        private string CreateHMACSHA256Signature(string method, Uri requestUri, DateTimeOffset date, bool isRelative = true)
         {
             // create string as source for the signature.
             // use \n for LF (Unix format)
             StringBuilder sb = new StringBuilder();
 
-            // if resource is relative, construct the request url.
-            if (isRelative)
-            {
-                sb.AppendFormat("(request-line): {0} {1}{2}\n", method.ToLower(), _apiEndPoint, resource);
-            }
-            // else use only the resource variable since it already has the url value
-            else
-            {
-                sb.AppendFormat("(request-line): {0} {1}\n", method.ToLower(), resource.Replace(_baseEndPoint, ""));
-            }
+            sb.AppendFormat("(request-line): {0} ", method.ToLower());
 
-            sb.AppendFormat("host: {0}\n", HOST);
+            sb.Append(String.Join("", requestUri.Segments));
+            sb.Append("\n");
+
+            sb.AppendFormat("host: {0}\n", requestUri.Host);
             sb.AppendFormat("accept: {0}\n", ACCEPT);
-            //sb.AppendFormat("x-deepfreeze-api-key: {0}\n", token); 
             sb.AppendFormat("date: {0}", date.ToUniversalTime().ToString("r"));
 
             // get signature
@@ -620,14 +611,7 @@ namespace DeepfreezeSDK
 
         #region constructor & public setters/getters
 
-        //[ImportingConstructor]
         public DeepfreezeClient() { }
-
-        
-        //public DeepfreezeClient(Settings settings)
-        //{
-        //    this.Settings = settings;
-        //}
 
         #endregion
     }
