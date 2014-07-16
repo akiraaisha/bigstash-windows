@@ -293,7 +293,7 @@ namespace DeepfreezeSDK
             };
 
             var request = CreateHttpRequestWithSignature(POST, _archivesUri);
-            request.Content = new StringContent(data.ToJson(), Encoding.ASCII, "application/json");
+            request.Content = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
             HttpResponseMessage response = new HttpResponseMessage();
 
             try
