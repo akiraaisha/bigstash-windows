@@ -15,9 +15,10 @@ using DeepfreezeModel;
 namespace DeepfreezeApp
 {
     [Export(typeof(ILoginViewModel))]
-    public class LoginViewModel : PropertyChangedBase, ILoginViewModel
+    public class LoginViewModel : Screen, ILoginViewModel
     {
         #region members
+
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -32,9 +33,11 @@ namespace DeepfreezeApp
         private string _usernameError;
         private string _passwordError;
         private string _loginError;
+
         #endregion
 
         #region constructors
+
         public LoginViewModel() { }
 
         [ImportingConstructor]
@@ -43,13 +46,20 @@ namespace DeepfreezeApp
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
         }
+
         #endregion
 
         #region properties
+
         public bool IsBusy
         {
             get { return _isBusy; }
             set { _isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
+        }
+
+        public string ConnectHeader
+        {
+            get { return Properties.Resources.ConnectHeaderText; }
         }
 
         public bool HasUsernameError
@@ -145,10 +155,19 @@ namespace DeepfreezeApp
                 NotifyOfPropertyChange(() => LoginError);
             }
         }
+
         #endregion
 
         #region action methods
-        public async Task Login()
+
+        /// <summary>
+        /// Validate the input boxes and proceed with creating a new Deepfreeze Token to use with
+        /// DeepfreezeClient. Validate the new token by fetching the User resource and providing the 
+        /// response as the Deepfreeze's ActiveUser property. Finally, save the local preferences file
+        /// and publish a LoginSuccessMessage for the ShellViewModel to handle.
+        /// </summary>
+        /// <returns></returns>
+        public async Task Connect()
         {
             if (!Validate())
                 return;
@@ -163,12 +182,7 @@ namespace DeepfreezeApp
                 if (token == null) throw new Exception();
 
                 // After creating a new token, set it to be used as default in DeepfreezeClient.
-
-                // First instatiate a new Settings object with the new token.
-                var settings = new Settings() { ActiveToken = token };
-
-                // DeepfreezeClient should now use the new settings.
-                _deepfreezeClient.Settings = settings;
+                this._deepfreezeClient.Settings.ActiveToken = token;
 
                 // Make sure that the token satisfies the authorization level needed for GET /user/
                 var user = await _deepfreezeClient.GetUserAsync();
@@ -177,26 +191,35 @@ namespace DeepfreezeApp
 
                 // Since the user response contains a valid User, 
                 // then update the DeepfreezeClient settings.
-                _deepfreezeClient.Settings.ActiveUser = user;
+                this._deepfreezeClient.Settings.ActiveUser = user;
 
                 // Since ActiveToken and ActiveUser are not null, 
                 // the user is considered as logged into the DeepfreezeClient.
                 
                 // Save preferences file.
-                LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, settings, Encoding.ASCII);
+                await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.ASCII))
+                    .ConfigureAwait(false);
 
                 // Publish LoginSuccess Message
                 this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
             }
-            catch (UnauthorizedAccessException e)
-            {
-                HasLoginError = true;
-                LoginError = Properties.Resources.UnauthorizedExceptionMessage;
-            }
             catch (Exception e) 
             {
                 HasLoginError = true;
-                LoginError = e.Message;
+
+                if (e is Exceptions.DfApiException)
+                {
+                    var response = ((Exceptions.DfApiException)e).HttpResponse;
+
+                    switch (response.StatusCode)
+                    {
+                        case System.Net.HttpStatusCode.Unauthorized:
+                            LoginError = Properties.Resources.UnauthorizedExceptionMessage;
+                            break;
+                    }
+                }
+                else
+                    LoginError = e.Message;
             }
             finally
             {
@@ -204,19 +227,32 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Handle the PasswordBox TextChanged event and retrieve the typed password.
+        /// </summary>
+        /// <param name="pwdBox"></param>
         public void RetrievePassword(PasswordBox pwdBox)
         {
             if (pwdBox != null)
                 this.PasswordInput = pwdBox.Password;
         }
 
+        /// <summary>
+        /// Open the remember password Deepfreeze page.
+        /// </summary>
         public void Remember()
         {
             Process.Start(Properties.Resources.RememberPasswordURL);
         }
+
         #endregion
 
         #region private methods
+
+        /// <summary>
+        /// Validate the username and password boxes.
+        /// </summary>
+        /// <returns></returns>
         private bool Validate()
         {
             ClearErrors();
@@ -236,6 +272,9 @@ namespace DeepfreezeApp
             return !(HasUsernameError || HasPasswordError);
         }
 
+        /// <summary>
+        /// Clear all errors.
+        /// </summary>
         private void ClearErrors()
         {
             HasUsernameError = false;
@@ -246,6 +285,34 @@ namespace DeepfreezeApp
             PasswordError = null;
             LoginError = null;
         }
+
+        /// <summary>
+        /// Clear this viewmodel's properties.
+        /// </summary>
+        private void Reset()
+        {
+            this.UsernameInput = null;
+            this.PasswordInput = null;
+            this.IsBusy = false;
+            this.ClearErrors();
+        }
+
+        #endregion
+
+        #region events
+
+        protected override void OnActivate()
+        {
+            this.Reset();
+            base.OnActivate();
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            this.Reset();
+            base.OnDeactivate(close);
+        }
+
         #endregion
     }
 }

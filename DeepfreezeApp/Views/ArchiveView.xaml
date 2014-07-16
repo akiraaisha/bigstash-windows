@@ -149,7 +149,7 @@
                                     Style="{DynamicResource AccentedSquareButtonStyle}"
                                 />
 
-                            <Button x:Name="Cancel" 
+                            <Button x:Name="Reset" 
                                     Content="{Binding CancelButtonContent}"
                                     Width="70"
                                     Margin="20 0 0 0"

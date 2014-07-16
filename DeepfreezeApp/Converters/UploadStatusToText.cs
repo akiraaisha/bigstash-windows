@@ -33,14 +33,8 @@ namespace DeepfreezeApp
                 case Enumerations.Status.Completed:
                     statusString = Properties.Resources.StatusCompletedText;
                     break;
-                case Enumerations.Status.Creating:
-                    statusString = Properties.Resources.StatusCreatingText;
-                    break;
-                case Enumerations.Status.Failed:
-                    statusString = Properties.Resources.StatusFailedText;
-                    break;
-                case Enumerations.Status.UnableToStart:
-                    statusString = Properties.Resources.StatusUnableToStartText;
+                case Enumerations.Status.Error:
+                    statusString = Properties.Resources.StatusErrorText;
                     break;
             }
 

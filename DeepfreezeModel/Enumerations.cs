@@ -10,53 +10,45 @@ namespace DeepfreezeModel
     {
         public enum Status
         {
-            Creating,
             Pending,
-            Resuming,
-            InProgress,
-            Uploading,
-            Pausing,
-            Paused,
             Uploaded,
+            Error,
             Completed,
-            Frozen,
-            Cancelling,
-            Cancelled,
-            Failed,
-            Aborted,
-            UnableToStart
+            Paused,
+            Uploading
         }
 
         public static Status GetStatusFromString(string statusString)
         {
-            Status status = Status.Failed;
+            Status status = Status.Error;
 
             switch(statusString)
             {
-                case "creating":
-                    status = Status.Creating;
-                    break;
-                case "frozen":
-                    status = Status.Frozen;
-                    break;
                 case "uploaded":
                     status = Status.Uploaded;
                     break;
                 case "completed":
                     status = Status.Completed;
                     break;
-                case "failed":
-                    status = Status.Failed;
-                    break;
                 case "paused":
                     status = Status.Paused;
                     break;
-                case "uploading":
-                    status = Status.Uploading;
+                case "error":
+                    status = Status.Error;
+                    break;
+                case "pending":
+                    status = Status.Paused;
                     break;
             }
 
             return status;
+        }
+
+        public enum UploadAction
+        {
+            Create,
+            Start,
+            Pause
         }
     }
 }

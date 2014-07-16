@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DeepfreezeApp
 {
-    public interface IRemoveUploadViewModel
+    public interface IRemoveUploadViewModelMessage
     {
         UploadViewModel UploadVMToRemove { get; set; }
     }

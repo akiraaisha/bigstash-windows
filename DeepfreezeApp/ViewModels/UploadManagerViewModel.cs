@@ -15,7 +15,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IUploadManagerViewModel))]
     public class UploadManagerViewModel : Conductor<Screen>.Collection.AllActive, IUploadManagerViewModel,
-        IHandleWithTask<IInitiateUploadMessage>, IHandle<IRemoveUploadViewModel>
+        IHandle<IInitiateUploadMessage>, IHandle<IRemoveUploadViewModelMessage>
     {
         #region fields
         private readonly IEventAggregator _eventAggregator;
@@ -23,21 +23,26 @@ namespace DeepfreezeApp
 
         private bool _isBusy = true;
         private IList<LocalUpload> _localUploads = new List<LocalUpload>();
-        private BindableCollection<UploadViewModel> _filteredUploads = new BindableCollection<UploadViewModel>();
-        private BindableCollection<UploadViewModel> _allUploads = new BindableCollection<UploadViewModel>();
-        private string _totalUploadsText;
-
-        private string _searchTerm = "";
+        private BindableCollection<UploadViewModel> _uploads = new BindableCollection<UploadViewModel>();
+        private string _errorMessage;
 
         #endregion
 
+        #region UploadViewModelFactory
         [Import]
         public ExportFactory<IUploadViewModel> UploadVMFactory { get; set; }
 
+        /// <summary>
+        /// Create a new UploadViewModel viewmodel. This is used instead of the container
+        /// because we need a new UploadViewModel each time a new upload occurs.
+        /// </summary>
+        /// <returns></returns>
         public IUploadViewModel CreateNewUploadVM()
         {
             return UploadVMFactory.CreateExport().Value;
         }
+
+        #endregion
 
         #region constructor
         [ImportingConstructor]
@@ -45,8 +50,6 @@ namespace DeepfreezeApp
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
-
-            this._eventAggregator.Subscribe(this);
         }
 
         #endregion
@@ -59,10 +62,10 @@ namespace DeepfreezeApp
             set { this._isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
         }
 
-        public BindableCollection<UploadViewModel> FilteredUploads
+        public BindableCollection<UploadViewModel> Uploads
         {
-            get { return this._filteredUploads; }
-            set { this._filteredUploads = value; NotifyOfPropertyChange(() => FilteredUploads); }
+            get { return this._uploads; }
+            set { this._uploads = value; NotifyOfPropertyChange(() => Uploads); }
         }
 
         public string TotalUploadsText
@@ -70,57 +73,40 @@ namespace DeepfreezeApp
             get
             {
                 if (IsBusy)
-                    return "Preparing Uploads.";
+                    return "Preparing Uploads...";
 
-                if (this.FilteredUploads != null && this.FilteredUploads.Count > 0)
-                    return Properties.Resources.TotalUploadsText + FilteredUploads.Count.ToString();
-                else
+                if (this.Uploads.Count == 0)
                     return Properties.Resources.NoUploadsHeaderText;
+                else
+                    return null;
             }
-            //get { return this._totalUploadsText; }
-            //set { this._totalUploadsText = value; NotifyOfPropertyChange(() => TotalUploadsText); }
         }
 
-        public string SearchTerm
+        public string ErrorMessage
         {
-            get { return this._searchTerm; }
-            set { this._searchTerm = value; NotifyOfPropertyChange(() => SearchTerm); }
+            get { return this._errorMessage; }
+            set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
         }
 
-        #endregion
-
-        #region action methods
-        //public void FilterUploadsList()
-        //{
-        //    if (!String.IsNullOrEmpty(SearchTerm))
-        //    {
-        //        var filteredUploads = this._allUploads.Where(x => x.Archive.Title.Contains(SearchTerm))
-        //            .OrderByDescending(x => x.Archive.Title).ToList();
-
-        //        foreach(var u in filteredUploads)
-        //        {
-        //            FilteredUploads.Add(u);
-        //        }
-        //    }
-        //}
-        #endregion
-
-        #region message handlers
         #endregion
 
         #region private methods
 
         /// <summary>
         /// Read local uploads files and populate the LocalUploads List,
-        /// to keep them all in memory while this client runs.
+        /// to keep them all in memory while this client runs. This method is called 
+        /// in the overriden OnActivate method.
         /// </summary>
         /// <returns></returns>
-        private IList<LocalUpload> ReadLocalUploads()
+        private async Task<IList<LocalUpload>> ReadLocalUploads()
         {
             try
             {
                 IList<LocalUpload> localUploads = new List<LocalUpload>();
-                var uploadFilesPaths = Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly);
+
+                var uploadFilesPaths = 
+                    await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly))
+                    .ConfigureAwait(false);
 
                 foreach(var uploadFilePath in uploadFilesPaths)
                 {
@@ -129,15 +115,23 @@ namespace DeepfreezeApp
                     if (content != null)
                     {
                         var localUpload = JsonConvert.DeserializeObject<LocalUpload>(content);
-                        localUpload.SavePath = uploadFilePath;
-                        localUploads.Add(localUpload);
+
+                        // load only those local uploads that use the currently used api endpoint.
+                        // we can filter this because each local upload has the URL property,
+                        // which contains the api endpoint.
+                        // Also, update the SavePath property using the files' paths, because this value
+                        // is not preserved in the local files' content.
+                        if (localUpload.Url.Contains(this._deepfreezeClient.Settings.ApiEndpoint))
+                        {
+                            localUpload.SavePath = uploadFilePath;
+                            localUploads.Add(localUpload);
+                        }
                     }
                 }
 
                 return localUploads.OrderByDescending(x => x.SavePath).ToList();
             }
-            catch (FileNotFoundException e) { throw e; }
-            catch (JsonReaderException e) { throw e; }
+            catch (Exception e) { throw e; }
         }
 
         /// <summary>
@@ -156,33 +150,27 @@ namespace DeepfreezeApp
             {
                 //tasks.Add(InstatiateUploadViewModel(localUpload));
 
-                UploadViewModel u = CreateNewUploadVM() as UploadViewModel; // IoC.Get<IUploadViewModel>() as UploadViewModel;
+                UploadViewModel u = CreateNewUploadVM() as UploadViewModel;
                 u.LocalUpload = localUpload;
 
                 this.ActivateItem(u);
 
-                this._allUploads.Add(u);
+                this.Uploads.Add(u);
             }
-
-            FilteredUploads = this._allUploads;
         }
 
         /// <summary>
         /// Initiate a new upload operation by creating a new UploadViewModel, setting its properties,
-        /// saving its local upload file and finally automatically starting the upload process.
+        /// saving its local upload file and finall publishing an UploadActionMessage with a UploadAction.Create
+        /// property for the new UploadViewModel to handle.
         /// </summary>
         /// <param name="newLocalUpload"></param>
         /// <param name="newArchive"></param>
         /// <returns></returns>
-        private async Task InitiateNewUpload(Archive newArchive, IList<ArchiveFileInfo> archiveFilesInfo)
+        private void InitiateNewUpload(Archive newArchive, IList<ArchiveFileInfo> archiveFilesInfo)
         {
             // create a new UploadViewModel.
-            UploadViewModel newUploadVM = IoC.Get<IUploadViewModel>() as UploadViewModel;
-
-            // add the new UploadViewModel in Uploads list.
-            this._allUploads.Add(newUploadVM);
-            FilteredUploads.Add(newUploadVM);
-            NotifyOfPropertyChange(() => TotalUploadsText);
+            UploadViewModel newUploadVM = this.CreateNewUploadVM() as UploadViewModel;
 
             // create a new local upload
             var newLocalUpload = new LocalUpload()
@@ -193,46 +181,81 @@ namespace DeepfreezeApp
             newUploadVM.Archive = newArchive;
             newUploadVM.LocalUpload = newLocalUpload;
 
-            // initiate a new upload and set it to newUploadVM.Upload
-            await newUploadVM.CreateNewUpload();
-
             this._localUploads.Add(newUploadVM.LocalUpload);
 
-            // final step: automatically start uploading.
-            await newUploadVM.StartUpload();
+            // add the new UploadViewModel at the beginning of the Uploads list.
+            Uploads.Insert(0, newUploadVM);
+
+            NotifyOfPropertyChange(() => TotalUploadsText);
+
+            // activate the new uploadviewmodel before sending the create message.
+            this.ActivateItem(newUploadVM);
+
+            IUploadActionMessage uploadActionMessage = IoC.Get<IUploadActionMessage>();
+            uploadActionMessage.UploadAction = Enumerations.UploadAction.Create;
+            uploadActionMessage.UploadVM = newUploadVM;
+
+            this._eventAggregator.PublishOnBackgroundThread(uploadActionMessage);
         }
 
-        #endregion
-
-        #region events
+        /// <summary>
+        /// Clear essential lists for this viewmodel.
+        /// </summary>
+        private void Reset()
+        {
+            this._localUploads.Clear();
+            this._uploads.Clear();
+            this.Uploads.Clear();
+        }
 
         #endregion
 
         #region message_handlers
 
-        public async Task Handle(IInitiateUploadMessage message)
+        /// <summary>
+        /// Handle any InitiateUploadMessage to create a new UploadViewModel
+        /// after the user creates a new Archive. Essentially, this calls the 
+        /// InitiateNewUpload private method.
+        /// </summary>
+        /// <param name="message"></param>
+        public void Handle(IInitiateUploadMessage message)
         {
-            await this.InitiateNewUpload(message.Archive, message.ArchiveFilesInfo);
+            this.InitiateNewUpload(message.Archive, message.ArchiveFilesInfo);
         }
 
-        public void Handle(IRemoveUploadViewModel message)
+        /// <summary>
+        /// Handle any RemoveUploadViewModelMessage. This removes the message's 
+        /// UploadViewModel from the current Uploads list, closes it and finally it 
+        /// sets it to null. After the removal, it publishes a new RefreshUserMessage
+        /// for the UserViewModel to handle and update the User object.
+        /// </summary>
+        /// <param name="message"></param>
+        public void Handle(IRemoveUploadViewModelMessage message)
         {
-            this.FilteredUploads.Remove(message.UploadVMToRemove);
+            this.Uploads.Remove(message.UploadVMToRemove);
+            message.UploadVMToRemove.TryClose();
             message.UploadVMToRemove = null;
             NotifyOfPropertyChange(() => TotalUploadsText);
+
+            // send a new message to refresh user stats.
+            this._eventAggregator.PublishOnBackgroundThread(IoC.Get<IRefreshUserMessage>());
         }
 
         #endregion
 
         #region events
 
-        protected override void OnActivate()
+        protected override async void OnActivate()
         {
+            base.OnActivate();
+
             IsBusy = true;
+
+            this._eventAggregator.Subscribe(this);
 
             try
             {
-                this._localUploads = this.ReadLocalUploads();
+                this._localUploads = await this.ReadLocalUploads();
 
                 if (this._localUploads != null)
                     this.CreateUploadViewModels(this._localUploads);
@@ -240,7 +263,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-
+                this.ErrorMessage = e.Message;
             }
             finally
             {
@@ -248,8 +271,15 @@ namespace DeepfreezeApp
 
                 NotifyOfPropertyChange(() => TotalUploadsText);
             }
+        }
 
-            base.OnActivate();
+        protected override void OnDeactivate(bool close)
+        {
+            this._eventAggregator.Unsubscribe(this);
+
+            this.Reset();
+
+            base.OnDeactivate(close);
         }
 
         #endregion

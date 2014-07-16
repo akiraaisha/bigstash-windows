@@ -8,20 +8,25 @@ using System.ComponentModel.Composition;
 using Caliburn.Micro;
 using DeepfreezeSDK;
 using DeepfreezeModel;
+using System.IO;
 
 namespace DeepfreezeApp
 {
     [Export(typeof(IUserViewModel))]
-    public class UserViewModel : PropertyChangedBase, IUserViewModel
+    public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>
     {
         #region members
+
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
-        private string _logoutString;
+        private bool _isBusy = false;
+        private string _errorMessage;
+
         #endregion
 
         #region constructors
+
         public UserViewModel() { }
 
         [ImportingConstructor]
@@ -30,9 +35,22 @@ namespace DeepfreezeApp
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
         }
+
         #endregion
 
         #region properties
+
+        public bool IsBusy
+        {
+            get { return this._isBusy; }
+            set { this._isBusy = value; }
+        }
+
+        public string ErrorMessage
+        {
+            get { return this._errorMessage; }
+            set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
+        }
 
         public User ActiveUser
         {
@@ -76,28 +94,74 @@ namespace DeepfreezeApp
             } 
         }
 
-        public string ArchivesNum
-        { 
-            get 
+        #endregion
+
+        #region methods
+
+        public async Task RefreshUser()
+        {
+            this.IsBusy = true;
+            try
             {
-                if (this.ActiveUser.Archives != null)
-                    return Properties.Resources.TotalArchivesText + this.ActiveUser.Archives.Count.ToString();
-                else
-                    return null;
-            } 
+                var user = await this._deepfreezeClient.GetUserAsync();
+
+                if (user != null)
+                {
+                    this._deepfreezeClient.Settings.ActiveUser = user;
+                }
+            }
+            catch (Exception e) 
+            {
+                this.ErrorMessage = e.Message;
+            }
+            finally 
+            { 
+                this.IsBusy = false;
+                this.Refresh();
+            }
+        }
+
+        public void Logout()
+        {
+            try
+            {
+                // Finally publish a message to notify for the login change.
+                // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
+                this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILogoutMessage>());
+            }
+            catch (Exception e) { }
         }
 
         #endregion
 
-        #region methods
-        public async Task Logout()
-        {
-            try
-            {
+        #region message_handlers
 
-            }
-            catch (Exception e) { }
+        public async Task Handle(IRefreshUserMessage message)
+        {
+            await this.RefreshUser();
         }
+
+        #endregion
+
+        #region private_methods
+        #endregion
+
+        #region events
+
+        protected override void OnActivate()
+        {
+            this._eventAggregator.Subscribe(this);
+
+            base.OnActivate();
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            this._eventAggregator.Unsubscribe(this);
+
+            base.OnDeactivate(close);
+        }
+
         #endregion
     }
 }

@@ -14,13 +14,23 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Controls.Gravatar;component/generic.xaml"/>
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
             <local:LongSizeToStringConverter x:Key="LongSizeToStringConverter" />
+            <local:BoolToVisibility x:Key="BoolToVisibilityConverter" />
+            <local:InvertBool x:Key="InvertBoolToVisibilityConverter" />
+            <local:ValueConverterGroup x:Key="EmptyStringToBoolToVisibilityConverter" >
+                <local:EmptyStringToBool />
+                <local:InvertBool />
+                <local:BoolToVisibility />
+            </local:ValueConverterGroup>
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Width="350">
+    <StackPanel Width="350"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                >
 
         <Label x:Name="ActiveUserHeader"
                Style="{DynamicResource DescriptionHeaderStyle}"
@@ -78,16 +88,42 @@
                 Margin="0 10 0 0"
                 />
         </Grid>
-              
-        <Label x:Name="QuotaHeader" 
-                Style="{DynamicResource DescriptionHeaderStyle}" 
-               Margin="5 20 0 0"
-                />
+        
+        <StackPanel Orientation="Horizontal"
+                    Margin="5 20 0 5">
 
-        <Label Margin="5 5 0 0" 
-               Content="{Binding ArchivesNum}"
-               FontSize="14"
-               />
+            <Label x:Name="QuotaHeader" 
+                   Style="{DynamicResource DescriptionHeaderStyle}" 
+                   VerticalAlignment="Center"
+                />
+            
+            <Button Height="30" 
+                    Width="30" 
+                    VerticalContentAlignment="Center" 
+                    HorizontalContentAlignment="Center" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Center" 
+                    Style="{DynamicResource MetroCircleButtonStyle}"
+                    x:Name="RefreshUser" 
+                    ToolTip="Refresh" 
+                    Margin="0 0 5 0"
+                    >
+
+                <Rectangle Width="13" Height="13" Fill="Black">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+
+            </Button>
+
+            <controls:ProgressRing Height="20"
+                                   Width="20" 
+                                   IsActive="{Binding IsBusy}"
+                                   VerticalAlignment="Center"
+                                   />
+            
+        </StackPanel>
         
         <Grid Margin="5 5 0 0"
               HorizontalAlignment="Stretch">
@@ -116,6 +152,11 @@
                          />
 
         </Grid>
+        
+        <TextBlock x:Name="ErrorMessage"
+                   Foreground="Red"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToBoolToVisibilityConverter}}"
+                   />
         
     </StackPanel>
 </UserControl>

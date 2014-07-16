@@ -94,6 +94,7 @@
     <Compile Include="Interfaces\ILogoutMessage.cs" />
     <Compile Include="Interfaces\IRefreshUserMessage.cs" />
     <Compile Include="Interfaces\IRemoveUploadViewModelMessage.cs" />
+    <Compile Include="Interfaces\IUploadActionMessage.cs" />
     <Compile Include="Messages\FetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Messages\NewUploadMessage.cs" />
     <Compile Include="Messages\RefreshUserMessage.cs" />
     <Compile Include="Messages\RemoveUploadViewModelMessage.cs" />
+    <Compile Include="Messages\UploadActionMessage.cs" />
     <Compile Include="ViewModels\UploadManagerViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />

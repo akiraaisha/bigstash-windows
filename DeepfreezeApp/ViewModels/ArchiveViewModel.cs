@@ -130,6 +130,11 @@ namespace DeepfreezeApp
 
         #region action methods
 
+        /// <summary>
+        /// Choose a folder for the new archive. This method opens a new Folder selection
+        /// dialog.
+        /// </summary>
+        /// <returns></returns>
         public async Task ChooseFolder()
         {
             // Clear list with archive files info.
@@ -172,6 +177,12 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Handle the DragEnter event from the user's drag and drop action. 
+        /// If the DataFormats is not a FileDrop, then the drop is not allowed. 
+        /// This way we make sure that only file drops are handled, so the archive creation can go on.
+        /// </summary>
+        /// <param name="e"></param>
         public void HandleDragEnter(DragEventArgs e)
         {
             // Allow only FileDrop drag and drop actions.
@@ -181,6 +192,11 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Handle the Drop event from the user's drag and drop action.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         public async Task HandleDrop(DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -201,7 +217,7 @@ namespace DeepfreezeApp
                     BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
 
                     // get the base directory of the selection.
-                    this._baseDirectory = Path.GetDirectoryName(paths.SingleOrDefault()) + "\\";
+                    this._baseDirectory = Path.GetDirectoryName(paths.FirstOrDefault()) + "\\";
 
                     try
                     {
@@ -222,6 +238,9 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Checks if the Upload button can be clicked or not.
+        /// </summary>
         public bool CanUpload
         {
             get
@@ -232,6 +251,11 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Initiate an Archive creation and publish an InitiateUploadMessage for
+        /// the UploadManagerViewModel to handle.
+        /// </summary>
+        /// <returns></returns>
         public async Task Upload()
         {
             HasChosenFiles = false;
@@ -243,14 +267,20 @@ namespace DeepfreezeApp
                 // create a new archive using DF API.
                 var archive = await this._deepfreezeClient.CreateArchiveAsync(this._archiveSize, ArchiveTitle);
 
-                // publish a message to UploadManager to initiate the upload.
-                var message = IoC.Get<IInitiateUploadMessage>();
-                message.Archive = archive;
-                message.ArchiveFilesInfo = this._archiveInfo;
-                this._eventAggregator.PublishOnUIThread(message);
+                if (archive != null)
+                {
+                    // send a message to refresh user storage stats.
+                    this._eventAggregator.PublishOnCurrentThread(IoC.Get<IRefreshUserMessage>());
+
+                    // publish a message to UploadManager to initiate the upload.
+                    var message = IoC.Get<IInitiateUploadMessage>();
+                    message.Archive = archive;
+                    message.ArchiveFilesInfo = this._archiveInfo.ToList();
+                    this._eventAggregator.PublishOnBackgroundThread(message);
+                }
 
                 // reset the view
-                this.Cancel(); 
+                this.Reset(); 
             }
             catch (Exception e)
             {
@@ -263,7 +293,10 @@ namespace DeepfreezeApp
             }
         }
 
-        public void Cancel()
+        /// <summary>
+        /// Clear all essential properties for this viewmodel.
+        /// </summary>
+        public void Reset()
         {
             IsBusy = false;
             HasChosenFiles = false;
@@ -280,16 +313,14 @@ namespace DeepfreezeApp
 
         #region private methods
 
-        //private async Task PrepareArchivePathsAndSize(string dir)
-        //{
-        //    try
-        //    {
-        //        _paths.Add(dir);
-        //        await PrepareArchivePathsAndSize(_paths);
-        //    }
-        //    catch (Exception e) { throw e; }
-        //}
-
+        /// <summary>
+        /// Prepare the ArchiveFileInfo list needed for this archive. This method scans for all files
+        /// to be included in the archive and prepares their keynames, file paths and base prefixes. 
+        /// If the user selection doesn't include any files or if the user selection has a total size 
+        /// more than the remaining free Deepfreeze Storage, this method throws an exception.
+        /// </summary>
+        /// <param name="paths"></param>
+        /// <returns></returns>
         private async Task<long> PrepareArchivePathsAndSize(IEnumerable<string> paths)
         {
             try
@@ -383,10 +414,6 @@ namespace DeepfreezeApp
 
                 return size;
             }
-            catch (UnauthorizedAccessException e)
-            {
-                throw e;
-            }
             catch (Exception e)
             {
                 throw e;
@@ -395,9 +422,20 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region events
+
         protected override void OnActivate()
         {
             base.OnActivate();
         }
+
+        protected override void OnDeactivate(bool close)
+        {
+            this.Reset();
+
+            base.OnDeactivate(close);
+        }
+
+        #endregion
     }
 }

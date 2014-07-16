@@ -7,8 +7,8 @@ using System.ComponentModel.Composition;
 
 namespace DeepfreezeApp
 {
-    [Export(typeof(IRemoveUploadViewModel))]
-    public class RemoveUploadViewModelMessage : IRemoveUploadViewModel
+    [Export(typeof(IRemoveUploadViewModelMessage))]
+    public class RemoveUploadViewModelMessage : IRemoveUploadViewModelMessage
     {
         public UploadViewModel UploadVMToRemove { get; set; }
     }

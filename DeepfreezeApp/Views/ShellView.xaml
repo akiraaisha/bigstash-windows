@@ -14,7 +14,7 @@
         Height="500" 
         Width="300"
         MinHeight="500"        
-                      
+        SaveWindowPosition="True"
         >
 
     <Window.Resources>
@@ -31,7 +31,11 @@
                 <local:InvertBool />
                 <local:BoolToVisibility />
             </local:ValueConverterGroup>
-
+            <local:ValueConverterGroup x:Key="EmptyStringToInvertBoolToVisibilityConverter">
+                <local:EmptyStringToBool />
+                <local:InvertBool />
+                <local:BoolToVisibility />
+            </local:ValueConverterGroup>
         </ResourceDictionary>
     </Window.Resources>
     
@@ -78,46 +82,56 @@
     </controls:MetroWindow.Flyouts>
 
     <Grid Margin="0 0 0 10">
-        
-        <StackPanel
-        Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-        >
-            
-        <ContentControl cal:View.Model="{Binding LoginVM}" />
-            
-    </StackPanel>
 
-        <WrapPanel HorizontalAlignment="Center" 
+        <TextBlock x:Name="ErrorMessage"
+                   Foreground="Red"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                   />
+        
+        <Grid Visibility="{Binding HasError, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+
+            <WrapPanel HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
                    >
-            
-            <Label Content="{Binding BusyMessage}" />
-            
-            <controls:ProgressRing IsActive="{Binding IsBusy}" 
+
+                <Label Content="{Binding BusyMessage}" />
+
+                <controls:ProgressRing IsActive="{Binding IsBusy}" 
                                    Width="20" 
                                    Height="20" 
                                    />
-            
-        </WrapPanel>
 
-        <DockPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
-            
-            <ContentControl cal:View.Model="{Binding ArchiveVM}"
+            </WrapPanel>
+
+            <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                    VerticalAlignment="Center"
+                    >
+
+                <ContentControl cal:View.Model="{Binding LoginVM}" />
+
+            </StackPanel>
+
+            <DockPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                <ContentControl cal:View.Model="{Binding ArchiveVM}"
                             DockPanel.Dock="Top"
                             />
 
-            <ScrollViewer DockPanel.Dock="Top"
+                <ScrollViewer DockPanel.Dock="Top"
                           VerticalScrollBarVisibility="Auto"
                           >
 
-                <!--<Border BorderThickness="1" BorderBrush="WhiteSmoke" />-->
+                    <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
 
-                <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
+                </ScrollViewer>
 
-            </ScrollViewer>
+            </DockPanel>
             
-        </DockPanel>
+        </Grid>
 
     </Grid>
+    
 </controls:MetroWindow>

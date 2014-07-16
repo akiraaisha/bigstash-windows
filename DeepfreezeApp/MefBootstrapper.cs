@@ -11,6 +11,8 @@ using System.Text;
 using System.Windows;
 
 using Newtonsoft.Json;
+using DeepfreezeModel;
+using System.Threading.Tasks;
 
 namespace DeepfreezeApp
 {
@@ -72,10 +74,23 @@ namespace DeepfreezeApp
             // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
             CreateLocalApplicationDataDirectory();
 
-            // Read local settings.json and set DeepfreezeClient settings.
-            SetDeepfreezeClientSettings();
-
             DisplayRootViewFor<IShell>();
+        }
+
+        protected override async void OnExit(object sender, EventArgs e)
+        {
+            var client = IoC.Get<IDeepfreezeClient>();
+
+            if (client.IsLogged())
+            {
+                // Save preferences file.
+                await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII))
+                    .ConfigureAwait(false);
+            }
+            else
+                File.Delete(Properties.Settings.Default.SettingsFilePath);
+
+            base.OnExit(sender, e);
         }
 
         private void CreateLocalApplicationDataDirectory()
@@ -107,40 +122,12 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.SettingsFileName
                     );
 
-            // %APPDATA\Deepfreeze\uploads.json
-            Properties.Settings.Default.UploadsFilePath =
-                    Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
-                        Properties.Settings.Default.UploadsFileName
-                    );
-
             // %APPDATA\Deepfreeze\uploads\
             Properties.Settings.Default.UploadsFolderPath =
                     Path.Combine(
                         Properties.Settings.Default.LocalAppDataDFFolder,
                         Properties.Settings.Default.UploadsFolderName
                     );
-        }
-
-        private void SetDeepfreezeClientSettings()
-        {
-            try
-            {
-                var client = IoC.Get<IDeepfreezeClient>();
-
-                // try to read %APPDATA\Deepfreeze\settings.json
-                // to instatiate client settings for last user and token.
-                var content = File.ReadAllText(Properties.Settings.Default.SettingsFilePath, Encoding.ASCII);
-
-                if (content != null)
-                    client.Settings = JsonConvert.DeserializeObject<Settings>(content);
-
-                if (String.IsNullOrEmpty(client.Settings.ApiEndpoint))
-                    client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
-
-            }
-            catch (FileNotFoundException e) { } // do nothing, client has null settings.
-            catch (JsonReaderException e) { } // do nothing, client has null settings.
         }
     }
 }

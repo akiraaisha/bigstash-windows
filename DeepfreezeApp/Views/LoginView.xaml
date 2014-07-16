@@ -17,42 +17,51 @@
             <local:BoolToVisibility />
         </local:ValueConverterGroup>
     </UserControl.Resources>
-    
-    <Grid>
-        <StackPanel 
+
+    <StackPanel 
             IsEnabled="{Binding IsBusy, Converter={StaticResource ResourceKey=InvertBoolConverter}}"
             MinWidth="100"
             MaxWidth="300"
+            VerticalAlignment="Center"
             >
-            
-            <TextBlock
+        
+        <TextBlock Text="{Binding ConnectHeader}"
+                   FontSize="16"
+                   HorizontalAlignment="Center"
+                   Margin="0 0 0 20"
+                   />
+        
+        <TextBlock
                 x:Name="UsernameError"
                 Foreground="Red"
                 TextWrapping="Wrap"
                 Visibility="{Binding HasUsernameError, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
-            
-            <TextBox 
+
+        <TextBox 
                 x:Name="UsernameInput" 
                 MinWidth="100"
                 controls:TextboxHelper.Watermark="{Binding UsernameHelper}"
                 />
 
-            <TextBlock
+        <TextBlock
                 x:Name="PasswordError"
                 Foreground="Red"
                 TextWrapping="Wrap"
                 Visibility="{Binding HasPasswordError, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
 
-            <PasswordBox 
+        <PasswordBox 
                 cal:Message.Attach="[Event PasswordChanged] = [Action RetrievePassword($source)]"
                 MinWidth="100"
                 controls:TextboxHelper.Watermark="{Binding PasswordHelper}"
                 />
 
+        <StackPanel Orientation="Horizontal"
+                        Margin="0 5 0 5">
+
             <Button 
-                x:Name="Login"
+                x:Name="Connect"
                 Content="{Binding LoginString}"
                 IsDefault="True"
                 Width="Auto"
@@ -60,14 +69,22 @@
                 HorizontalAlignment="Left"
                 Style="{DynamicResource AccentedSquareButtonStyle}"
                 />
-            
-            <TextBlock
+
+            <controls:ProgressRing IsActive="{Binding IsBusy}"
+                                       Width="20"
+                                       Height="20"
+                                       Margin="5 0 0 0"
+                                       VerticalAlignment="Center"
+                                       />
+
+        </StackPanel>
+
+        <TextBlock
                 x:Name="LoginError"
                 Foreground="Red"
                 TextWrapping="Wrap"
                 Visibility="{Binding HasLoginError, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
-            
-        </StackPanel>
-    </Grid>
+
+    </StackPanel>
 </UserControl>

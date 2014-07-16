@@ -115,6 +115,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect to your Deepfreeze Account.
+        /// </summary>
+        internal static string ConnectHeaderText {
+            get {
+                return ResourceManager.GetString("ConnectHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creating new archive.
         /// </summary>
         internal static string CreatingArchiveText {

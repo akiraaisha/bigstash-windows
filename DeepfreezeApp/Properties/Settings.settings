@@ -14,12 +14,6 @@
     <Setting Name="SettingsFilePath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="UploadsFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">uploads.json</Value>
-    </Setting>
-    <Setting Name="UploadsFilePath" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="UploadsFolderName" Type="System.String" Scope="User">
       <Value Profile="(Default)">uploads</Value>
     </Setting>

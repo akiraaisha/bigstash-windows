@@ -45,6 +45,7 @@ namespace DeepfreezeSDK
         private readonly string _archivesUri = "archives/";
 
         private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
+        private Settings _settings;
         #endregion
 
         public Settings Settings { get; set; }
@@ -370,6 +371,7 @@ namespace DeepfreezeSDK
         {
             var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response = new HttpResponseMessage();
+            string content = String.Empty;
 
             try
             {
@@ -378,9 +380,8 @@ namespace DeepfreezeSDK
                     response = await httpClient.SendAsync(request);
                 }
 
+                content = await response.Content.ReadAsStringAsync();
                 response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
 
                 if (content != null)
                 {
@@ -395,7 +396,7 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                    throw new Exceptions.DfApiException(e.Message + "\n" + content, e, response);
                 else
                     throw e;
             }

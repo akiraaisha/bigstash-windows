@@ -19,7 +19,7 @@ namespace DeepfreezeSDK
     [Export(typeof(IDeepfreezeS3Client))]
     public class DeepfreezeS3Client : IDeepfreezeS3Client
     {
-        protected static readonly long PART_SIZE = 1024 * 1024;
+        protected static readonly long PART_SIZE = 10 * 1024 * 1024;
         protected static readonly int PARALLEL_NUM = Environment.ProcessorCount - 1;
 
         public IAmazonS3 s3Client;
@@ -28,7 +28,10 @@ namespace DeepfreezeSDK
         private static string _accessKeyID;
         private static string _secretAccessKey;
 
-        public event EventHandler<StreamTransferProgressArgs> ProgressChanged;
+        public Dictionary<int, long> MultipartUploadProgress = new Dictionary<int, long>();
+        public long SingleUploadProgress = 0;
+
+        public bool IsUploading = false;
 
         public DeepfreezeS3Client()
         { }
@@ -53,6 +56,7 @@ namespace DeepfreezeSDK
                 // set the standard us region endpoint.
                 _s3Config = new AmazonS3Config();
                 _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USEast1;
+                _s3Config.ProgressUpdateInterval = 5 * 100 * 1024; // fire progress update event every 500 KB.
 
                 s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
             }
@@ -289,7 +293,7 @@ namespace DeepfreezeSDK
         /// <param name="uploadPartRequest"></param>
         /// <param name="token"></param>
         /// <returns>Task<UploadPartResponse></returns>
-        public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, CancellationToken token)
+        public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, Dictionary<int, long> partsProgress, CancellationToken token)
         {
             try
             {
@@ -299,6 +303,12 @@ namespace DeepfreezeSDK
                 //uploadPartRequest.StreamTransferProgress +=
                 //    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
 
+                uploadPartRequest.StreamTransferProgress += (sender, eventArgs) =>
+                    {
+                        partsProgress[uploadPartRequest.PartNumber] = eventArgs.TransferredBytes;
+                        Console.WriteLine("Part " + uploadPartRequest.PartNumber + " transferred bytes: " + partsProgress[uploadPartRequest.PartNumber]);
+                    };
+
                 // Upload part and return response.
                 var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
 
@@ -306,15 +316,7 @@ namespace DeepfreezeSDK
 
                 return uploadPartResponse;
             }
-            catch (AggregateException ex)
-            {
-                ex.Handle(e =>
-                {
-                    return e is OperationCanceledException;
-                });
-
-                throw ex;
-            }
+            catch (Exception e) { throw e; }
         }
 
         /// <summary>
@@ -328,7 +330,11 @@ namespace DeepfreezeSDK
         {
             try
             {
+                this.IsUploading = true;
+
                 token.ThrowIfCancellationRequested();
+
+                this.SingleUploadProgress = 0;
 
                 var putRequest = new PutObjectRequest()
                 {
@@ -337,18 +343,25 @@ namespace DeepfreezeSDK
                     FilePath = info.FilePath
                 };
 
-                //putRequest.StreamTransferProgress += 
-                //    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
+                putRequest.StreamTransferProgress += (sender, eventArgs) =>
+                {
+                    this.SingleUploadProgress = eventArgs.TransferredBytes;
+                    Console.WriteLine("Single Upload Progress: " + this.SingleUploadProgress);
+                };
 
                 var putResponse = await this.s3Client.PutObjectAsync(putRequest, token).ConfigureAwait(false);
 
                 return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
             }
-            catch (OperationCanceledException e) { throw e; }
             catch (Exception e) { throw e; }
+            finally
+            {
+                this.IsUploading = false;
+            }
         }
 
-        public Queue<UploadPartRequest> PreparePartRequests(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, List<PartDetail> uploadedParts, CancellationToken token)
+        public Queue<UploadPartRequest> PreparePartRequests(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, 
+            List<PartDetail> uploadedParts, Dictionary<int, long> partsProgress, CancellationToken token)
         {
             long filePosition = 0;
             long partSize = PART_SIZE; // 5 MB
@@ -359,11 +372,16 @@ namespace DeepfreezeSDK
 
             for (int i = 1; filePosition < fileInfo.Size; i++)
             {
-                if (uploadedParts.Select(x => x.PartNumber).Contains(i))
+                var uploadedPart = uploadedParts.Where(x => x.PartNumber == i).FirstOrDefault();
+                if (uploadedPart != null) // uploadedParts.Select(x => x.PartNumber).Contains(i))
                 {
-                    filePosition += partSize;
+                    //partsProgress.Add(i, uploadedPart.Size); // for each already uploaded part, add total part size as transferred bytes.
+                    filePosition += uploadedPart.Size;
                     continue;
                 }
+
+                // for each NOT uploaded part, add a pair in the progress dictionary with value = 0
+                partsProgress.Add(i, 0);
 
                 bool isLastPart = false;
 
@@ -396,41 +414,49 @@ namespace DeepfreezeSDK
         public async Task<bool> UploadFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, CancellationToken token)
         {
             bool hasException = false;
+            this.IsUploading = true;
+
+            MultipartUploadProgress.Clear();
+
             ListPartsResponse partsResponse = new ListPartsResponse();
 
             var uploadPartTasks = new List<Task<UploadPartResponse>>();
             Queue<UploadPartRequest> partRequests = new Queue<UploadPartRequest>();
             List<Task<UploadPartResponse>> runningTasks = new List<Task<UploadPartResponse>>();
 
-            // if this isn't a new file upload (resuming a past upload)
-            // then we have to get the uploaded parts so the upload continues
-            // where it's stopped.
-            if (!isNewFileUpload)
-                partsResponse = await this.ListPartsAsync(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token).ConfigureAwait(false);
-
-            token.ThrowIfCancellationRequested();
-
-            Console.WriteLine("Creating upload part tasks.");
-
-            // create all part requests.
-            partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, token);
-
-            Console.WriteLine("Finished creating upload part tasks.");
-
-            token.ThrowIfCancellationRequested();
-
-            // initialize first tasks to run.
-            while (runningTasks.Count < PARALLEL_NUM && partRequests.Count > 0)
+            try
             {
-                var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), token);
-                runningTasks.Add(uploadTask);
-                Console.WriteLine("New task.");
-            }
+                token.ThrowIfCancellationRequested();
 
-            while (runningTasks.Count > 0)
-            {
-                try
+                // if this isn't a new file upload (resuming a past upload)
+                // then we have to get the uploaded parts so the upload continues
+                // where it's stopped.
+                if (!isNewFileUpload)
+                    partsResponse = await this.ListPartsAsync(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token).ConfigureAwait(false);
+
+                token.ThrowIfCancellationRequested();
+
+                Console.WriteLine("Creating upload part tasks.");
+
+                // create all part requests.
+                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, MultipartUploadProgress, token);
+
+                Console.WriteLine("Finished creating upload part tasks.");
+
+                token.ThrowIfCancellationRequested();
+
+                // initialize first tasks to run.
+                while (runningTasks.Count < PARALLEL_NUM && partRequests.Count > 0)
                 {
+                    var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), MultipartUploadProgress, token);
+                    runningTasks.Add(uploadTask);
+                    Console.WriteLine("New task.");
+                }
+
+                while (runningTasks.Count > 0)
+                {
+                    token.ThrowIfCancellationRequested();
+
                     var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
 
                     runningTasks.Remove(finishedTask);
@@ -440,30 +466,26 @@ namespace DeepfreezeSDK
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), token);
+                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), MultipartUploadProgress, token);
                         runningTasks.Add(uploadTask);
                         Console.WriteLine("New task.");
                     }
                 }
-                catch(AggregateException ex)
-                {
-                    ex.Handle(e =>
-                    {
-                        return e is OperationCanceledException;
-                    });
 
-                    partRequests.Clear();
-                    runningTasks.Clear();
-
-                    throw ex;
-                }
+                // if all goes well, return true
+                return true;
             }
+            catch (Exception ex)
+            {
+                partRequests.Clear();
+                runningTasks.Clear();
 
-            // send a complete request to finish the s3 upload.
-            //await this.CompleteMultipartUpload(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token);
-
-            // if all goes well, return true
-            return true; 
+                throw ex;
+            }
+            finally
+            {
+                this.IsUploading = false;
+            }
         }
 
         /// <summary>

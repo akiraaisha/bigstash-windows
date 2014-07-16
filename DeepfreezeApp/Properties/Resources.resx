@@ -140,6 +140,9 @@
     <value>Connect</value>
     <comment>Used for connect button content.</comment>
   </data>
+  <data name="ConnectHeaderText" xml:space="preserve">
+    <value>Connect to your Deepfreeze Account</value>
+  </data>
   <data name="CreatingArchiveText" xml:space="preserve">
     <value>Creating new archive</value>
   </data>

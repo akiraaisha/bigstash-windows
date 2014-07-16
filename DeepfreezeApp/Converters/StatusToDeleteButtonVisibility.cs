@@ -20,12 +20,13 @@ namespace DeepfreezeApp
 
             switch(status)
             {
-                case Enumerations.Status.Uploading:
+                
                 case Enumerations.Status.Paused:
-                case Enumerations.Status.Failed:
-                case Enumerations.Status.UnableToStart:
+                case Enumerations.Status.Error:
                     buttonVisibility = Visibility.Visible;
                     break;
+                case Enumerations.Status.Pending:
+                case Enumerations.Status.Uploading:
                 case Enumerations.Status.Uploaded:
                 case Enumerations.Status.Completed:
                     buttonVisibility = Visibility.Collapsed;

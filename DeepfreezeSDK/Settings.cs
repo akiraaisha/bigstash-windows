@@ -33,19 +33,7 @@ namespace DeepfreezeSDK
         /// "/" character, the public setter takes care of it. :)
         /// </summary>
         [JsonProperty("api_endpoint")]
-        public string ApiEndpoint
-        {
-            get { return this._apiEndpoint; }
-            set
-            {
-                var endpoint = value;
-
-                if (endpoint.EndsWith("/"))
-                    this._apiEndpoint = endpoint;
-                else
-                    this._apiEndpoint = endpoint + "/";
-            }
-        }
+        public string ApiEndpoint { get; set; }
 
         /// <summary>
         /// Serialize Settings to json string.

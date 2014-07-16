@@ -10,7 +10,7 @@ namespace DeepfreezeModel
 {
     public class Archive
     {
-        [JsonProperty("status")]
+        [JsonIgnore]
         public Enumerations.Status Status { get; set; }
 
         [JsonProperty("size")]

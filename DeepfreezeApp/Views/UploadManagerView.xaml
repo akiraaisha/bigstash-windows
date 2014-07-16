@@ -13,16 +13,22 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <local:BoolToVisibility x:Key="BoolToVisibilityConverter" />
+            <local:ValueConverterGroup x:Key="EmptyStringToInvertBoolToVisibilityConverter">
+                <local:EmptyStringToBool />
+                <local:InvertBool />
+                <local:BoolToVisibility />
+            </local:ValueConverterGroup>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <StackPanel Margin="5">
 
-        <WrapPanel>
+        <WrapPanel HorizontalAlignment="Center">
 
-            <Label x:Name="TotalUploadsText"
+            <TextBlock x:Name="TotalUploadsText"
                    FontSize="14"
-                   HorizontalAlignment="Stretch"
+                   TextWrapping="Wrap"
+                   Visibility="{Binding TotalUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
 
             <controls:ProgressRing Height="20"
@@ -33,15 +39,12 @@
 
         </WrapPanel>
         
-        <!--<TextBox x:Name="SearchTerm" controls:TextboxHelper.Watermark="Search by archive name." >
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="TextChanged">
-                    <cal:ActionMessage MethodName="FilterUploadsList"></cal:ActionMessage>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </TextBox>-->
+        <TextBlock x:Name="ErrorMessage"
+                   Foreground="Red"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                   />
 
-        <ItemsControl x:Name="FilteredUploads" 
+        <ItemsControl x:Name="Uploads" 
                      >
 
             <ItemsControl.ItemTemplate>
