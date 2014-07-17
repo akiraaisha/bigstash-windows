@@ -20,7 +20,7 @@ namespace DeepfreezeSDK
     public class DeepfreezeS3Client : IDeepfreezeS3Client
     {
         protected static readonly long PART_SIZE = 10 * 1024 * 1024;
-        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount - 1;
+        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount;
 
         public IAmazonS3 s3Client;
 
