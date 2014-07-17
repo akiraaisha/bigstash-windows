@@ -11,21 +11,6 @@ namespace DeepfreezeSDK
     static class HelperMethods
     {
         /// <summary>
-        /// Returns the sum of long numbers found in an enumerable collection.
-        /// </summary>
-        /// <param name="numbers"></param>
-        /// <returns></returns>
-        public static long SumNumbers(IEnumerable<long> numbers)
-        {
-            long sum = 0;
-            foreach(long num in numbers)
-            {
-                sum += num;
-            }
-            return sum;
-        }
-
-        /// <summary>
         /// Encode plain text string to base64.
         /// </summary>
         /// <param name="plainText"></param>
