@@ -446,7 +446,7 @@ namespace DeepfreezeSDK
         public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
             var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
-            request.Content = new StringContent(patchContent, Encoding.ASCII, "application/json");
+            request.Content = new StringContent(patchContent, Encoding.UTF8, "application/json");
             HttpResponseMessage response = new HttpResponseMessage();
 
             try
