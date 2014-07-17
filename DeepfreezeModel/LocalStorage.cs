@@ -33,7 +33,7 @@ namespace DeepfreezeModel
                     return true;
                 }
             }
-            catch (AggregateException e)
+            catch (Exception e)
             { throw e; }
         }
     }
