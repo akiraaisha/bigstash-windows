@@ -18,6 +18,8 @@ namespace DeepfreezeApp
         IHandle<IInitiateUploadMessage>, IHandle<IRemoveUploadViewModelMessage>
     {
         #region fields
+
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(UploadManagerViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -39,6 +41,7 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public IUploadViewModel CreateNewUploadVM()
         {
+            _log.Info("Creating a new UploadViewModel for the upload manager.");
             return UploadVMFactory.CreateExport().Value;
         }
 
@@ -104,9 +107,13 @@ namespace DeepfreezeApp
             {
                 IList<LocalUpload> localUploads = new List<LocalUpload>();
 
+                _log.Info("Reading local upload files in directory \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
+
                 var uploadFilesPaths = 
                     await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly))
                     .ConfigureAwait(false);
+
+                _log.Info("Found " + uploadFilesPaths.Count() + " local upload files.");
 
                 foreach(var uploadFilePath in uploadFilesPaths)
                 {
@@ -129,9 +136,14 @@ namespace DeepfreezeApp
                     }
                 }
 
+                _log.Info("Loaded " + localUploads.Count() + " local upload files.");
+
                 return localUploads.OrderByDescending(x => x.SavePath).ToList();
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e) 
+            { 
+                throw e; 
+            }
         }
 
         /// <summary>
@@ -157,6 +169,8 @@ namespace DeepfreezeApp
 
                 this.Uploads.Add(u);
             }
+
+            _log.Info("Created " + this.Uploads.Count + " UploadViewModels for the upload manager.");
         }
 
         /// <summary>
@@ -169,6 +183,8 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private void InitiateNewUpload(Archive newArchive, IList<ArchiveFileInfo> archiveFilesInfo)
         {
+            _log.Info("Initiating a new upload in the upload manager.");
+
             // create a new UploadViewModel.
             UploadViewModel newUploadVM = this.CreateNewUploadVM() as UploadViewModel;
 
@@ -232,13 +248,13 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(IRemoveUploadViewModelMessage message)
         {
+            _log.Info("Removing archive upload with title \"" + message.UploadVMToRemove.Archive.Title +
+                "\" from the upload manager.");
+
             this.Uploads.Remove(message.UploadVMToRemove);
             message.UploadVMToRemove.TryClose();
             message.UploadVMToRemove = null;
             NotifyOfPropertyChange(() => TotalUploadsText);
-
-            // send a new message to refresh user stats.
-            this._eventAggregator.PublishOnBackgroundThread(IoC.Get<IRefreshUserMessage>());
         }
 
         #endregion
