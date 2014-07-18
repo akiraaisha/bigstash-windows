@@ -14,11 +14,11 @@ using DeepfreezeModel;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-
 using Amazon.Runtime;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using log4net;
 
 namespace DeepfreezeSDK
 {
@@ -26,16 +26,15 @@ namespace DeepfreezeSDK
     public class DeepfreezeClient : IDeepfreezeClient
     {
         #region fields
+        private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeClient));
 
         // strings representing http methods names in lower case;
         private readonly string GET = "GET";
         private readonly string POST = "POST";
-        private readonly string PUT = "PUT";
         private readonly string PATCH = "PATCH";
         private readonly string DELETE = "DELETE";
 
         // Currently pointing to beta stage api.
-        private readonly string HOST = "stage.deepfreeze.io";
         private readonly string ACCEPT = "application/vnd.deepfreeze+json";
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
@@ -45,7 +44,6 @@ namespace DeepfreezeSDK
         private readonly string _archivesUri = "archives/";
 
         private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
-        private Settings _settings;
         #endregion
 
         public Settings Settings { get; set; }
@@ -117,12 +115,14 @@ namespace DeepfreezeSDK
             // Only for this request, the client uses basic auth with user credentials.
             // For every other authorized actions, a signed request should be sent.
 
+            _log.Info("Called CreateTokenAsync.");
+
             HttpResponseMessage response = new HttpResponseMessage();
             Token token = new Token();
 
             var requestUri = new UriBuilder(this.Settings.ApiEndpoint + _tokenUri).Uri;
             var name = @"{""name"":""Deepfreeze.io for Windows on " + Environment.MachineName + @"""}";
-            var requestContent = new StringContent(name, Encoding.ASCII, "application/json");
+            var requestContent = new StringContent(name, Encoding.UTF8, "application/json");
 
             try
             {
@@ -147,13 +147,27 @@ namespace DeepfreezeSDK
                 {
                     throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
                 }
-            }   
+            }
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("CreateTokenAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("CreateTokenAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -163,6 +177,8 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<User> GetUserAsync()
         {
+            _log.Info("Called GetUserAsync.");
+
             var request = CreateHttpRequestWithSignature(GET, _userUri);
             HttpResponseMessage response = new HttpResponseMessage();
                 
@@ -192,9 +208,23 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("GetUserAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("GetUserAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -244,6 +274,8 @@ namespace DeepfreezeSDK
         /// <returns>List of Archive</returns>
         public async Task<Archive> GetArchiveAsync(string url)
         {
+            _log.Info("Called GetArchiveAsync with parameter url = \"" + url + "\".");
+
             var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response = new HttpResponseMessage();
 
@@ -271,9 +303,24 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("GetArchiveAsync with parameter url = \"" + url + 
+                        "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("GetArchiveAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -286,6 +333,8 @@ namespace DeepfreezeSDK
         /// <returns>Archive</returns>
         public async Task<Archive> CreateArchiveAsync(long size, string title)
         {
+            _log.Info("Called CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + "\".");
+
             ArchivePostData data = new ArchivePostData()
             {
                 Size = size,
@@ -318,9 +367,24 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + 
+                        "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("CreateArchiveAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -369,6 +433,8 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> GetUploadAsync(string url)
         {
+            _log.Info("Called GetUploadAsync with parameter url = \"" + url + "\".");
+
             var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response = new HttpResponseMessage();
             string content = String.Empty;
@@ -396,9 +462,24 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message + "\n" + content, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("GetUploadAsync with parameter url = \"" + url + "\" threw " + e.GetType().ToString() + 
+                        " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("GetUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -410,6 +491,8 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> InitiateUploadAsync(Archive archive)
         {
+            _log.Info("Called InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\".");
+
             var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
             HttpResponseMessage response = new HttpResponseMessage();
 
@@ -437,14 +520,38 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\" threw " + 
+                        e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("InitiateUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
+        /// <summary>
+        /// Send a PATCH "Upload.Url"-url request which returns a Deepfreeze upload.
+        /// This request is responsible for patching an upload resource with the specified patchContent parameter.
+        /// </summary>
+        /// <param name="upload"></param>
+        /// <param name="patchContent"></param>
+        /// <returns></returns>
         public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
+            _log.Info("Called PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + patchContent + "\".");
+
             var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
             request.Content = new StringContent(patchContent, Encoding.UTF8, "application/json");
             HttpResponseMessage response = new HttpResponseMessage();
@@ -473,9 +580,24 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + 
+                        patchContent + "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("PatchUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -486,6 +608,8 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<Upload> FinishUploadAsync(Upload upload)
         {
+            _log.Info("Called FinishUploadAsync with parameter url = \"" + upload.Url + "\".");
+
             try
             {
                 var patchedUpload = await this.PatchUploadAsync(upload, @"{""status"": ""uploaded""}").ConfigureAwait(false);
@@ -503,6 +627,8 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         public async Task<bool> DeleteUploadAsync(Upload upload)
         {
+            _log.Info("Called DeleteUploadAsync with parameter url = \"" + upload.Url + "\".");
+
             var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
             HttpResponseMessage response = new HttpResponseMessage();
 
@@ -520,9 +646,24 @@ namespace DeepfreezeSDK
             catch (Exception e)
             {
                 if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
+                {
+                    Exceptions.DfApiException dfApiException;
+
+                    if (e.InnerException != null)
+                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
+                    else
+                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
+
+                    _log.Error("DeleteUploadAsync with parameter url = \"" + upload.Url + "\" threw " + 
+                        e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                    throw dfApiException;
+                }
                 else
+                {
+                    _log.Error("DeleteUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                     throw e;
+                }
             }
         }
 
@@ -615,7 +756,7 @@ namespace DeepfreezeSDK
 
         #endregion
 
-        #region constructor & public setters/getters
+        #region constructors
 
         public DeepfreezeClient() { }
 
