@@ -7,11 +7,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DeepfreezeApp")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Deepfreeze for Windows")]
+[assembly: AssemblyDescription("This is the official Windows Desktop client application for the Deepfreeze.io service.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DeepfreezeApp")]
+[assembly: AssemblyCompany("The Longaccess Company")]
+[assembly: AssemblyProduct("Deepfreeze for Windows")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -55,3 +55,5 @@ using System.Windows;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 // Log4Net configuration
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "Log4Net.config", Watch = true)]
+[assembly: NeutralResourcesLanguageAttribute("en")]
+[assembly: GuidAttribute("0686143D-9199-435A-987F-6DC09AC0DAAF")]
