@@ -65,15 +65,12 @@ namespace DeepfreezeApp.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("uploads")]
         public string UploadsFolderName {
             get {
                 return ((string)(this["UploadsFolderName"]));
-            }
-            set {
-                this["UploadsFolderName"] = value;
             }
         }
         
@@ -95,6 +92,27 @@ namespace DeepfreezeApp.Properties {
         public string ServerBaseAddress {
             get {
                 return ((string)(this["ServerBaseAddress"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("endpoint.txt")]
+        public string EndpointFileName {
+            get {
+                return ((string)(this["EndpointFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EndpointFilePath {
+            get {
+                return ((string)(this["EndpointFilePath"]));
+            }
+            set {
+                this["EndpointFilePath"] = value;
             }
         }
     }

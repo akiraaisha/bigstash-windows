@@ -18,6 +18,8 @@ namespace DeepfreezeApp
 {
     public class MefBootstrapper : BootstrapperBase
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger((System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
+
         private CompositionContainer container;
 
         public MefBootstrapper()
@@ -67,6 +69,17 @@ namespace DeepfreezeApp
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
+
+            Log.Info("Starting up a new instance of Deepfreeze for Windows.");
+            Log.Info("******************************************************");
+            Log.Info("******************************************************");
+            Log.Info("*********                                    *********");
+            Log.Info("*********       Deepfreeze for Windows       *********");
+            Log.Info("*********                                    *********");
+            Log.Info("******************************************************");
+            Log.Info("******************************************************");
+
             // Set Application local app data folder and file paths
             // in Application.Properties for use in this application instance.
             SetApplicationPathsProperties();
@@ -79,16 +92,23 @@ namespace DeepfreezeApp
 
         protected override async void OnExit(object sender, EventArgs e)
         {
+            Log.Info("Exiting application.");
+
             var client = IoC.Get<IDeepfreezeClient>();
 
             if (client.IsLogged())
             {
+                Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+
                 // Save preferences file.
                 await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII))
                     .ConfigureAwait(false);
             }
             else
+            {
+                Log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
                 File.Delete(Properties.Settings.Default.SettingsFilePath);
+            }
 
             base.OnExit(sender, e);
         }
@@ -99,7 +119,11 @@ namespace DeepfreezeApp
             try
             {
                 if (!Directory.Exists(Properties.Settings.Default.LocalAppDataDFFolder))
+                {
+                    Log.Info("Creating LocalAppData Deepfreeze directory.");
+
                     Directory.CreateDirectory(Properties.Settings.Default.LocalAppDataDFFolder);
+                }
             }
             catch (Exception ex) { }
         }
@@ -115,6 +139,8 @@ namespace DeepfreezeApp
                     Properties.Settings.Default.ApplicationName
                 );
 
+            Log.Info("Setting LocalAppData Deepfreeze directory path as \"" + Properties.Settings.Default.LocalAppDataDFFolder + "\".");
+
             // %APPDATA\Deepfreeze\preferences.json
             Properties.Settings.Default.SettingsFilePath =
                     Path.Combine(
@@ -122,12 +148,25 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.SettingsFileName
                     );
 
+            Log.Info("Setting Deepfreeze preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
+
             // %APPDATA\Deepfreeze\uploads\
             Properties.Settings.Default.UploadsFolderPath =
                     Path.Combine(
                         Properties.Settings.Default.LocalAppDataDFFolder,
                         Properties.Settings.Default.UploadsFolderName
                     );
+
+            Log.Info("Setting Deepfreeze local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
+
+            // %APPDATA\Deepfreeze\endpoint.json
+            Properties.Settings.Default.EndpointFilePath =
+                    Path.Combine(
+                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.EndpointFileName
+                    );
+
+            Log.Info("Setting Deepfreeze endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
         }
     }
 }
