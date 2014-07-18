@@ -123,6 +123,20 @@ namespace DeepfreezeApp
             base.OnExit(sender, e);
         }
 
+        protected override void OnUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            // Catch any unhandled exception and shut down the app.
+            base.OnUnhandledException(sender, e);
+            Execute.OnUIThread(() =>
+            {
+                System.Windows.MessageBox.Show(e.Exception.Message, "Application Exception", System.Windows.MessageBoxButton.OK);
+            });
+
+            Log.Error("Unhandled exception occured, thrown " + e.Exception.GetType().Name + " with message \"" + e.Exception.Message + "\".");
+
+            Application.Shutdown();
+        }
+
         #region private_methods
 
         private void CreateLocalApplicationDataDirectory()
