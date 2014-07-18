@@ -73,11 +73,9 @@
                 Theme="Adapt"
                 >
 
-                <StackPanel>
-                    <ContentControl cal:View.Model="{Binding PreferencesVM}" />
-                </StackPanel>
+                <ContentControl cal:View.Model="{Binding PreferencesVM}" />
 
-        </controls:Flyout>
+            </controls:Flyout>
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
