@@ -13,9 +13,11 @@ Third party project dependencies
 --------------------------------
 - ```Caliburn.Micro```
 - ```MahApps.Metro```
+- ```MahApps.Metro.Resources```
 - ```Json.NET```
 - ```Amazon AWS SDK for .NET```
 - ```log4net```
+- ```WPF instance aware application```
 
 Build
 -----
