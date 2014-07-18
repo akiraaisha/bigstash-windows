@@ -65,7 +65,7 @@ namespace DeepfreezeApp
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
 
-            this._refreshProgressTimer.Tick += ProgressTick;
+            this._refreshProgressTimer.Tick += Tick;
             this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
         }
 
@@ -325,6 +325,8 @@ namespace DeepfreezeApp
             // if the user paused, we have to update the total progress, as some parts probably got aborted before finishing.
             if (hasException)
             {
+                // check again for timer stop
+                this._refreshProgressTimer.Stop();
                 // in case of an exception other than operation cancelled (which is thrown by the user's pause action,
                 // make sure to actually send a cancel to all remaining uploading part tasks to abort them.
                 if (this._cts != null && !this._cts.IsCancellationRequested)
@@ -857,7 +859,7 @@ namespace DeepfreezeApp
 
         #region events
 
-        private async void ProgressTick(object sender, object e)
+        private async void Tick(object sender, object e)
         {
             try
             {
