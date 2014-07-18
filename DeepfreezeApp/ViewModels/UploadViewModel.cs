@@ -689,8 +689,9 @@ namespace DeepfreezeApp
             try
             {
                 // Save the newLocalUpload to the correct local upload file
-                // in %APPDATA\Deepfreeze\uploads\ArchiveKey.json
-                this.LocalUpload.SavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath, this.Archive.Key + ".json");
+                // in %APPDATA\Deepfreeze\uploads\ArchiveKey.djf
+                this.LocalUpload.SavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath, 
+                    this.Archive.Key + Properties.Settings.Default.DeepfreezeJsonFormat);
 
                 _log.Info("Saving \"" + this.LocalUpload.SavePath + "\".");
                 
