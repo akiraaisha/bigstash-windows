@@ -13,12 +13,15 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using System.IO;
 using Amazon.Runtime;
+using log4net;
 
 namespace DeepfreezeSDK
 {
     [Export(typeof(IDeepfreezeS3Client))]
     public class DeepfreezeS3Client : IDeepfreezeS3Client
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
+
         protected static readonly long PART_SIZE = 10 * 1024 * 1024;
         protected static readonly int PARALLEL_NUM = Environment.ProcessorCount;
 
@@ -63,118 +66,16 @@ namespace DeepfreezeSDK
             catch (Exception e) { throw e; }
         }
 
-
-        #region examples
-        /// <summary>
-        /// Lists buckets.
-        /// </summary>
-        public async Task<List<S3Bucket>> ListBucketsAsync(CancellationToken token)
-        {
-            try
-            {
-                ListBucketsResponse response = await s3Client.ListBucketsAsync(new ListBucketsRequest(), token);
-
-                return response.Buckets;
-            }
-            catch (AmazonS3Exception amazonS3Exception)
-            {
-                if (amazonS3Exception.ErrorCode != null &&
-                    (amazonS3Exception.ErrorCode.Equals("InvalidAccessKeyId") ||
-                    amazonS3Exception.ErrorCode.Equals("InvalidSecurity")))
-                {
-                    Console.WriteLine("Please check the provided AWS Credentials.");
-                    Console.WriteLine("If you haven't signed up for Amazon S3, please visit http://aws.amazon.com/s3");
-                }
-                else
-                {
-                    Console.WriteLine("An Error, number {0}, occurred when listing buckets with the message '{1}", amazonS3Exception.ErrorCode, amazonS3Exception.Message);
-                }
-
-                throw amazonS3Exception;
-            }
-        }
-
-        public async Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName)
-        {
-            return await ListObjectsByBucketAsync(bucketName, CancellationToken.None);
-        }
-        public async Task<List<S3Object>> ListObjectsByBucketAsync(string bucketName, CancellationToken token)
-        {
-            try
-            {
-                ListObjectsRequest request = new ListObjectsRequest();
-                request.BucketName = bucketName;
-                ListObjectsResponse response = await s3Client.ListObjectsAsync(request, token);
-
-                return response.S3Objects;
-            }
-            catch (AmazonS3Exception amazonS3Exception)
-            {
-                if (amazonS3Exception.ErrorCode != null && (amazonS3Exception.ErrorCode.Equals("InvalidAccessKeyId") || amazonS3Exception.ErrorCode.Equals("InvalidSecurity")))
-                {
-                    Console.WriteLine("Please check the provided AWS Credentials.");
-                    Console.WriteLine("If you haven't signed up for Amazon S3, please visit http://aws.amazon.com/s3");
-                }
-                else
-                {
-                    Console.WriteLine("An error occurred with the message '{0}' when listing objects", amazonS3Exception.Message);
-                }
-
-                throw amazonS3Exception;
-            }
-        }
-
-        public void ReadingAnObject(string bucketName, string keyName)
-        {
-            try
-            {
-                GetObjectRequest request = new GetObjectRequest()
-                {
-                    BucketName = bucketName,
-                    Key = keyName
-                };
-
-                using (GetObjectResponse response = s3Client.GetObject(request))
-                {
-                    string title = response.Metadata["x-amz-meta-title"];
-                    Console.WriteLine("The object's title is {0}", title);
-                    string dest = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), keyName);
-                    if (!System.IO.File.Exists(dest))
-                    {
-                        response.WriteResponseStreamToFile(dest);
-                    }
-                }
-            }
-            catch (AmazonS3Exception amazonS3Exception)
-            {
-                if (amazonS3Exception.ErrorCode != null &&
-                    (amazonS3Exception.ErrorCode.Equals("InvalidAccessKeyId") ||
-                    amazonS3Exception.ErrorCode.Equals("InvalidSecurity")))
-                {
-                    Console.WriteLine("Please check the provided AWS Credentials.");
-                    Console.WriteLine("If you haven't signed up for Amazon S3, please visit http://aws.amazon.com/s3");
-                }
-                else
-                {
-                    Console.WriteLine("An error occurred with the message '{0}' when reading an object", amazonS3Exception.Message);
-                }
-            }
-        }
-        #endregion
-
-
-
-
-
-
         /// <summary>
         /// Send a InitiateMultipartUploadRequest request and return the response.
         /// </summary>
         /// <param name="existingBucketName"></param>
         /// <param name="keyName"></param>
         /// <returns></returns>
-        public async Task<InitiateMultipartUploadResponse> InitiateMultipartUpload(string existingBucketName, string keyName, CancellationToken token)
+        public async Task<InitiateMultipartUploadResponse> InitiateMultipartUploadAsync(string existingBucketName, string keyName, CancellationToken token)
         {
+            _log.Info("Called InitiateMultipartUploadAsync with parameter keyName = \"" + keyName + "\".");
+
             try
             {
                 InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest
@@ -186,7 +87,19 @@ namespace DeepfreezeSDK
                 InitiateMultipartUploadResponse initResponse = await s3Client.InitiateMultipartUploadAsync(initiateRequest, token).ConfigureAwait(false);
                 return initResponse;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e)
+            {
+                string logMessage = "InitiateMultipartUploadAsync with parameter keyName = \"" + keyName + "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".";
+
+                if (e is AmazonS3Exception)
+                {
+                    logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                }
+
+                _log.Error(logMessage);
+
+                throw e;
+            }
         }
 
         /// <summary>
@@ -197,22 +110,37 @@ namespace DeepfreezeSDK
         /// <param name="uploadID"></param>
         /// <param name="token"></param>
         /// <returns>Task<ListPartsResponse></returns>
-        public async Task<ListPartsResponse> ListPartsAsync(string existingBucketName, string keyName, string uploadID, CancellationToken token)
+        public async Task<ListPartsResponse> ListPartsAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
         {
+            _log.Info("Called ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
+
             try
             {
                 ListPartsRequest request = new ListPartsRequest();
                 request.BucketName = existingBucketName;
                 request.Key = keyName;
-                request.UploadId = uploadID;
+                request.UploadId = uploadId;
 
                 ListPartsResponse response = await this.s3Client.ListPartsAsync(request, token).ConfigureAwait(false);
 
                 return response;
             }
             catch (Exception e) 
-            { 
-                throw e; 
+            {
+                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    string logMessage = "ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId +
+                        "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+
+                    if (e is AmazonS3Exception)
+                    {
+                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                    }
+
+                    _log.Error(logMessage);
+                }
+
+                throw e;
             }
         }
 
@@ -223,9 +151,11 @@ namespace DeepfreezeSDK
         /// <param name="keyName"></param>
         /// <param name="uploadID"></param>
         /// <returns>Task<CompleteMultipartUploadRequest></returns>
-        public async Task<CompleteMultipartUploadRequest> CompleteMultipartUpload(string existingBucketName, string keyName, string uploadId, 
+        public async Task<CompleteMultipartUploadRequest> CompleteMultipartUploadAsync(string existingBucketName, string keyName, string uploadId, 
             CancellationToken token)
         {
+            _log.Info("Called CompleteMultipartUploadAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
+
             try
             {
                 CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest
@@ -250,13 +180,24 @@ namespace DeepfreezeSDK
 
                 return completeRequest;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e) 
+            {
+                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    string logMessage = "CompleteMultipartUploadAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId +
+                        "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+
+                    if (e is AmazonS3Exception)
+                    {
+                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                    }
+
+                    _log.Error(logMessage);
+                }
+
+                throw e;
+            }
         }
-
-
-
-
-
 
         /// <summary>
         /// Create an UploadPartRequest.
@@ -295,13 +236,13 @@ namespace DeepfreezeSDK
         /// <returns>Task<UploadPartResponse></returns>
         public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, Dictionary<int, long> partsProgress, CancellationToken token)
         {
+            _log.Info("Called UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key + 
+                "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
+                ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
+
             try
             {
                 token.ThrowIfCancellationRequested();
-
-                // Subscribe to progress event.
-                //uploadPartRequest.StreamTransferProgress +=
-                //    new EventHandler<StreamTransferProgressArgs>(UploadPartProgressEventCallback);
 
                 uploadPartRequest.StreamTransferProgress += (sender, eventArgs) =>
                     {
@@ -312,11 +253,31 @@ namespace DeepfreezeSDK
                 // Upload part and return response.
                 var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
 
-                Console.WriteLine("Finished part " + uploadPartRequest.PartNumber);
+                _log.Info("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
+                "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
+                ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
 
                 return uploadPartResponse;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e)
+            {
+                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    var logMessage = "UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
+                        "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
+                        ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath +
+                        "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+
+                    if (e is AmazonS3Exception)
+                    {
+                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                    }
+
+                    _log.Error(logMessage);
+                }
+
+                throw e;
+            }
         }
 
         /// <summary>
@@ -328,6 +289,9 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<bool> UploadSingleFileAsync(string existingBucketName, ArchiveFileInfo info, CancellationToken token)
         {
+            _log.Info("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
+                "\", FilePath = \"" + info.FilePath + "\".");
+
             try
             {
                 this.IsUploading = true;
@@ -353,13 +317,39 @@ namespace DeepfreezeSDK
 
                 return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e) 
+            {
+                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    var logMessage = "UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
+                        "\", FilePath = \"" + info.FilePath + "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+
+                    if (e is AmazonS3Exception)
+                    {
+                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                    }
+
+                    _log.Error(logMessage);
+                }
+
+                throw e;
+            }
             finally
             {
                 this.IsUploading = false;
             }
         }
 
+        /// <summary>
+        /// Create UploadPartRequest objects for a multipart upload.
+        /// </summary>
+        /// <param name="isNewFileUpload"></param>
+        /// <param name="existingBucketName"></param>
+        /// <param name="fileInfo"></param>
+        /// <param name="uploadedParts"></param>
+        /// <param name="partsProgress"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public Queue<UploadPartRequest> PreparePartRequests(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, 
             List<PartDetail> uploadedParts, Dictionary<int, long> partsProgress, CancellationToken token)
         {
@@ -411,12 +401,16 @@ namespace DeepfreezeSDK
             return partRequests;
         }
 
-        public async Task<bool> UploadFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, CancellationToken token)
+        public async Task<bool> UploadMultipartFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo,
+            CancellationTokenSource cts, CancellationToken token)
         {
+            _log.Info("Called UploadMultipartFileAsync with ArchiveFileInfo properties: KeyName = \"" + fileInfo.KeyName +
+                "\", FilePath = \"" + fileInfo.FilePath + "\".");
+
             bool hasException = false;
             this.IsUploading = true;
 
-            MultipartUploadProgress.Clear();
+            this.MultipartUploadProgress.Clear();
 
             ListPartsResponse partsResponse = new ListPartsResponse();
 
@@ -436,21 +430,16 @@ namespace DeepfreezeSDK
 
                 token.ThrowIfCancellationRequested();
 
-                Console.WriteLine("Creating upload part tasks.");
-
                 // create all part requests.
-                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, MultipartUploadProgress, token);
-
-                Console.WriteLine("Finished creating upload part tasks.");
+                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, this.MultipartUploadProgress, token);
 
                 token.ThrowIfCancellationRequested();
 
                 // initialize first tasks to run.
                 while (runningTasks.Count < PARALLEL_NUM && partRequests.Count > 0)
                 {
-                    var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), MultipartUploadProgress, token);
+                    var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), this.MultipartUploadProgress, token);
                     runningTasks.Add(uploadTask);
-                    Console.WriteLine("New task.");
                 }
 
                 while (runningTasks.Count > 0)
@@ -460,23 +449,28 @@ namespace DeepfreezeSDK
                     var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
 
                     runningTasks.Remove(finishedTask);
-                    finishedTask.Dispose();
+
+                    if (finishedTask.Status == TaskStatus.Faulted)
+                        throw finishedTask.Exception;
 
                     if (partRequests.Count > 0)
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), MultipartUploadProgress, token);
+                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), this.MultipartUploadProgress, token);
                         runningTasks.Add(uploadTask);
-                        Console.WriteLine("New task.");
                     }
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // if all goes well, return true
                 return true;
             }
             catch (Exception ex)
             {
+                hasException = true;
+
                 partRequests.Clear();
                 runningTasks.Clear();
 
@@ -484,31 +478,11 @@ namespace DeepfreezeSDK
             }
             finally
             {
+                if (hasException && cts != null && !cts.IsCancellationRequested)
+                    cts.Cancel();
+
                 this.IsUploading = false;
             }
-        }
-
-        /// <summary>
-        /// Asynchronously list all multipart pending uploads.
-        /// </summary>
-        /// <param name="existingBucketName"></param>
-        /// <returns></returns>
-        public async Task<List<MultipartUpload>> ListMultiPartUploadsAsync(string existingBucketName)
-        {
-            ListMultipartUploadsRequest request = new ListMultipartUploadsRequest
-            {
-                BucketName = existingBucketName
-            };
-            
-            try
-            {
-                ListMultipartUploadsResponse response = await s3Client.ListMultipartUploadsAsync(request).ConfigureAwait(false);
-
-                List<MultipartUpload> pendingUploads = response.MultipartUploads;
-
-                return pendingUploads;
-            }
-            catch (Exception e) { throw e; }
         }
 
         /// <summary>
@@ -519,22 +493,38 @@ namespace DeepfreezeSDK
         /// <param name="uploadID"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public async Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadID, CancellationToken cts)
+        public async Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadId, CancellationToken cts)
         {
+            _log.Info("Called AbortMultiPartUploadAsync with parameters keyName = \"" + keyName +
+                "\", UploadId = \"" + uploadId + "\".");
+
             AbortMultipartUploadRequest request = new AbortMultipartUploadRequest()
             {
                 BucketName = existingBucketName,
                 Key = keyName,
-                UploadId = uploadID
+                UploadId = uploadId
             };
 
             try
             {
                 await s3Client.AbortMultipartUploadAsync(request, cts).ConfigureAwait(false);
             }
-            catch(AggregateException ex)
+            catch(Exception e)
             {
-                throw ex;
+                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    string logMessage = "AbortMultiPartUploadAsync with parameters keyName = \"" + keyName +
+                        "\", UploadId = \"" + uploadId + "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+
+                    if (e is AmazonS3Exception)
+                    {
+                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                    }
+
+                    _log.Error(logMessage);
+                }
+
+                throw e;
             }
         }
     }
