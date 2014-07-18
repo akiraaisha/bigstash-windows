@@ -17,6 +17,7 @@ namespace DeepfreezeApp
     {
         #region members
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(UserViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -96,18 +97,30 @@ namespace DeepfreezeApp
 
         #endregion
 
-        #region methods
+        #region action_methods
 
         public async Task RefreshUser()
         {
             this.IsBusy = true;
             try
             {
+                _log.Info("Fetching User, GET users resource.");
                 var user = await this._deepfreezeClient.GetUserAsync();
 
                 if (user != null)
                 {
+                    _log.Info("Fetched User, saving to \"" + Properties.Settings.Default.SettingsFilePath + "\"");
+
                     this._deepfreezeClient.Settings.ActiveUser = user;
+                    // Save preferences file here again to sync with online data (quota, display name etc.).
+                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8);
+                }
+                else
+                {
+                    _log.Warn("GetUserAsync returned null. Disconnection will follow.");
+                    // Publish a message to disconnect since the user is not valid.
+                    // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
+                    this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILogoutMessage>());
                 }
             }
             catch (Exception e) 
@@ -121,15 +134,12 @@ namespace DeepfreezeApp
             }
         }
 
-        public void Logout()
+        public void Disconnect()
         {
-            try
-            {
-                // Finally publish a message to notify for the login change.
-                // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
-                this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILogoutMessage>());
-            }
-            catch (Exception e) { }
+            _log.Info("User clicked Disconnect button from the preferences screen.");
+            // Finally publish a message to notify for the login change.
+            // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
+            this._eventAggregator.PublishOnBackgroundThread(IoC.Get<ILogoutMessage>());
         }
 
         #endregion
