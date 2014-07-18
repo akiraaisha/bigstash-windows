@@ -19,6 +19,7 @@ namespace DeepfreezeApp
     {
         #region members
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(LoginViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -176,10 +177,18 @@ namespace DeepfreezeApp
             {
                 IsBusy = true;
 
+                _log.Info("Connecting user with email \"" + this.UsernameInput + "\".");
+
                 var authorizationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
                 var token = await _deepfreezeClient.CreateTokenAsync(authorizationString);
 
-                if (token == null) throw new Exception();
+                if (token == null)
+                {
+                    _log.Warn("CreateTokenAsync returned null.");
+                    throw new Exception();
+                }
+
+                _log.Info("Created a new Deepfreeze token.");
 
                 // After creating a new token, set it to be used as default in DeepfreezeClient.
                 this._deepfreezeClient.Settings.ActiveToken = token;
@@ -187,7 +196,11 @@ namespace DeepfreezeApp
                 // Make sure that the token satisfies the authorization level needed for GET /user/
                 var user = await _deepfreezeClient.GetUserAsync();
 
-                if (user == null) throw new Exception();
+                if (user == null)
+                {
+                    _log.Warn("GetUserAsync returned null.");
+                    throw new Exception();
+                }
 
                 // Since the user response contains a valid User, 
                 // then update the DeepfreezeClient settings.
@@ -195,10 +208,14 @@ namespace DeepfreezeApp
 
                 // Since ActiveToken and ActiveUser are not null, 
                 // the user is considered as logged into the DeepfreezeClient.
-                
+
+                _log.Info("Fetched User is valid, saving to \"" + Properties.Settings.Default.SettingsFilePath + "\".");
+
                 // Save preferences file.
                 await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.ASCII))
                     .ConfigureAwait(false);
+
+                this.ClearErrors();
 
                 // Publish LoginSuccess Message
                 this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
@@ -206,6 +223,7 @@ namespace DeepfreezeApp
             catch (Exception e) 
             {
                 HasLoginError = true;
+                LoginError = e.Message;
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -218,8 +236,6 @@ namespace DeepfreezeApp
                             break;
                     }
                 }
-                else
-                    LoginError = e.Message;
             }
             finally
             {
@@ -294,7 +310,6 @@ namespace DeepfreezeApp
             this.UsernameInput = null;
             this.PasswordInput = null;
             this.IsBusy = false;
-            this.ClearErrors();
         }
 
         #endregion
