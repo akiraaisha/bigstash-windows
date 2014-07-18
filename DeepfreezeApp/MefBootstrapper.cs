@@ -13,6 +13,7 @@ using System.Windows;
 using Newtonsoft.Json;
 using DeepfreezeModel;
 using System.Threading.Tasks;
+using Custom.Windows;
 
 namespace DeepfreezeApp
 {
@@ -69,6 +70,15 @@ namespace DeepfreezeApp
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            // check if this is the first instance running
+            // or a newer with the first instance already running.
+            // if this is the case, the newer instance shuts down.
+            var app = Application as InstanceAwareApplication;
+            if (!(app == null || app.IsFirstInstance))
+                app.Shutdown();
+
+            // Else go on with normal startup.
+
             log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
             Log.Info("Starting up a new instance of Deepfreeze for Windows.");
@@ -112,6 +122,8 @@ namespace DeepfreezeApp
 
             base.OnExit(sender, e);
         }
+
+        #region private_methods
 
         private void CreateLocalApplicationDataDirectory()
         {
@@ -168,5 +180,7 @@ namespace DeepfreezeApp
 
             Log.Info("Setting Deepfreeze endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
         }
+
+        #endregion
     }
 }
