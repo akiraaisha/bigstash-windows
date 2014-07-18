@@ -133,6 +133,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Log.
+        /// </summary>
+        internal static string DebugButtonContent {
+            get {
+                return ResourceManager.GetString("DebugButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Longaccess for Windows, we might ask you to provide copies of the logs. Clicking the button saves two log files on your Desktop..
+        /// </summary>
+        internal static string DebugHelpText {
+            get {
+                return ResourceManager.GetString("DebugHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disconnect.
         /// </summary>
         internal static string DisconnectButtonContent {

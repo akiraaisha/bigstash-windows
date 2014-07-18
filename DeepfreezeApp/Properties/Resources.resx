@@ -146,6 +146,12 @@
   <data name="CreatingArchiveText" xml:space="preserve">
     <value>Creating new archive</value>
   </data>
+  <data name="DebugButtonContent" xml:space="preserve">
+    <value>Open Log</value>
+  </data>
+  <data name="DebugHelpText" xml:space="preserve">
+    <value>If you're experiencing problems with Deepfreeze for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
+  </data>
   <data name="DisconnectButtonContent" xml:space="preserve">
     <value>Disconnect</value>
     <comment>Used for disconnect button content.</comment>

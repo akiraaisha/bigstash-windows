@@ -183,7 +183,6 @@
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Content Include="..\Log4Net.config">
       <Link>Log4Net.config</Link>
