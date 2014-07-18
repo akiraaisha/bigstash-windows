@@ -79,7 +79,7 @@
             <Button 
                 Grid.Row="2"
                 Grid.Column="0"
-                x:Name="Logout" 
+                x:Name="Disconnect" 
                 Content="{Binding LogoutString}"
                 Width="70"
                 HorizontalAlignment="Left"
