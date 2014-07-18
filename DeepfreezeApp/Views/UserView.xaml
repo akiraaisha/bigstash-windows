@@ -6,14 +6,12 @@
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:DeepfreezeApp"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-             xmlns:gravatar="clr-namespace:Controls;assembly=Controls.Gravatar"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="350">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Controls.Gravatar;component/generic.xaml"/>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
@@ -34,9 +32,10 @@
 
         <Label x:Name="ActiveUserHeader"
                Style="{DynamicResource DescriptionHeaderStyle}"
-               Margin="5 5 0 0"/>
+               HorizontalAlignment="Left"
+               />
 
-        <Grid Margin="5 5 0 0"
+        <Grid Margin="5 0 0 0"
               HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -48,15 +47,11 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <gravatar:Gravatar 
-                Grid.Row="0"
-                Grid.Column="0"
-                Grid.RowSpan="2"
-                Width="70"
-                Email="{Binding ActiveUser.Email}"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                />
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Grid.RowSpan="2"
+                   x:Name="Avatar"
+                   Source="{Binding ActiveUser.AvatarUrl.Large}" />
 
             <Label 
                 Grid.Row="0"
@@ -79,18 +74,18 @@
             <Button 
                 Grid.Row="2"
                 Grid.Column="0"
+                Width="{Binding ElementName=Avatar, Path=ActualWidth}"
                 x:Name="Disconnect" 
                 Content="{Binding LogoutString}"
-                Width="70"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
+                VerticalAlignment="Center"
                 Style="{DynamicResource SquareButtonStyle}"
                 Margin="0 10 0 0"
                 />
         </Grid>
         
         <StackPanel Orientation="Horizontal"
-                    Margin="5 20 0 5">
+                    Margin="0 20 0 0">
 
             <Label x:Name="QuotaHeader" 
                    Style="{DynamicResource DescriptionHeaderStyle}" 
@@ -125,7 +120,7 @@
             
         </StackPanel>
         
-        <Grid Margin="5 5 0 0"
+        <Grid Margin="5 0 0 0"
               HorizontalAlignment="Stretch">
             
             <Grid.RowDefinitions>
