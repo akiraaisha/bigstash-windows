@@ -178,12 +178,12 @@
 
                 <Button Margin="0 0 5 0"
                         Width="70"
+                        x:Name="RemoveUpload"
                         Content="Remove"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Style="{DynamicResource SquareButtonStyle}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToRemoveButtonVisibilityConverter}}"
-                        cal:Message.Attach="DeleteUpload"
                         />
 
             </StackPanel>
