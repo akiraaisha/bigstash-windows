@@ -19,6 +19,7 @@ namespace DeepfreezeApp
     {
         #region fields
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ShellViewModel));
         private readonly IWindowManager _windowManager;
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
@@ -189,25 +190,54 @@ namespace DeepfreezeApp
                 // first try to read local preferences file
                 if (File.Exists(Properties.Settings.Default.SettingsFilePath))
                 {
-                    var content = File.ReadAllText(Properties.Settings.Default.SettingsFilePath, Encoding.ASCII);
+                    _log.Info("Reading preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
-                    if (content != null)
+                    var content = File.ReadAllText(Properties.Settings.Default.SettingsFilePath, Encoding.UTF8);
+
+                    if (!(String.IsNullOrEmpty(content) || String.IsNullOrWhiteSpace(content)))
                     {
                         this._deepfreezeClient.Settings = JsonConvert.DeserializeObject<Settings>(content);
-
-                        if (String.IsNullOrEmpty(this._deepfreezeClient.Settings.ApiEndpoint))
-                            this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
                     }
                     else
                     {
+                        _log.Warn("Preferences is null. Use default server address: \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
+                        var settings = new Settings();
+                        this._deepfreezeClient.Settings = settings;
+                    }
+                }
+                else
+                {
+                    _log.Info("Preferences.json doesn't exist. The client is disconnected.");
+
+                    var settings = new Settings();
+                    this._deepfreezeClient.Settings = settings;
+                }
+
+                // try to read the endpoint file
+                if (File.Exists(Properties.Settings.Default.EndpointFilePath))
+                {
+                    var content = File.ReadAllText(Properties.Settings.Default.EndpointFilePath, Encoding.UTF8);
+
+                    _log.Info("Found " + Properties.Settings.Default.EndpointFileName + 
+                        " at \"" + Properties.Settings.Default.EndpointFilePath + 
+                        "\" with value = \"" + content + "\".");
+
+                    if (!(String.IsNullOrEmpty(content) ||
+                          String.IsNullOrWhiteSpace(content)))
+                    {
+                        this._deepfreezeClient.Settings.ApiEndpoint = content;
+                    }
+                    else
+                    {
+                        _log.Warn("Endpoint is null. Setting to default as \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
+
                         this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
                     }
                 }
                 else
                 {
-                    var settings = new Settings();
-                    settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
-                    this._deepfreezeClient.Settings = settings;
+                    _log.Info("Endpoint file doesn't exist. Setting to default as \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
+                    this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
                 }
 
                 if (IsLoggedIn)
@@ -222,13 +252,20 @@ namespace DeepfreezeApp
                         this.IsBusy = false;
                         this.BusyMessage = null;
 
+                        _log.Info("Fetched User is valid, saving to \"" + Properties.Settings.Default.SettingsFilePath + "\".");
+
                         this._deepfreezeClient.Settings.ActiveUser = user;
                         // Save preferences file here again to sync with online data (quota, display name etc.).
-                        LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.ASCII);
+                        LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8);
 
                         InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();
                         InstatiateUploadManagerViewModel();
+                    }
+                    else
+                    {
+                        _log.Warn("GetUserAsync returned null.");
+                        InstatiateLoginViewModel();
                     }
                 }
                 else
@@ -236,8 +273,20 @@ namespace DeepfreezeApp
                     InstatiateLoginViewModel();
                 }
             }
+            catch(JsonException e)
+            {
+                // The preferences file format seems to be invalid.
+                var settings = new Settings();
+                this._deepfreezeClient.Settings = settings;
+                this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
+
+                InstatiateLoginViewModel();
+            }
             catch(Exception e)
             {
+                HasError = true;
+                this.ErrorMessage = e.Message;
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = ((Exceptions.DfApiException)e).HttpResponse;
@@ -246,14 +295,11 @@ namespace DeepfreezeApp
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
                         case System.Net.HttpStatusCode.Forbidden:
+                            HasError = false;
+                            this.ErrorMessage = null;
                             this.Disconnect("Your previous session is no longer valid. Please connect again.");
                             break;
                     }
-                }
-                else
-                {
-                    HasError = true;
-                    this.ErrorMessage = e.Message;
                 }
             }
             finally 
@@ -277,6 +323,8 @@ namespace DeepfreezeApp
             {
                 LoginVM = IoC.Get<ILoginViewModel>() as LoginViewModel;
             }
+            LoginVM.HasLoginError = true;
+            LoginVM.LoginError = errorMessage;
             this.ActivateItem(LoginVM);
         }
 
@@ -329,6 +377,8 @@ namespace DeepfreezeApp
             // Close the preferences flyout.
             if (this.IsPreferencesFlyoutOpen)
                 TogglePreferencesFlyout();
+
+            _log.Info("Disconnecting user, deleting \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
             // When logging out, we delete the the local preferences file and reset
             // DeepfreezeClient's settings to null, so no user is logged in.
