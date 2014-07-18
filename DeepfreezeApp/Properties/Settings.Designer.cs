@@ -46,7 +46,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("preferences.json")]
+        [global::System.Configuration.DefaultSettingValueAttribute("preferences.djf")]
         public string SettingsFileName {
             get {
                 return ((string)(this["SettingsFileName"]));
@@ -143,6 +143,15 @@ namespace DeepfreezeApp.Properties {
             }
             set {
                 this["LogFilePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(".djf")]
+        public string DeepfreezeJsonFormat {
+            get {
+                return ((string)(this["DeepfreezeJsonFormat"]));
             }
         }
     }
