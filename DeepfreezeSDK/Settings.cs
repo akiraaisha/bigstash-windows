@@ -13,8 +13,6 @@ namespace DeepfreezeSDK
 {
     public class Settings
     {
-        private string _apiEndpoint;
-
         /// <summary>
         /// Current active Deepfreeze user.
         /// </summary>
