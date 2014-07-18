@@ -237,4 +237,7 @@
     <value>someone@example.com</value>
     <comment>Used for username login textbox.</comment>
   </data>
+  <data name="VersionHeaderText" xml:space="preserve">
+    <value>Version</value>
+  </data>
 </root>

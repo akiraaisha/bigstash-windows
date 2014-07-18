@@ -365,5 +365,14 @@ namespace DeepfreezeApp.Properties {
                 return ResourceManager.GetString("UsernameTextboxHelper", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version.
+        /// </summary>
+        internal static string VersionHeaderText {
+            get {
+                return ResourceManager.GetString("VersionHeaderText", resourceCulture);
+            }
+        }
     }
 }
