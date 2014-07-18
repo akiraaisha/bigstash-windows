@@ -41,6 +41,8 @@
         
         <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
+                   HorizontalAlignment="Center"
+                   TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
 
