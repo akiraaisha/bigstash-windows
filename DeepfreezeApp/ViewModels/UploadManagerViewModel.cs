@@ -109,6 +109,9 @@ namespace DeepfreezeApp
 
                 _log.Info("Reading local upload files in directory \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
 
+                if (!Directory.Exists(Properties.Settings.Default.UploadsFolderPath))
+                    Directory.CreateDirectory(Properties.Settings.Default.UploadsFolderPath);
+
                 var uploadFilesPaths = 
                     await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly))
                     .ConfigureAwait(false);
