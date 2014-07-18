@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DeepfreezeApp"
         Title="Deepfreeze"
         TitleCaps="False"
-        Icon="deepfreeze.ico"
+        Icon="..\deepfreeze.ico"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         GlowBrush="{DynamicResource GrayBrush7}"
