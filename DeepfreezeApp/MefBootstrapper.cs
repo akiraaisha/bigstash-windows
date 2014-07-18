@@ -193,6 +193,15 @@ namespace DeepfreezeApp
                     );
 
             Log.Info("Setting Deepfreeze endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
+
+            // %APPDATA\Deepfreeze\DFLog.txt
+            Properties.Settings.Default.LogFilePath =
+                    Path.Combine(
+                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.LogFileName
+                    );
+
+            Log.Info("Setting Deepfreeze log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
         }
 
         #endregion
