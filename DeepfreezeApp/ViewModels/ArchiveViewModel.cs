@@ -18,6 +18,7 @@ namespace DeepfreezeApp
     {
         #region fields
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ArchiveViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
         private static readonly long PART_SIZE = 10 * 1024 * 1024; // in bytes.
@@ -158,6 +159,8 @@ namespace DeepfreezeApp
                     var dir = dialog.SelectedPath;
                     this._baseDirectory = Path.GetDirectoryName(dir) + "\\";
 
+                    _log.Info("Selected directory \"" + dir + "\".");
+
                     var paths = new List<string>();
                     paths.Add(dir);
 
@@ -170,6 +173,7 @@ namespace DeepfreezeApp
                 }
                 catch (Exception e)
                 {
+                    _log.Error("Error preparing archive, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
                     IsReset = true;
                     ErrorSelectingFiles = e.Message;
                 }
@@ -219,6 +223,8 @@ namespace DeepfreezeApp
                     // get the base directory of the selection.
                     this._baseDirectory = Path.GetDirectoryName(paths.FirstOrDefault()) + "\\";
 
+                    _log.Info("Drag and dropped files from directory \"" + this._baseDirectory + "\".");
+
                     try
                     {
                         this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
@@ -230,6 +236,7 @@ namespace DeepfreezeApp
                     }
                     catch(Exception ex)
                     {
+                        _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
                         IsReset = true;
                         ErrorSelectingFiles = ex.Message;
                     }
@@ -264,6 +271,7 @@ namespace DeepfreezeApp
 
             try
             {
+                _log.Info("Create new archive, size = " + this._archiveSize + " bytes, title = \"" + ArchiveTitle + "\".");
                 // create a new archive using DF API.
                 var archive = await this._deepfreezeClient.CreateArchiveAsync(this._archiveSize, ArchiveTitle);
 
@@ -278,6 +286,8 @@ namespace DeepfreezeApp
                     message.ArchiveFilesInfo = this._archiveInfo.ToList();
                     this._eventAggregator.PublishOnBackgroundThread(message);
                 }
+                else
+                    _log.Warn("CreateArchiveAsync returned null.");
 
                 // reset the view
                 this.Reset(); 
@@ -286,6 +296,13 @@ namespace DeepfreezeApp
             {
                 HasChosenFiles = true;
                 ErrorCreatingArchive = e.Message;
+                _log.Error("Error creating archive (user clicked upload button), thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
+
+                if (e is Exceptions.DfApiException)
+                {
+                    var response = (e as Exceptions.DfApiException).HttpResponse;
+                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
+                }
             }
             finally 
             {
