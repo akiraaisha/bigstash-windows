@@ -707,7 +707,7 @@ namespace DeepfreezeSDK
             message.Headers.UserAgent.Add(new ProductInfoHeaderValue("deepfreeze-windows-desktop", "alpha"));
 
             // set host header
-            message.Headers.Host = message.RequestUri.Host;
+            message.Headers.Host = message.RequestUri.Authority;
             // set accept header
             message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
 
@@ -744,7 +744,7 @@ namespace DeepfreezeSDK
             sb.Append(String.Join("", requestUri.Segments));
             sb.Append("\n");
 
-            sb.AppendFormat("host: {0}\n", requestUri.Host);
+            sb.AppendFormat("host: {0}\n", requestUri.Authority);
             sb.AppendFormat("accept: {0}\n", ACCEPT);
             sb.AppendFormat("date: {0}", date.ToUniversalTime().ToString("r"));
 
