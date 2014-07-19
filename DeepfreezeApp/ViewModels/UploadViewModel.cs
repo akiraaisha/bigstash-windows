@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
+using System.Net.Http;
 using System.IO;
 
 using Caliburn.Micro;
@@ -12,11 +15,9 @@ using Caliburn.Micro;
 using DeepfreezeSDK;
 using DeepfreezeModel;
 
+using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.Runtime;
-using System.Windows.Threading;
-using System.Net.Http;
-using Amazon.S3;
 
 namespace DeepfreezeApp
 {
@@ -54,19 +55,20 @@ namespace DeepfreezeApp
 
         private readonly long MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD = 10 * 1024 * 1024;
 
-        private DispatcherTimer _refreshProgressTimer = new DispatcherTimer();
+        private DispatcherTimer _refreshProgressTimer;
 
         #endregion
 
         #region constructor
+
         [ImportingConstructor]
         public UploadViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
 
-            this._refreshProgressTimer.Tick += Tick;
-            this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
+            // get a new DispatcherTimer on the UI Thread.
+            this._refreshProgressTimer = new DispatcherTimer(new TimeSpan(0, 0, 5), DispatcherPriority.Normal, Tick, Application.Current.Dispatcher);
         }
 
         #endregion
@@ -864,7 +866,7 @@ namespace DeepfreezeApp
         {
             try
             {
-                await this.RenewUploadTokenAsync().ConfigureAwait(false);
+                await this.RenewUploadTokenAsync();
 
                 if (this._currentUploadIsMultipart)
                     this._currentFileProgress = this._s3Client.MultipartUploadProgress.Sum(x => x.Value);
