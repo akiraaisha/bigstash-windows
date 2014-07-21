@@ -27,7 +27,6 @@
             <local:StatusToPauseButtonVisibility x:Key="StatusToPauseButtonVisibilityConverter" />
             <local:StatusToDeleteButtonVisibility x:Key="StatusToDeleteButtonVisibilityConverter" />
             <local:StatusToRemoveButtonVisibility x:Key="StatusToRemoveButtonVisibilityConverter" />
-            <local:UploadStatusToRedForeground x:Key="UploadStatusToBrushConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -100,14 +99,31 @@
                 
             </Button>
 
-            <TextBlock Grid.Row="0" 
-               Grid.Column="0"
-               Text="{Binding Archive.Title}"
-               TextWrapping="Wrap"
-               FontWeight="SemiBold"
-               FontSize="14"
-               HorizontalAlignment="Stretch"
-               />
+            <StackPanel Grid.Row="0" 
+                        Grid.Column="0"
+                        Margin="0 0 0 5">
+                
+                <TextBlock Text="{Binding Archive.Title}"
+                           TextWrapping="Wrap"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           HorizontalAlignment="Stretch"
+                           />
+                
+                <WrapPanel>
+                    
+                    <TextBlock Text="Archive ID: "
+                               VerticalAlignment="Top"/>
+
+                    <TextBlock Text="{Binding Archive.Key}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"
+                           />
+
+                </WrapPanel>
+                
+            </StackPanel>
+            
             
             
 
