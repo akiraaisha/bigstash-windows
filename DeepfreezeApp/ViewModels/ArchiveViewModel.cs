@@ -21,7 +21,7 @@ namespace DeepfreezeApp
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ArchiveViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
-        private static readonly long PART_SIZE = 10 * 1024 * 1024; // in bytes.
+        private static readonly long PART_SIZE = 5 * 1024 * 1024; // in bytes.
         private static readonly long MAX_ALLOWED_FILE_SIZE = PART_SIZE * 10000; // max parts is 10000, so max size is part size * 10000.
 
         private bool _isReset = true;
@@ -403,9 +403,10 @@ namespace DeepfreezeApp
 
                     // Check that the archive size does not exceed the maximum allowed file size.
                     // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
-                    // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
+                    // Since DF supports part size of 5 MB, archive size must not exceed 5 MB * 10000
                     if (info.Length > MAX_ALLOWED_FILE_SIZE)
-                        throw new Exception("The file " + info + " exceeds the maximum allowed archive size of 100 GB.");
+                        throw new Exception("The file " + info + " exceeds the maximum allowed archive size of " + 
+                            LongToSizeString.ConvertToString((double)MAX_ALLOWED_FILE_SIZE) + ".");
 
                     var archiveFileInfo = new ArchiveFileInfo()
                     {

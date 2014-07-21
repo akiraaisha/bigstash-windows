@@ -53,7 +53,7 @@ namespace DeepfreezeApp
 
         private Enumerations.Status _operationStatus;
 
-        private readonly long MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD = 10 * 1024 * 1024;
+        private readonly long MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD = 5 * 1024 * 1024;
 
         private DispatcherTimer _refreshProgressTimer;
 
@@ -69,6 +69,7 @@ namespace DeepfreezeApp
 
             // get a new DispatcherTimer on the UI Thread.
             this._refreshProgressTimer = new DispatcherTimer(new TimeSpan(0, 0, 5), DispatcherPriority.Normal, Tick, Application.Current.Dispatcher);
+            this._refreshProgressTimer.Stop();
         }
 
         #endregion
@@ -102,9 +103,9 @@ namespace DeepfreezeApp
         public long Progress
         {
             get { return this._progress; }
-            set 
-            { 
-                this._progress = value; 
+            set
+            {
+                this._progress = value;
                 NotifyOfPropertyChange(() => this.Progress);
                 NotifyOfPropertyChange(() => this.ProgressText);
             }
@@ -281,24 +282,21 @@ namespace DeepfreezeApp
                         this._refreshProgressTimer.Stop();
                     }
 
-                    _log.Info("Finished uploading file: \"" + info.FileName + "\".");
-
                     info.IsUploaded = uploadFinished;
-                    await this.SaveLocalUpload();
+
+                    _log.Info("Finished uploading file: \"" + info.FileName + "\".");
 
                     // So, at this point, a file finished uploading, so we check the total uploaded bytes.
                     await this.CalculateTotalUploadedSize().ConfigureAwait(false);
                     this.Progress = this._totalProgress;
+
+                    await this.SaveLocalUpload();
                 }
 
                 // Since all files are uploaded send a patch to upload url with status uploaded to complete it.
                 this.Upload = await this._deepfreezeClient.FinishUploadAsync(this.Upload).ConfigureAwait(false);
 
                 _log.Info("Finished archive upload with title \"" + this.Archive.Title + "\".");
-
-                // again make sure progress is reported correctly.
-                await this.CalculateTotalUploadedSize().ConfigureAwait(false);
-                this.Progress = this._totalProgress;
 
                 this.OperationStatus = this.Upload.Status;
             }
@@ -333,8 +331,6 @@ namespace DeepfreezeApp
                 // make sure to actually send a cancel to all remaining uploading part tasks to abort them.
                 if (this._cts != null && !this._cts.IsCancellationRequested)
                     await this.PauseUpload(true);
-
-                await this.CalculateTotalUploadedSize().ConfigureAwait(false);
 
                 // finally make sure to save the local upload file to preserve the current status of the upload.
                 await this.SaveLocalUpload();
@@ -419,7 +415,10 @@ namespace DeepfreezeApp
         {
             try
             {
-                _log.Info("Removing (user clicked the Remove button) completed archive upload with title \"" + this.Archive.Title + "\".");
+                if (this.OperationStatus == Enumerations.Status.NotFound)
+                    _log.Info("Removing (user clicked the Remove button) already deleted upload on the server.");
+                else
+                    _log.Info("Removing (user clicked the Remove button) completed archive upload with title \"" + this.Archive.Title + "\".");
 
                 this.DeleteLocalUpload();
 
@@ -679,7 +678,9 @@ namespace DeepfreezeApp
             var completedPartsSize = await this.GetAllUploadedPartsSize().ConfigureAwait(false);
 
             this._totalProgress = completedFilesSize + completedPartsSize;
-            this.Progress = this._totalProgress;
+
+            if (this.Progress < this._totalProgress)
+                this.Progress = this._totalProgress;
         }
 
         /// <summary>
@@ -696,6 +697,9 @@ namespace DeepfreezeApp
                     this.Archive.Key + Properties.Settings.Default.DeepfreezeJsonFormat);
 
                 _log.Info("Saving \"" + this.LocalUpload.SavePath + "\".");
+
+                // get the latest progress value
+                this.LocalUpload.Progress = this.Progress;
                 
                 await Task.Run(() => LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8))
                     .ConfigureAwait(false);
@@ -773,7 +777,9 @@ namespace DeepfreezeApp
                     else
                         this.OperationStatus = this.Upload.Status;
 
-                    // calculate total uploaded size.
+                    this.Progress = this.LocalUpload.Progress;
+
+                    // calculate total uploaded size to keep track of the real uploaded size (completed files and completed parts).
                     await CalculateTotalUploadedSize().ConfigureAwait(false);
                 }
             }
@@ -781,11 +787,15 @@ namespace DeepfreezeApp
             {
                 if (e is Exceptions.DfApiException)
                 {
-                    this.OperationStatus = Enumerations.Status.Error;
-
                     var response = (e as Exceptions.DfApiException).HttpResponse;
-                    
-                    this.ErrorMessage = "Error: " + response.StatusCode + "\n" + e.Message;
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        this.OperationStatus = Enumerations.Status.NotFound;
+                    else
+                        this.OperationStatus = Enumerations.Status.Error;
+
+                    this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
+                    this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
                 }
 
                 if (e is AmazonS3Exception)
@@ -873,7 +883,11 @@ namespace DeepfreezeApp
                 else
                     this._currentFileProgress = this._s3Client.SingleUploadProgress;
 
-                this.Progress = this._currentFileProgress + this._totalProgress;
+                long newProgress = this._currentFileProgress + this._totalProgress;
+
+                if (this.Progress < newProgress)
+                    this.Progress = newProgress;
+
             }
             catch (Exception ex)
             {

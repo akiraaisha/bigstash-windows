@@ -251,9 +251,6 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(IRemoveUploadViewModelMessage message)
         {
-            _log.Info("Removing archive upload with title \"" + message.UploadVMToRemove.Archive.Title +
-                "\" from the upload manager.");
-
             this.Uploads.Remove(message.UploadVMToRemove);
             message.UploadVMToRemove.TryClose();
             message.UploadVMToRemove = null;
