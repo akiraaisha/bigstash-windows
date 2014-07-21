@@ -27,10 +27,11 @@
             <local:StatusToPauseButtonVisibility x:Key="StatusToPauseButtonVisibilityConverter" />
             <local:StatusToDeleteButtonVisibility x:Key="StatusToDeleteButtonVisibilityConverter" />
             <local:StatusToRemoveButtonVisibility x:Key="StatusToRemoveButtonVisibilityConverter" />
-
+            <local:UploadStatusToRedForeground x:Key="UploadStatusToBrushConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -128,11 +129,21 @@
                    />
 
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
-                           Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
-                           VerticalAlignment="Center"
+                       Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
+                       VerticalAlignment="Center"
                        HorizontalAlignment="Left"
-                           FontSize="14"
-                           />
+                       FontSize="14"
+                       >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="Error">
+                                <Setter Property="Foreground" Value="Red" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
                            Text="{Binding ProgressText}"
