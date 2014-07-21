@@ -22,7 +22,7 @@ namespace DeepfreezeSDK
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
 
-        protected static readonly long PART_SIZE = 10 * 1024 * 1024;
+        protected static readonly long PART_SIZE = 5 * 1024 * 1024;
         protected static readonly int PARALLEL_NUM = Environment.ProcessorCount;
 
         public IAmazonS3 s3Client;
