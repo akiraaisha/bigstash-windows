@@ -15,7 +15,8 @@ namespace DeepfreezeModel
             Error,
             Completed,
             Paused,
-            Uploading
+            Uploading,
+            NotFound // use this for cases when the upload is deleted from the server, but the client still has the local upload file.
         }
 
         public static Status GetStatusFromString(string statusString)
