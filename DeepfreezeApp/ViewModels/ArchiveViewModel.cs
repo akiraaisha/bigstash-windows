@@ -429,6 +429,14 @@ namespace DeepfreezeApp
                 if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
                     throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
 
+                // suggest an archive title
+                if (directories.Count == 1)
+                    this.ArchiveTitle = new DirectoryInfo(directories.First()).Name;
+                else if (this._archiveInfo.Count == 1)
+                    this.ArchiveTitle = this._archiveInfo.First().FileName;
+                else
+                    this.ArchiveTitle = "upload-" + String.Format("{0:yyyy-MM-dd}", DateTime.Now);
+
                 return size;
             }
             catch (Exception e)
