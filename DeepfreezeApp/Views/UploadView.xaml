@@ -27,10 +27,10 @@
             <local:StatusToPauseButtonVisibility x:Key="StatusToPauseButtonVisibilityConverter" />
             <local:StatusToDeleteButtonVisibility x:Key="StatusToDeleteButtonVisibilityConverter" />
             <local:StatusToRemoveButtonVisibility x:Key="StatusToRemoveButtonVisibilityConverter" />
-
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -99,14 +99,31 @@
                 
             </Button>
 
-            <TextBlock Grid.Row="0" 
-               Grid.Column="0"
-               Text="{Binding Archive.Title}"
-               TextWrapping="Wrap"
-               FontWeight="SemiBold"
-               FontSize="14"
-               HorizontalAlignment="Stretch"
-               />
+            <StackPanel Grid.Row="0" 
+                        Grid.Column="0"
+                        Margin="0 0 0 5">
+                
+                <TextBlock Text="{Binding Archive.Title}"
+                           TextWrapping="Wrap"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           HorizontalAlignment="Stretch"
+                           />
+                
+                <WrapPanel>
+                    
+                    <TextBlock Text="Archive ID: "
+                               VerticalAlignment="Top"/>
+
+                    <TextBlock Text="{Binding Archive.Key}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"
+                           />
+
+                </WrapPanel>
+                
+            </StackPanel>
+            
             
             
 
@@ -128,11 +145,21 @@
                    />
 
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
-                           Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
-                           VerticalAlignment="Center"
+                       Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
+                       VerticalAlignment="Center"
                        HorizontalAlignment="Left"
-                           FontSize="14"
-                           />
+                       FontSize="14"
+                       >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="Error">
+                                <Setter Property="Foreground" Value="Red" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
                            Text="{Binding ProgressText}"
