@@ -26,7 +26,7 @@ namespace DeepfreezeApp
 
         private bool _isOpen;
         private string _errorMessage;
-        private bool _runOnStartup = true;
+        private bool _runOnStartup;
 
         #endregion
 
@@ -134,9 +134,14 @@ namespace DeepfreezeApp
 
         protected override void OnActivate()
         {
-            base.OnActivate();
+            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly curAssembly = Assembly.GetExecutingAssembly();
+
+            this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
 
             this.ActivateItem(this.UserVM);
+
+            base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
