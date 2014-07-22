@@ -106,6 +106,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to was successfully frozen..
+        /// </summary>
+        internal static string CompletedNotificationText {
+            get {
+                return ResourceManager.GetString("CompletedNotificationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connect.
         /// </summary>
         internal static string ConnectButtonContent {
@@ -363,6 +372,15 @@ namespace DeepfreezeApp.Properties {
         internal static string UploadButtonContent {
             get {
                 return ResourceManager.GetString("UploadButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to was successfully uploaded..
+        /// </summary>
+        internal static string UploadedNotificationText {
+            get {
+                return ResourceManager.GetString("UploadedNotificationText", resourceCulture);
             }
         }
         

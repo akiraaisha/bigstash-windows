@@ -86,6 +86,10 @@
     <Reference Include="Custom.Windows">
       <HintPath>..\packages\Custom.Windows.1.0.2.1\lib\net40\Custom.Windows.dll</HintPath>
     </Reference>
+    <Reference Include="Hardcodet.Wpf.TaskbarNotification, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Hardcodet.NotifyIcon.Wpf.1.0.5\lib\net45\Hardcodet.Wpf.TaskbarNotification.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
@@ -101,6 +105,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
@@ -151,10 +156,12 @@
     <Compile Include="Interfaces\INewUploadMessage.cs" />
     <Compile Include="Interfaces\IUploadManagerViewModel.cs" />
     <Compile Include="Interfaces\IUploadViewModel.cs" />
+    <Compile Include="Interfaces\INotificationMessage.cs" />
     <Compile Include="Messages\LoginSuccessMessage.cs" />
     <Compile Include="Converters\EmptyStringToBool.cs" />
     <Compile Include="Messages\LogoutMessage.cs" />
     <Compile Include="Messages\NewUploadMessage.cs" />
+    <Compile Include="Messages\NotificationMessage.cs" />
     <Compile Include="Messages\RefreshUserMessage.cs" />
     <Compile Include="Messages\RemoveUploadViewModelMessage.cs" />
     <Compile Include="Messages\UploadActionMessage.cs" />
@@ -186,6 +193,7 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="deepfreeze_tray.ico" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
