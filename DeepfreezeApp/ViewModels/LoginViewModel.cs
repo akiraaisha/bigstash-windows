@@ -157,6 +157,9 @@ namespace DeepfreezeApp
             }
         }
 
+        public string ForgotPasswordText
+        { get { return Properties.Resources.ForgotPasswordText; } }
+
         #endregion
 
         #region action methods
@@ -256,9 +259,9 @@ namespace DeepfreezeApp
         /// <summary>
         /// Open the remember password Deepfreeze page.
         /// </summary>
-        public void Remember()
+        public void ForgotPassword()
         {
-            Process.Start(Properties.Resources.RememberPasswordURL);
+            Process.Start(Properties.Resources.ForgotPasswordURL);
         }
 
         #endregion

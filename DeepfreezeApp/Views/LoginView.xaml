@@ -79,6 +79,15 @@
 
         </StackPanel>
 
+        <TextBlock HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Text="{Binding ForgotPasswordText}"
+                   Cursor="Hand"
+                   TextDecorations="Underline"
+                   Foreground="Blue"
+                   cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ForgotPassword()]"
+                   />
+
         <TextBlock
                 x:Name="LoginError"
                 Foreground="Red"
