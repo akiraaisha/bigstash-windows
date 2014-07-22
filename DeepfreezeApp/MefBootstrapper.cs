@@ -98,6 +98,14 @@ namespace DeepfreezeApp
             CreateLocalApplicationDataDirectory();
 
             DisplayRootViewFor<IShell>();
+
+            // Catch with args and forward a message with them
+            if (e.Args.Length > 0)
+            {
+                this.CatchAndForwardArgs(e.Args[0]);
+            }
+
+            base.OnStartup(sender, e);
         }
 
         protected override async void OnExit(object sender, EventArgs e)
@@ -137,7 +145,30 @@ namespace DeepfreezeApp
             Application.Shutdown();
         }
 
+        private void OnStartupNextInstance(object sender, StartupNextInstanceEventArgs e)
+        {
+            // Catch with args and forward a message with them
+            if (e.Args.Length > 0)
+            {
+                this.CatchAndForwardArgs(e.Args[0]);
+            }
+        }
         #region private_methods
+
+        protected override void PrepareApplication()
+        {
+            base.PrepareApplication();
+            var application = (InstanceAwareApplication)Application;
+            application.StartupNextInstance += OnStartupNextInstance;
+        }
+
+        private void CatchAndForwardArgs(string arg)
+        {
+            var eventAggregator = IoC.Get<IEventAggregator>();
+            var startUpArgsMessage = IoC.Get<IStartUpArgsMessage>();
+            startUpArgsMessage.StartUpArgument = arg;
+            eventAggregator.PublishOnUIThread(startUpArgsMessage);
+        }
 
         private void CreateLocalApplicationDataDirectory()
         {
