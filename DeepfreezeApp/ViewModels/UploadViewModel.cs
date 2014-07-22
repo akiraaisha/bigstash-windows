@@ -786,6 +786,16 @@ namespace DeepfreezeApp
 
                     // calculate total uploaded size to keep track of the real uploaded size (completed files and completed parts).
                     await CalculateTotalUploadedSize().ConfigureAwait(false);
+
+                    // finally check if this is a user paused upload or an automatically paused upload.
+                    // in the second case, publish a message to handle automatic start.
+                    if (!this.LocalUpload.UserPaused)
+                    {
+                        var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+                        uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
+                        uploadActionMessage.UploadVM = this;
+                        this._eventAggregator.PublishOnUIThread(uploadActionMessage);
+                    }
                 }
             }
             catch (Exception e)
