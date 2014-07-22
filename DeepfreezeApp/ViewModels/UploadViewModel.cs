@@ -707,7 +707,7 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> SaveLocalUpload()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || this.LocalUpload == null)
                 return false;
 
             try
@@ -746,6 +746,9 @@ namespace DeepfreezeApp
 
                 // Delete the LocalUpload file
                 File.Delete(this.LocalUpload.SavePath);
+
+                // Set this to null since the local file doesn't exist anymore.
+                this.LocalUpload = null;
 
                 return true;
             }
