@@ -164,6 +164,13 @@
     <value>The folder you selected is empty.</value>
     <comment>Used for exception message when the user selects an empty folder to archive.</comment>
   </data>
+  <data name="ForgotPasswordText" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
+  <data name="ForgotPasswordURL" xml:space="preserve">
+    <value>https://www.deepfreeze.io/o/password_reset/</value>
+    <comment>Change this for production.</comment>
+  </data>
   <data name="FreeText" xml:space="preserve">
     <value> Free / </value>
   </data>
@@ -188,10 +195,6 @@
   <data name="QuotaHeader" xml:space="preserve">
     <value>Storage</value>
     <comment>Used for quota header in preferences.</comment>
-  </data>
-  <data name="RememberPasswordURL" xml:space="preserve">
-    <value>https://stage.deepfreeze.io/o/password_reset/</value>
-    <comment>Change this for production.</comment>
   </data>
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>

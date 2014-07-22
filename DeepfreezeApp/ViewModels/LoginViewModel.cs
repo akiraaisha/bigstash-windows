@@ -258,7 +258,7 @@ namespace DeepfreezeApp
         /// </summary>
         public void Remember()
         {
-            Process.Start(Properties.Resources.RememberPasswordURL);
+            Process.Start(Properties.Resources.ForgotPasswordURL);
         }
 
         #endregion

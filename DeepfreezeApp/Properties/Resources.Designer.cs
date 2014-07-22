@@ -142,7 +142,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Longaccess for Windows, we might ask you to provide copies of the logs. Clicking the button saves two log files on your Desktop..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Deepfreeze for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
@@ -174,6 +174,24 @@ namespace DeepfreezeApp.Properties {
         internal static string EmptyFolderSelection {
             get {
                 return ResourceManager.GetString("EmptyFolderSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forgot your password?.
+        /// </summary>
+        internal static string ForgotPasswordText {
+            get {
+                return ResourceManager.GetString("ForgotPasswordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://www.deepfreeze.io/o/password_reset/.
+        /// </summary>
+        internal static string ForgotPasswordURL {
+            get {
+                return ResourceManager.GetString("ForgotPasswordURL", resourceCulture);
             }
         }
         
@@ -237,15 +255,6 @@ namespace DeepfreezeApp.Properties {
         internal static string QuotaHeader {
             get {
                 return ResourceManager.GetString("QuotaHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://stage.deepfreeze.io/o/password_reset/.
-        /// </summary>
-        internal static string RememberPasswordURL {
-            get {
-                return ResourceManager.GetString("RememberPasswordURL", resourceCulture);
             }
         }
         
