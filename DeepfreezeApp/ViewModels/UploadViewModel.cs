@@ -703,6 +703,9 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> SaveLocalUpload()
         {
+            if (this.IsBusy)
+                return false;
+
             try
             {
                 // Save the newLocalUpload to the correct local upload file
