@@ -68,7 +68,7 @@ namespace DeepfreezeApp
             this._deepfreezeClient = deepfreezeClient;
 
             // get a new DispatcherTimer on the UI Thread.
-            this._refreshProgressTimer = new DispatcherTimer(new TimeSpan(0, 0, 5), DispatcherPriority.Normal, Tick, Application.Current.Dispatcher);
+            this._refreshProgressTimer = new DispatcherTimer(new TimeSpan(0, 1, 0), DispatcherPriority.Normal, Tick, Application.Current.Dispatcher);
             this._refreshProgressTimer.Stop();
         }
 
@@ -214,8 +214,12 @@ namespace DeepfreezeApp
 
             _log.Info("Starting (user clicked the Start button) archive upload with title \"" + this.Archive.Title + "\".");
 
+            // set UserPaused to false and save the local file
             this.LocalUpload.UserPaused = false;
             await this.SaveLocalUpload();
+
+            // set timer interval to 5 seconds to catch progress updates
+            this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
 
             // skip files with IsUploaded = true entirely.
             var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
@@ -302,6 +306,11 @@ namespace DeepfreezeApp
                 _log.Info("Finished archive upload with title \"" + this.Archive.Title + "\".");
 
                 this.OperationStatus = this.Upload.Status;
+
+                // set timer interval to 1 minute to catch upload completed status change.
+                this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
+                // and start the timer again.
+                this._refreshProgressTimer.Start();
             }
             catch (Exception e)
             {
@@ -694,6 +703,9 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> SaveLocalUpload()
         {
+            if (this.IsBusy)
+                return false;
+
             try
             {
                 // Save the newLocalUpload to the correct local upload file
@@ -777,24 +789,36 @@ namespace DeepfreezeApp
 
                 if (isExistingUpload)
                 {
-                    if (this.Upload.Status == Enumerations.Status.Pending)
-                        this.OperationStatus = Enumerations.Status.Paused;
-                    else
-                        this.OperationStatus = this.Upload.Status;
-
                     this.Progress = this.LocalUpload.Progress;
 
                     // calculate total uploaded size to keep track of the real uploaded size (completed files and completed parts).
                     await CalculateTotalUploadedSize().ConfigureAwait(false);
 
-                    // finally check if this is a user paused upload or an automatically paused upload.
-                    // in the second case, publish a message to handle automatic start.
-                    if (!this.LocalUpload.UserPaused)
+                    if (this.Upload.Status == Enumerations.Status.Pending)
                     {
-                        var uploadActionMessage = IoC.Get<IUploadActionMessage>();
-                        uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
-                        uploadActionMessage.UploadVM = this;
-                        this._eventAggregator.PublishOnUIThread(uploadActionMessage);
+                        this.OperationStatus = Enumerations.Status.Paused;
+
+                        // check if this is a user paused upload or an automatically paused upload
+                        // with pending status.
+                        // in the second case, publish a message to handle automatic start.
+                        if (!this.LocalUpload.UserPaused)
+                        {
+                            var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+                            uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
+                            uploadActionMessage.UploadVM = this;
+                            this._eventAggregator.PublishOnUIThread(uploadActionMessage);
+                        }
+                    }
+                    else if (this.Upload.Status == Enumerations.Status.Uploaded)
+                    {
+                        // start polling the upload resource to catch the completed status change.
+                        this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
+                        this._refreshProgressTimer.Start();
+                    }
+                    else
+                    {
+                        // if upload status is completed or error, just show the status.
+                        this.OperationStatus = this.Upload.Status;
                     }
                 }
             }
@@ -891,18 +915,32 @@ namespace DeepfreezeApp
         {
             try
             {
-                await this.RenewUploadTokenAsync();
+                if (this.Upload.Status == Enumerations.Status.Pending
+                    && this.IsUploading)
+                {
+                    await this.RenewUploadTokenAsync();
 
-                if (this._currentUploadIsMultipart)
-                    this._currentFileProgress = this._s3Client.MultipartUploadProgress.Sum(x => x.Value);
-                else
-                    this._currentFileProgress = this._s3Client.SingleUploadProgress;
+                    if (this._currentUploadIsMultipart)
+                        this._currentFileProgress = this._s3Client.MultipartUploadProgress.Sum(x => x.Value);
+                    else
+                        this._currentFileProgress = this._s3Client.SingleUploadProgress;
 
-                long newProgress = this._currentFileProgress + this._totalProgress;
+                    long newProgress = this._currentFileProgress + this._totalProgress;
 
-                if (this.Progress < newProgress)
-                    this.Progress = newProgress;
+                    if (this.Progress < newProgress)
+                        this.Progress = newProgress;
+                }
 
+                if (this.Upload.Status == Enumerations.Status.Uploaded)
+                {
+                    await this.FetchUploadAsync(this.Upload.Url);
+
+                    if (this.Upload.Status == Enumerations.Status.Completed)
+                    {
+                        this.OperationStatus = this.Upload.Status;
+                        this._refreshProgressTimer.Stop();
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -930,7 +968,10 @@ namespace DeepfreezeApp
             // Immediately send cancel to cancel any upload tasks
             // if the operation status is equal to uploading.
             // This check takes place inside PauseUpload method's body.
-            await this.PauseUpload(true);
+            this.PauseUpload(true);
+
+            // do a final save
+            this.SaveLocalUpload();
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();
