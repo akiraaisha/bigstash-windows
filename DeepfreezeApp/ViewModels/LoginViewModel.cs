@@ -256,7 +256,7 @@ namespace DeepfreezeApp
         /// <summary>
         /// Open the remember password Deepfreeze page.
         /// </summary>
-        public void Remember()
+        public void ForgotPassword()
         {
             Process.Start(Properties.Resources.ForgotPasswordURL);
         }
