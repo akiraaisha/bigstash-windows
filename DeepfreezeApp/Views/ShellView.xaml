@@ -4,6 +4,7 @@
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:DeepfreezeApp"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="Deepfreeze"
         TitleCaps="False"
         Icon="..\deepfreeze.ico"
@@ -80,6 +81,12 @@
     </controls:MetroWindow.Flyouts>
 
     <Grid Margin="0 0 0 10">
+        
+        <tb:TaskbarIcon x:Name="DFTrayIcon" 
+                        IconSource="/deepfreeze_tray.ico"
+                        ToolTipText="Deepfreeze for Windows"
+                        cal:Message.Attach="[Event TrayMouseDoubleClick] = [Action ShowShellWindow()]"
+                        />
 
         <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"

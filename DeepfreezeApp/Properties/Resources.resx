@@ -136,6 +136,9 @@
     <value>or choose a folder</value>
     <comment>Used for choose folder textblock text.</comment>
   </data>
+  <data name="CompletedNotificationText" xml:space="preserve">
+    <value>was successfully frozen.</value>
+  </data>
   <data name="ConnectButtonContent" xml:space="preserve">
     <value>Connect</value>
     <comment>Used for connect button content.</comment>
@@ -234,6 +237,9 @@
   <data name="UploadButtonContent" xml:space="preserve">
     <value>Upload</value>
     <comment>Used for upload button content.</comment>
+  </data>
+  <data name="UploadedNotificationText" xml:space="preserve">
+    <value>was successfully uploaded.</value>
   </data>
   <data name="UsedText" xml:space="preserve">
     <value> Used / </value>
