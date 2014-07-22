@@ -367,7 +367,7 @@ namespace DeepfreezeApp
         {
             if (this.OperationStatus == Enumerations.Status.Uploading)
             {
-                this.IsBusy = true;
+                this.IsBusy = !isAutomatic; // show busy only if user paused, if it's automatic, it's on application close.
                 this.BusyMessage = "Pausing upload...";
                 this.OperationStatus = Enumerations.Status.Paused;
 
