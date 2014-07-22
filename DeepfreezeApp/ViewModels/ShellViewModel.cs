@@ -128,6 +128,7 @@ namespace DeepfreezeApp
         {
             _shellWindow.ShowInTaskbar = true;
             _shellWindow.WindowState = WindowState.Normal;
+            _shellWindow.Visibility = Visibility.Visible;
             _shellWindow.Activate();
         }
 
@@ -199,12 +200,14 @@ namespace DeepfreezeApp
                 switch(message.StartUpArgument)
                 {
                     case "minimized":
-                        _shellWindow.ShowInTaskbar = false;
+                        
                         _shellWindow.WindowState = WindowState.Minimized;
+                        _shellWindow.ShowInTaskbar = false;
                         break;
                     default:
-                        _shellWindow.ShowInTaskbar = true;
+                        
                         _shellWindow.WindowState = WindowState.Normal;
+                        _shellWindow.ShowInTaskbar = true;
                         break;
                 }
             }
