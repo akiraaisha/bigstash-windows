@@ -13,6 +13,7 @@ using DeepfreezeModel;
 using System.IO;
 using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
+using System.Windows;
 
 namespace DeepfreezeApp
 {
@@ -121,6 +122,11 @@ namespace DeepfreezeApp
         {
 
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
+        }
+
+        public void ShowShellWindow()
+        {
+            _shellWindow.WindowState = WindowState.Normal;
         }
 
         #endregion

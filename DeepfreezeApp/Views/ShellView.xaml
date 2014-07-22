@@ -85,6 +85,7 @@
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
                         IconSource="/deepfreeze_tray.ico"
                         ToolTipText="Deepfreeze for Windows"
+                        cal:Message.Attach="[Event TrayMouseDoubleClick] = [Action ShowShellWindow()]"
                         />
 
         <TextBlock x:Name="ErrorMessage"
