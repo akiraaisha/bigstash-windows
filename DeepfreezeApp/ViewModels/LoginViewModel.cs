@@ -157,6 +157,9 @@ namespace DeepfreezeApp
             }
         }
 
+        public string ForgotPasswordText
+        { get { return Properties.Resources.ForgotPasswordText; } }
+
         #endregion
 
         #region action methods
