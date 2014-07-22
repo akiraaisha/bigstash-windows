@@ -252,7 +252,7 @@ namespace DeepfreezeApp
         public void Handle(IRemoveUploadViewModelMessage message)
         {
             this.Uploads.Remove(message.UploadVMToRemove);
-            message.UploadVMToRemove.TryClose();
+            this.CloseItem(message.UploadVMToRemove);
             message.UploadVMToRemove = null;
             NotifyOfPropertyChange(() => TotalUploadsText);
         }
