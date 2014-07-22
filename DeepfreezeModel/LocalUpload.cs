@@ -25,6 +25,9 @@ namespace DeepfreezeModel
             set { this._progress = (long)value; }
         }
 
+        [JsonProperty("user_paused")]
+        public bool UserPaused { get; set; }
+
         [JsonProperty("archive_files_info")]
         public IList<ArchiveFileInfo> ArchiveFilesInfo { get; set; }
     }
