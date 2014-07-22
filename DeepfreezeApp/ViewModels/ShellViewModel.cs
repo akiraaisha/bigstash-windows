@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
+using System.Drawing;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
@@ -11,11 +12,13 @@ using MahApps.Metro.Controls;
 using DeepfreezeModel;
 using System.IO;
 using Newtonsoft.Json;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>
+    public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
+        IHandle<INotificationMessage>
     {
         #region fields
 
@@ -30,6 +33,7 @@ namespace DeepfreezeApp
         private UploadManagerViewModel _uploadManagerVM;
 
         private MetroWindow _shellWindow;
+        private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
 
         private bool _isBusy = false;
@@ -164,6 +168,14 @@ namespace DeepfreezeApp
             this.Disconnect();
         }
 
+        public void Handle(INotificationMessage message)
+        {
+            if (message != null)
+            {
+                _tray.ShowBalloonTip("Deepfreeze for Windows", message.Message, BalloonIcon.Info);
+            }
+        }
+
         #endregion
 
         #region events
@@ -174,7 +186,10 @@ namespace DeepfreezeApp
             v.Title = Properties.Settings.Default.ApplicationName;
 
             if (v != null)
+            {
                 _shellWindow = v;
+                _tray = _shellWindow.FindName("DFTrayIcon") as TaskbarIcon;
+            }
 
             base.OnViewLoaded(view);
         }
