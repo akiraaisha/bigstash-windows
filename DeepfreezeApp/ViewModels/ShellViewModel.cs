@@ -19,7 +19,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>
+        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>
     {
         #region fields
 
@@ -128,6 +128,7 @@ namespace DeepfreezeApp
         {
             _shellWindow.ShowInTaskbar = true;
             _shellWindow.WindowState = WindowState.Normal;
+            _shellWindow.Activate();
         }
 
         #endregion
@@ -175,11 +176,37 @@ namespace DeepfreezeApp
             this.Disconnect();
         }
 
+        /// <summary>
+        /// Handle NotificationMessage
+        /// </summary>
+        /// <param name="message"></param>
         public void Handle(INotificationMessage message)
         {
             if (message != null)
             {
                 _tray.ShowBalloonTip("Deepfreeze for Windows", message.Message, BalloonIcon.Info);
+            }
+        }
+
+        /// <summary>
+        /// Handle StartUpArgsMessage
+        /// </summary>
+        /// <param name="message"></param>
+        public void Handle(IStartUpArgsMessage message)
+        {
+            if (message != null)
+            {
+                switch(message.StartUpArgument)
+                {
+                    case "minimized":
+                        _shellWindow.ShowInTaskbar = false;
+                        _shellWindow.WindowState = WindowState.Minimized;
+                        break;
+                    default:
+                        _shellWindow.ShowInTaskbar = true;
+                        _shellWindow.WindowState = WindowState.Normal;
+                        break;
+                }
             }
         }
 
