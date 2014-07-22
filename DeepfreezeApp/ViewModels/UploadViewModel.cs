@@ -214,6 +214,9 @@ namespace DeepfreezeApp
 
             _log.Info("Starting (user clicked the Start button) archive upload with title \"" + this.Archive.Title + "\".");
 
+            this.LocalUpload.UserPaused = false;
+            await this.SaveLocalUpload();
+
             // skip files with IsUploaded = true entirely.
             var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
 
@@ -347,7 +350,7 @@ namespace DeepfreezeApp
         /// </summary>
         /// <param name="cancelAfter"></param>
         /// <returns></returns>
-        public async Task PauseUpload(bool isAutomatic) //wait 500 ms to be sure that the UI updates.
+        public async Task PauseUpload(bool isAutomatic)
         {
             if (this.OperationStatus == Enumerations.Status.Uploading)
             {
@@ -359,6 +362,8 @@ namespace DeepfreezeApp
 
                 var originalAction = isAutomatic ? "(automatic pause)" : "(user clicked the Pause button)";
                 _log.Info("Pausing " + originalAction + " archive upload with title \"" + this.Archive.Title + "\".");
+
+                this.LocalUpload.UserPaused = !isAutomatic;
 
                 if (this._cts != null)
                     await Task.Run(() => 
