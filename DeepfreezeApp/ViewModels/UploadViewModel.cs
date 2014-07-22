@@ -311,6 +311,10 @@ namespace DeepfreezeApp
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
                 // and start the timer again.
                 this._refreshProgressTimer.Start();
+
+                var notification = IoC.Get<INotificationMessage>();
+                notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.UploadedNotificationText;
+                this._eventAggregator.PublishOnBackgroundThread(notification);
             }
             catch (Exception e)
             {
@@ -939,6 +943,10 @@ namespace DeepfreezeApp
                     {
                         this.OperationStatus = this.Upload.Status;
                         this._refreshProgressTimer.Stop();
+
+                        var notification = IoC.Get<INotificationMessage>();
+                        notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+                        this._eventAggregator.PublishOnBackgroundThread(notification);
                     }
                 }
             }
