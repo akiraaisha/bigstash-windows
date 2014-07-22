@@ -126,6 +126,7 @@ namespace DeepfreezeApp
 
         public void ShowShellWindow()
         {
+            _shellWindow.ShowInTaskbar = true;
             _shellWindow.WindowState = WindowState.Normal;
         }
 
