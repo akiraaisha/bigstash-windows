@@ -14,11 +14,35 @@
                VerticalAlignment="Stretch">
         
         <ContentControl DockPanel.Dock="Top" cal:View.Model="{Binding UserVM}" />
+        
+        <StackPanel DockPanel.Dock="Top">
+            
+            <Label Content="Settings"
+                   Margin="0 20 0 0"
+                   HorizontalAlignment="Left"
+                   Style="{StaticResource DescriptionHeaderStyle}"
+                   />
+
+            <CheckBox x:Name="RunOnStartup" 
+                      Content="Run on Windows startup" 
+                      Margin="5 5 0 0"
+                      FontSize="14"
+                      cal:Message.Attach="RunOnStartupChanged"
+                      />
+            
+            <!--<StackPanel Orientation="Horizontal"
+                        Margin="0 5 0 0">
+
+                
+                
+            </StackPanel>-->
+            
+        </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
-                    Margin="10 0 0 10">
+                    Margin="0 0 0 10">
 
             <Label x:Name="ApplicationNameHeader" 
                Style="{DynamicResource HeaderLabelStyle}" 

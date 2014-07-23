@@ -14,7 +14,7 @@
         Style="{DynamicResource MyCleanWindowStyle}"
         Height="500" 
         Width="300"
-        MinHeight="500"        
+        MinHeight="550"        
         SaveWindowPosition="True"
         >
 

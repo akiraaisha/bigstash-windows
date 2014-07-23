@@ -10,6 +10,7 @@ using Caliburn.Micro;
 using DeepfreezeSDK;
 using System.IO;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace DeepfreezeApp
 {
@@ -25,6 +26,7 @@ namespace DeepfreezeApp
 
         private bool _isOpen;
         private string _errorMessage;
+        private bool _runOnStartup;
 
         #endregion
 
@@ -85,9 +87,30 @@ namespace DeepfreezeApp
             set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
         }
 
+        public bool RunOnStartup
+        {
+            get { return this._runOnStartup; }
+            set { this._runOnStartup = value; NotifyOfPropertyChange(() => this.RunOnStartup); }
+        }
+
         #endregion
 
         #region methods
+
+        public void RunOnStartupChanged()
+        {
+            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly curAssembly = Assembly.GetExecutingAssembly();
+
+            if (this.RunOnStartup)
+            {
+                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " minimized");
+            }
+            else
+            {
+                registryKey.DeleteValue(curAssembly.GetName().Name, false);
+            }
+        }
 
         public void ExportLog()
         {
@@ -111,9 +134,14 @@ namespace DeepfreezeApp
 
         protected override void OnActivate()
         {
-            base.OnActivate();
+            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            Assembly curAssembly = Assembly.GetExecutingAssembly();
+
+            this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
 
             this.ActivateItem(this.UserVM);
+
+            base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)

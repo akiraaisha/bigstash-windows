@@ -367,7 +367,7 @@ namespace DeepfreezeApp
         {
             if (this.OperationStatus == Enumerations.Status.Uploading)
             {
-                this.IsBusy = true;
+                this.IsBusy = !isAutomatic; // show busy only if user paused, if it's automatic, it's on application close.
                 this.BusyMessage = "Pausing upload...";
                 this.OperationStatus = Enumerations.Status.Paused;
 
@@ -707,7 +707,7 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> SaveLocalUpload()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || this.LocalUpload == null)
                 return false;
 
             try
@@ -746,6 +746,9 @@ namespace DeepfreezeApp
 
                 // Delete the LocalUpload file
                 File.Delete(this.LocalUpload.SavePath);
+
+                // Set this to null since the local file doesn't exist anymore.
+                this.LocalUpload = null;
 
                 return true;
             }
