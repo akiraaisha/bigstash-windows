@@ -18,6 +18,7 @@ Third party project dependencies
 - ```Amazon AWS SDK for .NET```
 - ```log4net```
 - ```WPF instance aware application```
+- ```Hardcodet.Wpf.TaskbarNotification```
 
 Build
 -----
