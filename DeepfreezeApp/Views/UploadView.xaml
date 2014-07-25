@@ -108,6 +108,8 @@
                            FontWeight="SemiBold"
                            FontSize="14"
                            HorizontalAlignment="Stretch"
+                           Cursor="Hand"
+                           cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenArchivePage()]"
                            />
                 
                 <WrapPanel>
