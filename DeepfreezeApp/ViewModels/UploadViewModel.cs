@@ -185,6 +185,18 @@ namespace DeepfreezeApp
             }
         }
 
+        public string ResumeButtonContent
+        { get { return Properties.Resources.ResumeButtonContent; } }
+
+        public string PauseButtonContent
+        { get { return Properties.Resources.PauseButtonContent; } }
+
+        public string DeleteButtonContent
+        { get { return Properties.Resources.DeleteButtonContent; } }
+
+        public string RemoveButtonContent
+        { get { return Properties.Resources.RemoveButtonContent; } }
+
         #endregion
 
         #region action_methods
