@@ -18,6 +18,7 @@ using DeepfreezeModel;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.Runtime;
+using System.Diagnostics;
 
 namespace DeepfreezeApp
 {
@@ -483,6 +484,18 @@ namespace DeepfreezeApp
                 this.ErrorMessage = e.Message;
             }
             finally { this._isRefreshing = false; }
+        }
+
+        /// <summary>
+        /// Open the archive's page in the user's default browser.
+        /// </summary>
+        public void OpenArchivePage()
+        {
+            if (!String.IsNullOrEmpty(this.Archive.Url))
+            {
+                var authority = new Uri(this.Archive.Url).Authority;
+                Process.Start(authority + "/a/" + this.Archive.Key);
+            }
         }
 
         #endregion
