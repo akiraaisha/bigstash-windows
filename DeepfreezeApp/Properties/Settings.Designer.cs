@@ -37,7 +37,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io")]
         public string ApplicationName {
             get {
                 return ((string)(this["ApplicationName"]));
@@ -118,7 +118,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze for Windows")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io for Windows")]
         public string ApplicationFullName {
             get {
                 return ((string)(this["ApplicationFullName"]));
