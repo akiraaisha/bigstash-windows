@@ -157,8 +157,8 @@ namespace DeepfreezeApp
             }
         }
 
-        public string ForgotPasswordText
-        { get { return Properties.Resources.ForgotPasswordText; } }
+        public string SetPasswordText
+        { get { return Properties.Resources.SetPasswordText; } }
 
         #endregion
 
@@ -254,6 +254,14 @@ namespace DeepfreezeApp
         {
             if (pwdBox != null)
                 this.PasswordInput = pwdBox.Password;
+        }
+
+        /// <summary>
+        /// Open the Deepfreeze account page.
+        /// </summary>
+        public void OpenAccountPage()
+        {
+            Process.Start(Properties.Resources.SetPasswordURL);
         }
 
         /// <summary>
