@@ -48,7 +48,9 @@
                Style="{DynamicResource HeaderLabelStyle}" 
                VerticalAlignment="Center"
                HorizontalAlignment="Center"
-                />
+               Cursor="Hand"
+               cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenDeepfreezePage()]"
+               />
 
             <TextBlock x:Name="VersionText"
                        HorizontalAlignment="Center"
