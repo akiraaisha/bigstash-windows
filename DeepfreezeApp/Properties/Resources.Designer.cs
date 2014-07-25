@@ -61,7 +61,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze Account.
+        ///   Looks up a localized string similar to Deepfreeze.io Account.
         /// </summary>
         internal static string ActiveUserHeader {
             get {
@@ -124,7 +124,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect to your Deepfreeze Account.
+        ///   Looks up a localized string similar to Connect to your Deepfreeze.io Account.
         /// </summary>
         internal static string ConnectHeaderText {
             get {
@@ -151,11 +151,20 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Deepfreeze for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Deepfreeze.io for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
                 return ResourceManager.GetString("DebugHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string DeleteButtonContent {
+            get {
+                return ResourceManager.GetString("DeleteButtonContent", resourceCulture);
             }
         }
         
@@ -241,6 +250,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pause.
+        /// </summary>
+        internal static string PauseButtonContent {
+            get {
+                return ResourceManager.GetString("PauseButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to % of .
         /// </summary>
         internal static string PercentageOfText {
@@ -264,6 +282,24 @@ namespace DeepfreezeApp.Properties {
         internal static string QuotaHeader {
             get {
                 return ResourceManager.GetString("QuotaHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        internal static string RemoveButtonContent {
+            get {
+                return ResourceManager.GetString("RemoveButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resume.
+        /// </summary>
+        internal static string ResumeButtonContent {
+            get {
+                return ResourceManager.GetString("ResumeButtonContent", resourceCulture);
             }
         }
         
@@ -358,7 +394,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze account credentials..
+        ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze.io account credentials..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {

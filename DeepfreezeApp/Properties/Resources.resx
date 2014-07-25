@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActiveUserHeader" xml:space="preserve">
-    <value>Deepfreeze Account</value>
+    <value>Deepfreeze.io Account</value>
     <comment>Used for active user header in preferences.</comment>
   </data>
   <data name="ArchiveTitleHelperText" xml:space="preserve">
@@ -144,7 +144,7 @@
     <comment>Used for connect button content.</comment>
   </data>
   <data name="ConnectHeaderText" xml:space="preserve">
-    <value>Connect to your Deepfreeze Account</value>
+    <value>Connect to your Deepfreeze.io Account</value>
   </data>
   <data name="CreatingArchiveText" xml:space="preserve">
     <value>Creating new archive</value>
@@ -153,7 +153,10 @@
     <value>Open Log</value>
   </data>
   <data name="DebugHelpText" xml:space="preserve">
-    <value>If you're experiencing problems with Deepfreeze for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
+    <value>If you're experiencing problems with Deepfreeze.io for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
+  </data>
+  <data name="DeleteButtonContent" xml:space="preserve">
+    <value>Delete</value>
   </data>
   <data name="DisconnectButtonContent" xml:space="preserve">
     <value>Disconnect</value>
@@ -188,6 +191,9 @@
     <value>Password</value>
     <comment>Used for password login passwordbox.</comment>
   </data>
+  <data name="PauseButtonContent" xml:space="preserve">
+    <value>Pause</value>
+  </data>
   <data name="PercentageOfText" xml:space="preserve">
     <value>% of </value>
   </data>
@@ -198,6 +204,12 @@
   <data name="QuotaHeader" xml:space="preserve">
     <value>Storage</value>
     <comment>Used for quota header in preferences.</comment>
+  </data>
+  <data name="RemoveButtonContent" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ResumeButtonContent" xml:space="preserve">
+    <value>Resume</value>
   </data>
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>
@@ -231,7 +243,7 @@
     <value>Total Uploads: </value>
   </data>
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
-    <value>Could not authenticate. Please enter your Deepfreeze account credentials.</value>
+    <value>Could not authenticate. Please enter your Deepfreeze.io account credentials.</value>
     <comment>Used for informing the user about wrong username/password combination.</comment>
   </data>
   <data name="UploadButtonContent" xml:space="preserve">

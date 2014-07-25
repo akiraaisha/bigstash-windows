@@ -185,7 +185,7 @@ namespace DeepfreezeApp
         {
             if (message != null)
             {
-                _tray.ShowBalloonTip("Deepfreeze for Windows", message.Message, BalloonIcon.Info);
+                _tray.ShowBalloonTip("Deepfreeze.io for Windows", message.Message, BalloonIcon.Info);
             }
         }
 

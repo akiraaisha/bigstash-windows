@@ -81,14 +81,14 @@ namespace DeepfreezeApp
 
             log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-            Log.Info("Starting up a new instance of Deepfreeze for Windows.");
-            Log.Info("******************************************************");
-            Log.Info("******************************************************");
-            Log.Info("*********                                    *********");
-            Log.Info("*********       Deepfreeze for Windows       *********");
-            Log.Info("*********                                    *********");
-            Log.Info("******************************************************");
-            Log.Info("******************************************************");
+            Log.Info("Starting up a new instance of Deepfreeze.io for Windows.");
+            Log.Info("*****************************************************");
+            Log.Info("*****************************************************");
+            Log.Info("*******                                       *******");
+            Log.Info("*******       Deepfreeze.io for Windows       *******");
+            Log.Info("*******                                       *******");
+            Log.Info("*****************************************************");
+            Log.Info("*****************************************************");
 
             // Set Application local app data folder and file paths
             // in Application.Properties for use in this application instance.
