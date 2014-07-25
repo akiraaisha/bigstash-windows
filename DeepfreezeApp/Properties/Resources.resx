@@ -211,6 +211,12 @@
   <data name="ResumeButtonContent" xml:space="preserve">
     <value>Resume</value>
   </data>
+  <data name="SetPasswordText" xml:space="preserve">
+    <value>Don't know your password?</value>
+  </data>
+  <data name="SetPasswordURL" xml:space="preserve">
+    <value>https://www.deepfreeze.io/account/</value>
+  </data>
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>
   </data>

@@ -304,6 +304,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t know your password?.
+        /// </summary>
+        internal static string SetPasswordText {
+            get {
+                return ResourceManager.GetString("SetPasswordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://www.deepfreeze.io/account/.
+        /// </summary>
+        internal static string SetPasswordURL {
+            get {
+                return ResourceManager.GetString("SetPasswordURL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Completed.
         /// </summary>
         internal static string StatusCompletedText {
