@@ -361,6 +361,9 @@ namespace DeepfreezeApp
                 if (this._cts != null && !this._cts.IsCancellationRequested)
                     await this.PauseUpload(true);
 
+                // after pause update _totalProgress, to have correct value.
+                await CalculateTotalUploadedSize();
+
                 // finally make sure to save the local upload file to preserve the current status of the upload.
                 await this.SaveLocalUpload();
             }
