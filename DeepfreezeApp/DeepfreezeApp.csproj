@@ -32,10 +32,10 @@
     <TargetCulture>en</TargetCulture>
     <ProductName>Deepfreeze.io for Windows</ProductName>
     <PublisherName>The Longaccess Company</PublisherName>
-    <MinimumRequiredVersion>1.0.1.1</MinimumRequiredVersion>
+    <MinimumRequiredVersion>1.1.1.1</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>3</ApplicationRevision>
-    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.1.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
