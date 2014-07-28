@@ -770,10 +770,13 @@ namespace DeepfreezeApp
         {
             try
             {
-                _log.Info("Deleting \"" + this.LocalUpload.SavePath + "\".");
+                if (this.LocalUpload.SavePath != null)
+                {
+                    _log.Info("Deleting \"" + this.LocalUpload.SavePath + "\".");
 
-                // Delete the LocalUpload file
-                File.Delete(this.LocalUpload.SavePath);
+                    // Delete the LocalUpload file
+                    File.Delete(this.LocalUpload.SavePath);
+                }
 
                 // Set this to null since the local file doesn't exist anymore.
                 this.LocalUpload = null;
