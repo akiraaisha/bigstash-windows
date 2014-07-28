@@ -103,16 +103,18 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Send a ListPartsRequest request and return the response.
+        /// Send a ListPartsRequest request and return a list of all uploaded parts.
         /// </summary>
         /// <param name="existingBucketName"></param>
         /// <param name="keyName"></param>
         /// <param name="uploadID"></param>
         /// <param name="token"></param>
-        /// <returns>Task<ListPartsResponse></returns>
-        public async Task<ListPartsResponse> ListPartsAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
+        /// <returns>Task<List<PartDetail>></returns>
+        public async Task<List<PartDetail>> ListPartsAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
         {
             _log.Info("Called ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
+
+            List<PartDetail> parts = new List<PartDetail>();
 
             try
             {
@@ -122,8 +124,16 @@ namespace DeepfreezeSDK
                 request.UploadId = uploadId;
 
                 ListPartsResponse response = await this.s3Client.ListPartsAsync(request, token).ConfigureAwait(false);
+                parts.AddRange(response.Parts);
 
-                return response;
+                while(response.IsTruncated)
+                {
+                    request.PartNumberMarker = response.NextPartNumberMarker.ToString();
+                    response = await this.s3Client.ListPartsAsync(request, token).ConfigureAwait(false);
+                    parts.AddRange(response.Parts);
+                }
+
+                return parts;
             }
             catch (Exception e) 
             {
@@ -166,10 +176,10 @@ namespace DeepfreezeSDK
                 };
 
                 // in any case request list parts to send etags for each part.
-                var partsResponse = await this.ListPartsAsync(existingBucketName, keyName, uploadId, token).ConfigureAwait(false);
+                var uploadedParts = await this.ListPartsAsync(existingBucketName, keyName, uploadId, token).ConfigureAwait(false);
                 List<PartETag> eTags = new List<PartETag>();
 
-                foreach(var part in partsResponse.Parts)
+                foreach (var part in uploadedParts)
                 {
                     eTags.Add(new PartETag(part.PartNumber, part.ETag));
                 }
@@ -412,7 +422,7 @@ namespace DeepfreezeSDK
 
             this.MultipartUploadProgress.Clear();
 
-            ListPartsResponse partsResponse = new ListPartsResponse();
+            List<PartDetail> uploadedParts = new List<PartDetail>();
 
             var uploadPartTasks = new List<Task<UploadPartResponse>>();
             Queue<UploadPartRequest> partRequests = new Queue<UploadPartRequest>();
@@ -426,12 +436,12 @@ namespace DeepfreezeSDK
                 // then we have to get the uploaded parts so the upload continues
                 // where it's stopped.
                 if (!isNewFileUpload)
-                    partsResponse = await this.ListPartsAsync(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token).ConfigureAwait(false);
+                    uploadedParts = await this.ListPartsAsync(existingBucketName, fileInfo.KeyName, fileInfo.UploadId, token).ConfigureAwait(false);
 
                 token.ThrowIfCancellationRequested();
 
                 // create all part requests.
-                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, partsResponse.Parts, this.MultipartUploadProgress, token);
+                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, uploadedParts, this.MultipartUploadProgress, token);
 
                 token.ThrowIfCancellationRequested();
 

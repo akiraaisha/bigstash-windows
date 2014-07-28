@@ -361,6 +361,9 @@ namespace DeepfreezeApp
                 if (this._cts != null && !this._cts.IsCancellationRequested)
                     await this.PauseUpload(true);
 
+                // after pause update _totalProgress, to have correct value.
+                await CalculateTotalUploadedSize();
+
                 // finally make sure to save the local upload file to preserve the current status of the upload.
                 await this.SaveLocalUpload();
             }
@@ -668,7 +671,7 @@ namespace DeepfreezeApp
             try
             {
                 long total = 0;
-                List<Task<ListPartsResponse>> partsTasks = new List<Task<ListPartsResponse>>();
+                List<Task<List<PartDetail>>> partsTasks = new List<Task<List<PartDetail>>>();
 
                 // get archive file info with UploadId
                 // so we count only those files that have already started uploading.
@@ -681,11 +684,11 @@ namespace DeepfreezeApp
                     partsTasks.Add(t);
                 }
 
-                var taskResult = (await Task<ListPartsResponse>.WhenAll(partsTasks).ConfigureAwait(false)).ToList();
+                var taskResult = (await Task<List<PartDetail>>.WhenAll(partsTasks).ConfigureAwait(false)).ToList();
 
-                foreach(var task in taskResult)
+                foreach(var result in taskResult)
                 {
-                    total += task.Parts.Sum(x => x.Size);
+                    total += result.Sum(x => x.Size);
                 }
 
                 return total;
