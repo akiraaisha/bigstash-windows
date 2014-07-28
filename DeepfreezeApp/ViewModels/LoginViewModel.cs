@@ -11,6 +11,7 @@ using Caliburn.Micro;
 
 using DeepfreezeSDK;
 using DeepfreezeModel;
+using System.Windows.Input;
 
 namespace DeepfreezeApp
 {
@@ -270,6 +271,43 @@ namespace DeepfreezeApp
         public void ForgotPassword()
         {
             Process.Start(Properties.Resources.ForgotPasswordURL);
+        }
+
+        public void SelectAll(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBox)
+            {
+                var tb = sender as TextBox;
+
+                if (tb == null)
+                {
+                    return;
+                }
+
+                if (!tb.IsKeyboardFocusWithin)
+                {
+                    tb.SelectAll();
+                    e.Handled = true;
+                    tb.Focus();
+                }
+            }
+                
+            else if (sender is PasswordBox)
+            {
+                var pb = sender as PasswordBox;
+
+                if (pb == null)
+                {
+                    return;
+                }
+
+                if (!pb.IsKeyboardFocusWithin)
+                {
+                    pb.SelectAll();
+                    e.Handled = true;
+                    pb.Focus();
+                }
+            }
         }
 
         #endregion
