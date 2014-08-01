@@ -116,6 +116,9 @@ namespace DeepfreezeApp
         {
             Log.Info("Exiting application.");
 
+            // make sure to save one final time the application wide settings.
+            Properties.Settings.Default.Save();
+
             var client = IoC.Get<IDeepfreezeClient>();
 
             if (client.IsLogged())
