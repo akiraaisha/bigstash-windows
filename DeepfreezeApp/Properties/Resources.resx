@@ -170,6 +170,9 @@
     <value>The folder you selected is empty.</value>
     <comment>Used for exception message when the user selects an empty folder to archive.</comment>
   </data>
+  <data name="ExitHeader" xml:space="preserve">
+    <value>Exit</value>
+  </data>
   <data name="ForgotPasswordText" xml:space="preserve">
     <value>Forgot your password?</value>
   </data>
