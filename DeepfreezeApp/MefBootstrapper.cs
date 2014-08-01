@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using DeepfreezeModel;
 using System.Threading.Tasks;
 using Custom.Windows;
+using System.Deployment.Application;
 
 namespace DeepfreezeApp
 {
@@ -96,6 +97,9 @@ namespace DeepfreezeApp
 
             // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
             CreateLocalApplicationDataDirectory();
+
+            // set first time run settings
+            this.SetFirstRunSettings();
 
             DisplayRootViewFor<IShell>();
 
@@ -233,6 +237,20 @@ namespace DeepfreezeApp
                     );
 
             Log.Info("Setting Deepfreeze log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
+        }
+
+        private void SetFirstRunSettings()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                var deployment = ApplicationDeployment.CurrentDeployment;
+
+                if (deployment.IsFirstRun)
+                {
+                    Properties.Settings.Default.MinimizeOnClose = true;
+                    Properties.Settings.Default.Save();
+                }
+            }
         }
 
         #endregion
