@@ -30,12 +30,11 @@
                       cal:Message.Attach="RunOnStartupChanged"
                       />
             
-            <!--<StackPanel Orientation="Horizontal"
-                        Margin="0 5 0 0">
-
-                
-                
-            </StackPanel>-->
+            <CheckBox x:Name="MinimizeOnClose" 
+                      Content="When the Close button is pressed, minimize to tray." 
+                      Margin="5 5 0 0"
+                      FontSize="14"
+                      />
             
         </StackPanel>
 
