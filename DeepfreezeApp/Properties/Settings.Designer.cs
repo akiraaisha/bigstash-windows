@@ -154,5 +154,17 @@ namespace DeepfreezeApp.Properties {
                 return ((string)(this["DeepfreezeJsonFormat"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MinimizeOnClose {
+            get {
+                return ((bool)(this["MinimizeOnClose"]));
+            }
+            set {
+                this["MinimizeOnClose"] = value;
+            }
+        }
     }
 }

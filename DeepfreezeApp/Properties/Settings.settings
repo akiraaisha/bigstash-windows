@@ -41,5 +41,8 @@
     <Setting Name="DeepfreezeJsonFormat" Type="System.String" Scope="Application">
       <Value Profile="(Default)">.djf</Value>
     </Setting>
+    <Setting Name="MinimizeOnClose" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
