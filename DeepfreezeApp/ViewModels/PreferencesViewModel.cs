@@ -93,6 +93,12 @@ namespace DeepfreezeApp
             set { this._runOnStartup = value; NotifyOfPropertyChange(() => this.RunOnStartup); }
         }
 
+        public bool MinimizeOnClose
+        {
+            get { return Properties.Settings.Default.MinimizeOnClose; }
+            set { Properties.Settings.Default.MinimizeOnClose = value; Properties.Settings.Default.Save(); NotifyOfPropertyChange(() => this.MinimizeOnClose); }
+        }
+
         #endregion
 
         #region methods
