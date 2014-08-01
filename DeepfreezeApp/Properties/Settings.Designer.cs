@@ -166,5 +166,17 @@ namespace DeepfreezeApp.Properties {
                 this["MinimizeOnClose"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsFirstLogin {
+            get {
+                return ((bool)(this["IsFirstLogin"]));
+            }
+            set {
+                this["IsFirstLogin"] = value;
+            }
+        }
     }
 }
