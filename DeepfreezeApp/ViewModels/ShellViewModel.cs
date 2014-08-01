@@ -112,6 +112,9 @@ namespace DeepfreezeApp
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
 
+        public string ExitHeader
+        { get { return Properties.Resources.ExitHeader; } }
+
         #endregion
 
         #region action methods
