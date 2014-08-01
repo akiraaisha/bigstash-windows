@@ -362,6 +362,13 @@ namespace DeepfreezeApp
             }
         }
 
+        protected override void OnDeactivate(bool close)
+        {
+            this._tray.Visibility = Visibility.Collapsed;
+            this._tray.Dispose();
+            base.OnDeactivate(close);
+        }
+
         public override void CanClose(Action<bool> callback)
         {
             if (Properties.Settings.Default.MinimizeOnClose)
