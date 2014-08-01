@@ -41,6 +41,7 @@ namespace DeepfreezeApp
         private bool _hasError = false;
         private string _busyMessage;
         private string _errorMessage;
+        private bool _trayExitClicked = false;
 
         #endregion
 
@@ -120,7 +121,6 @@ namespace DeepfreezeApp
         /// </summary>
         public void TogglePreferencesFlyout()
         {
-
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
         }
 
@@ -130,6 +130,24 @@ namespace DeepfreezeApp
             _shellWindow.WindowState = WindowState.Normal;
             _shellWindow.Visibility = Visibility.Visible;
             _shellWindow.Activate();
+        }
+
+        public void ShowPreferences()
+        {
+            if (_shellWindow.WindowState == WindowState.Minimized)
+                this.ShowShellWindow();
+
+            if (!_shellWindow.IsActive)
+                _shellWindow.Activate();
+
+            if (!IsPreferencesFlyoutOpen)
+                this.TogglePreferencesFlyout();
+        }
+
+        public void ExitApplication()
+        {
+            this._trayExitClicked = true;
+            this.TryClose();
         }
 
         #endregion
@@ -371,14 +389,23 @@ namespace DeepfreezeApp
 
         public override void CanClose(Action<bool> callback)
         {
-            if (Properties.Settings.Default.MinimizeOnClose)
+            // if the user selected exit from the tray icon, then always close.
+            if (this._trayExitClicked)
             {
-                _shellWindow.WindowState = WindowState.Minimized;
-                _shellWindow.ShowInTaskbar = false;
-                callback(false); // will cancel close
+                callback(true);
             }
             else
-                callback(true);
+            {
+                // if the user clicked the close button, then check the MinimizeOnClose setting
+                if (Properties.Settings.Default.MinimizeOnClose)
+                {
+                    _shellWindow.WindowState = WindowState.Minimized;
+                    _shellWindow.ShowInTaskbar = false;
+                    callback(false); // will cancel close
+                }
+                else
+                    callback(true);
+            }
         }
 
         #endregion
