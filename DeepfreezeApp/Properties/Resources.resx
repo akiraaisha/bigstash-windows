@@ -183,6 +183,9 @@
   <data name="FreeText" xml:space="preserve">
     <value> Free / </value>
   </data>
+  <data name="MinimizedMessageText" xml:space="preserve">
+    <value>Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
+  </data>
   <data name="NoUploadsHeaderText" xml:space="preserve">
     <value>There aren't any pending uploads from this app.</value>
   </data>

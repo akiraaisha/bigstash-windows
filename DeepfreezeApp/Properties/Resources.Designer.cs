@@ -232,6 +232,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        /// </summary>
+        internal static string MinimizedMessageText {
+            get {
+                return ResourceManager.GetString("MinimizedMessageText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There aren&apos;t any pending uploads from this app..
         /// </summary>
         internal static string NoUploadsHeaderText {
