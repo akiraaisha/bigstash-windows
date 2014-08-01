@@ -362,6 +362,18 @@ namespace DeepfreezeApp
             }
         }
 
+        public override void CanClose(Action<bool> callback)
+        {
+            if (Properties.Settings.Default.MinimizeOnClose)
+            {
+                _shellWindow.WindowState = WindowState.Minimized;
+                _shellWindow.ShowInTaskbar = false;
+                callback(false); // will cancel close
+            }
+            else
+                callback(true);
+        }
+
         #endregion
 
         #region private methods
