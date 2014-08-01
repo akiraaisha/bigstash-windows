@@ -42,6 +42,7 @@ namespace DeepfreezeApp
         private string _busyMessage;
         private string _errorMessage;
         private bool _trayExitClicked = false;
+        private bool _minimizeBallonTipShown = false;
 
         #endregion
 
@@ -407,6 +408,16 @@ namespace DeepfreezeApp
                 {
                     _shellWindow.WindowState = WindowState.Minimized;
                     _shellWindow.ShowInTaskbar = false;
+
+                    // if no user is currently connected, show a BallonTip
+                    // informing the user about the application minimizing instead of exiting.
+                    // Do this only one time in each application run.
+                    if (!this._minimizeBallonTipShown)
+                    {
+                        this._minimizeBallonTipShown = true;
+                        _tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
+                    }
+
                     callback(false); // will cancel close
                 }
                 else
