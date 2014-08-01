@@ -151,6 +151,14 @@ namespace DeepfreezeApp
 
             this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
 
+            // After the first ever login, set MinimizeOnClose to true.
+            // Future login actions will simply ignore this.
+            if (Properties.Settings.Default.IsFirstLogin)
+            {
+                Properties.Settings.Default.IsFirstLogin = false;
+                this.MinimizeOnClose = true;
+            }
+
             this.ActivateItem(this.UserVM);
 
             base.OnActivate();
