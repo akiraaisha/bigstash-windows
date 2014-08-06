@@ -154,5 +154,29 @@ namespace DeepfreezeApp.Properties {
                 return ((string)(this["DeepfreezeJsonFormat"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MinimizeOnClose {
+            get {
+                return ((bool)(this["MinimizeOnClose"]));
+            }
+            set {
+                this["MinimizeOnClose"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsFirstLogin {
+            get {
+                return ((bool)(this["IsFirstLogin"]));
+            }
+            set {
+                this["IsFirstLogin"] = value;
+            }
+        }
     }
 }

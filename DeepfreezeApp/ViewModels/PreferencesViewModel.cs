@@ -93,6 +93,12 @@ namespace DeepfreezeApp
             set { this._runOnStartup = value; NotifyOfPropertyChange(() => this.RunOnStartup); }
         }
 
+        public bool MinimizeOnClose
+        {
+            get { return Properties.Settings.Default.MinimizeOnClose; }
+            set { Properties.Settings.Default.MinimizeOnClose = value; Properties.Settings.Default.Save(); NotifyOfPropertyChange(() => this.MinimizeOnClose); }
+        }
+
         #endregion
 
         #region methods
@@ -144,6 +150,14 @@ namespace DeepfreezeApp
             Assembly curAssembly = Assembly.GetExecutingAssembly();
 
             this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
+
+            // After the first ever login, set MinimizeOnClose to true.
+            // Future login actions will simply ignore this.
+            if (Properties.Settings.Default.IsFirstLogin)
+            {
+                Properties.Settings.Default.IsFirstLogin = false;
+                this.MinimizeOnClose = true;
+            }
 
             this.ActivateItem(this.UserVM);
 

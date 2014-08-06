@@ -41,6 +41,8 @@ namespace DeepfreezeApp
         private bool _hasError = false;
         private string _busyMessage;
         private string _errorMessage;
+        private bool _trayExitClicked = false;
+        private bool _minimizeBallonTipShown = false;
 
         #endregion
 
@@ -111,6 +113,9 @@ namespace DeepfreezeApp
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
 
+        public string ExitHeader
+        { get { return Properties.Resources.ExitHeader; } }
+
         #endregion
 
         #region action methods
@@ -120,7 +125,6 @@ namespace DeepfreezeApp
         /// </summary>
         public void TogglePreferencesFlyout()
         {
-
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
         }
 
@@ -130,6 +134,24 @@ namespace DeepfreezeApp
             _shellWindow.WindowState = WindowState.Normal;
             _shellWindow.Visibility = Visibility.Visible;
             _shellWindow.Activate();
+        }
+
+        public void ShowPreferences()
+        {
+            if (_shellWindow.WindowState == WindowState.Minimized)
+                this.ShowShellWindow();
+
+            if (!_shellWindow.IsActive)
+                _shellWindow.Activate();
+
+            if (!IsPreferencesFlyoutOpen)
+                this.TogglePreferencesFlyout();
+        }
+
+        public void ExitApplication()
+        {
+            this._trayExitClicked = true;
+            this.TryClose();
         }
 
         #endregion
@@ -359,6 +381,47 @@ namespace DeepfreezeApp
                 IsBusy = false;
 
                 base.OnActivate();
+            }
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            if (this._tray != null)
+            {
+                this._tray.Visibility = Visibility.Collapsed;
+                this._tray.Dispose();
+            }
+            base.OnDeactivate(close);
+        }
+
+        public override void CanClose(Action<bool> callback)
+        {
+            // if the user selected exit from the tray icon, then always close.
+            if (this._trayExitClicked)
+            {
+                callback(true);
+            }
+            else
+            {
+                // if the user clicked the close button, then check the MinimizeOnClose setting
+                if (Properties.Settings.Default.MinimizeOnClose)
+                {
+                    _shellWindow.WindowState = WindowState.Minimized;
+                    _shellWindow.ShowInTaskbar = false;
+
+                    // if no user is currently connected, show a BallonTip
+                    // informing the user about the application minimizing instead of exiting.
+                    // Do this only one time in each application run.
+                    if (!this._minimizeBallonTipShown)
+                    {
+                        this._minimizeBallonTipShown = true;
+                        _tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
+                    }
+
+                    callback(false); // will cancel close
+                }
+                else
+                    callback(true);
             }
         }
 

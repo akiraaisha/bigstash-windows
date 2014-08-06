@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using DeepfreezeModel;
 using System.Threading.Tasks;
 using Custom.Windows;
+using System.Deployment.Application;
 
 namespace DeepfreezeApp
 {
@@ -76,56 +77,65 @@ namespace DeepfreezeApp
             var app = Application as InstanceAwareApplication;
             if (!(app == null || app.IsFirstInstance))
                 app.Shutdown();
-
-            // Else go on with normal startup.
-
-            log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
-
-            Log.Info("Starting up a new instance of Deepfreeze.io for Windows.");
-            Log.Info("*****************************************************");
-            Log.Info("*****************************************************");
-            Log.Info("*******                                       *******");
-            Log.Info("*******       Deepfreeze.io for Windows       *******");
-            Log.Info("*******                                       *******");
-            Log.Info("*****************************************************");
-            Log.Info("*****************************************************");
-
-            // Set Application local app data folder and file paths
-            // in Application.Properties for use in this application instance.
-            SetApplicationPathsProperties();
-
-            // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
-            CreateLocalApplicationDataDirectory();
-
-            DisplayRootViewFor<IShell>();
-
-            // Catch with args and forward a message with them
-            if (e.Args.Length > 0)
+            else
             {
-                this.CatchAndForwardArgs(e.Args[0]);
-            }
+                // Else go on with normal startup.
 
-            base.OnStartup(sender, e);
+                log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
+
+                Log.Info("Starting up a new instance of Deepfreeze.io for Windows.");
+                Log.Info("*****************************************************");
+                Log.Info("*****************************************************");
+                Log.Info("*******                                       *******");
+                Log.Info("*******       Deepfreeze.io for Windows       *******");
+                Log.Info("*******                                       *******");
+                Log.Info("*****************************************************");
+                Log.Info("*****************************************************");
+
+                // Set Application local app data folder and file paths
+                // in Application.Properties for use in this application instance.
+                SetApplicationPathsProperties();
+
+                // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
+                CreateLocalApplicationDataDirectory();
+
+                DisplayRootViewFor<IShell>();
+
+                // Catch with args and forward a message with them
+                if (e.Args.Length > 0)
+                {
+                    this.CatchAndForwardArgs(e.Args[0]);
+                }
+
+                base.OnStartup(sender, e);
+            }
         }
 
         protected override async void OnExit(object sender, EventArgs e)
         {
-            Log.Info("Exiting application.");
-
-            var client = IoC.Get<IDeepfreezeClient>();
-
-            if (client.IsLogged())
+            var app = Application as InstanceAwareApplication;
+            if ((app != null && app.IsFirstInstance))
             {
-                Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+                Log.Info("Exiting application.");
 
-                // Save preferences file.
-                await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII))
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                Log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
-                File.Delete(Properties.Settings.Default.SettingsFilePath);
+                // make sure to save one final time the application wide settings.
+                Properties.Settings.Default.Save();
+
+                var client = IoC.Get<IDeepfreezeClient>();
+
+                if (client.IsLogged())
+                {
+                    Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+
+                    // Save preferences file.
+                    await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    Log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
+                    File.Delete(Properties.Settings.Default.SettingsFilePath);
+                }
             }
 
             base.OnExit(sender, e);

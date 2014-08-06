@@ -196,6 +196,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exit.
+        /// </summary>
+        internal static string ExitHeader {
+            get {
+                return ResourceManager.GetString("ExitHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Forgot your password?.
         /// </summary>
         internal static string ForgotPasswordText {
@@ -219,6 +228,15 @@ namespace DeepfreezeApp.Properties {
         internal static string FreeText {
             get {
                 return ResourceManager.GetString("FreeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        /// </summary>
+        internal static string MinimizedMessageText {
+            get {
+                return ResourceManager.GetString("MinimizedMessageText", resourceCulture);
             }
         }
         
