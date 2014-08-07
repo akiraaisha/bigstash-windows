@@ -107,6 +107,7 @@
                    Foreground="Red"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
+                   TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
         
