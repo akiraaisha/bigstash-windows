@@ -959,6 +959,9 @@ namespace DeepfreezeApp
                         // Don't start the upload if it was user paused or if status != pending.
                         if (!this.LocalUpload.UserPaused && this.Upload.Status == Enumerations.Status.Pending)
                             await this.StartUpload();
+
+                        if (this.ErrorMessage.Contains(Properties.Resources.NoInternetConnectionMessage))
+                            this.ErrorMessage = null;
                         break;
                     case Enumerations.UploadAction.Pause:
                         await this.PauseUpload(true);
