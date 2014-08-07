@@ -241,6 +241,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No internet connection found. Please ensure you are connected to a network with Internet access..
+        /// </summary>
+        internal static string NoInternetConnectionMessage {
+            get {
+                return ResourceManager.GetString("NoInternetConnectionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There aren&apos;t any pending uploads from this app..
         /// </summary>
         internal static string NoUploadsHeaderText {
