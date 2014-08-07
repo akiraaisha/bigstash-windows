@@ -733,7 +733,7 @@ namespace DeepfreezeApp
         /// Save Local Upload to file.
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> SaveLocalUpload()
+        private async Task<bool> SaveLocalUpload(bool useAsync = true)
         {
             if (this.IsBusy || this.LocalUpload == null)
                 return false;
@@ -749,9 +749,12 @@ namespace DeepfreezeApp
 
                 // get the latest progress value
                 this.LocalUpload.Progress = this.Progress;
-                
-                await Task.Run(() => LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8))
-                    .ConfigureAwait(false);
+
+                if (useAsync)
+                    await Task.Run(() => LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8))
+                        .ConfigureAwait(false);
+                else
+                    LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8);
 
                 return true;
             }
@@ -1020,7 +1023,7 @@ namespace DeepfreezeApp
             this.PauseUpload(true);
 
             // do a final save
-            this.SaveLocalUpload();
+            this.SaveLocalUpload(false);
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();
