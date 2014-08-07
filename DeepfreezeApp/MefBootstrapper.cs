@@ -128,8 +128,7 @@ namespace DeepfreezeApp
                     Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
 
                     // Save preferences file.
-                    await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII))
-                        .ConfigureAwait(false);
+                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII);
                 }
                 else
                 {
