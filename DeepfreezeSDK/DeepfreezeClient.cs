@@ -8,6 +8,8 @@ using System.ComponentModel.Composition;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.IO;
+using System.Runtime;
+using System.Runtime.InteropServices;
 
 using DeepfreezeModel;
 
@@ -47,6 +49,20 @@ namespace DeepfreezeSDK
         #endregion
 
         public Settings Settings { get; set; }
+
+        [DllImport("wininet.dll")]
+        private extern static bool InternetGetConnectedState(out int Description, int ReservedValue);
+
+        public bool IsInternetConnected
+        {
+            get
+            {
+                int desc;
+                bool isConnected = false;
+                isConnected = InternetGetConnectedState(out desc, 0);
+                return isConnected;
+            }
+        }
 
         #region methods_for_consuming_DF_API
 

@@ -20,6 +20,8 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         bool IsLogged();
 
+        bool IsInternetConnected { get; }
+
         /// <summary>
         /// Create a new Deepfreeze API token using user credentials.
         /// </summary>
