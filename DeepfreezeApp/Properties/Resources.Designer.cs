@@ -133,6 +133,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Internet Connection lost. Pausing active uploads....
+        /// </summary>
+        internal static string ConnectionLostMessage {
+            get {
+                return ResourceManager.GetString("ConnectionLostMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Internet Connection restored. Resuming auto-paused uploads....
+        /// </summary>
+        internal static string ConnectionRestoredMessage {
+            get {
+                return ResourceManager.GetString("ConnectionRestoredMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creating new archive.
         /// </summary>
         internal static string CreatingArchiveText {

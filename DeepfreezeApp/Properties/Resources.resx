@@ -146,6 +146,12 @@
   <data name="ConnectHeaderText" xml:space="preserve">
     <value>Connect to your Deepfreeze.io Account</value>
   </data>
+  <data name="ConnectionLostMessage" xml:space="preserve">
+    <value>Internet Connection lost. Pausing active uploads...</value>
+  </data>
+  <data name="ConnectionRestoredMessage" xml:space="preserve">
+    <value>Internet Connection restored. Resuming auto-paused uploads...</value>
+  </data>
   <data name="CreatingArchiveText" xml:space="preserve">
     <value>Creating new archive</value>
   </data>
