@@ -464,12 +464,14 @@ namespace DeepfreezeApp
 
                 if (this.IsInternetConnected)
                 {
-                    _log.Warn("Restored Internet Connection. Resuming auto-paused uploads...");
+                    _log.Warn(Properties.Resources.ConnectionRestoredMessage);
+                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
                     uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
                 }
                 else
                 {
-                    _log.Warn("Lost Internet Connection. Pausing active uploads...");
+                    _log.Warn(Properties.Resources.ConnectionLostMessage);
+                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
                     uploadActionMessage.UploadAction = Enumerations.UploadAction.Pause;
                 }
 
