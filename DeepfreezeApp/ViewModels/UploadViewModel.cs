@@ -925,10 +925,15 @@ namespace DeepfreezeApp
 
         #region message_handlers
 
+        /// <summary>
+        /// Handle upload action messages for automatic pause and resume functionality.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task Handle(IUploadActionMessage message)
         {
             if (message != null 
-                && message.UploadVM == this)
+                && (message.UploadVM == this || message.UploadVM == null))
             {
                 switch(message.UploadAction)
                 {
@@ -936,7 +941,9 @@ namespace DeepfreezeApp
                         await this.CreateNewUpload();
                         break;
                     case Enumerations.UploadAction.Start:
-                        await this.StartUpload();
+                        // Don't start the upload if it was user paused.
+                        if (!this.LocalUpload.UserPaused)
+                            await this.StartUpload();
                         break;
                     case Enumerations.UploadAction.Pause:
                         await this.PauseUpload(true);
