@@ -474,12 +474,12 @@ namespace DeepfreezeSDK
                 {
                     token.ThrowIfCancellationRequested();
 
-                            var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
+                    var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
 
-                            runningTasks.Remove(finishedTask);
+                    runningTasks.Remove(finishedTask);
 
-                            if (finishedTask.Status == TaskStatus.Faulted)
-                                throw finishedTask.Exception;
+                    if (finishedTask.Status == TaskStatus.Faulted)
+                        throw finishedTask.Exception;
 
                     if (partRequests.Count > 0)
                     {
