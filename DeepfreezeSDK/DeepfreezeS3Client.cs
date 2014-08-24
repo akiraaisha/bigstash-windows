@@ -250,43 +250,52 @@ namespace DeepfreezeSDK
                 "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
                 ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
 
-            try
+            int retries = 2;
+
+            uploadPartRequest.StreamTransferProgress += (sender, eventArgs) =>
             {
-                token.ThrowIfCancellationRequested();
+                partsProgress[uploadPartRequest.PartNumber] = eventArgs.TransferredBytes;
+                Console.WriteLine("Part " + uploadPartRequest.PartNumber + " transferred bytes: " + partsProgress[uploadPartRequest.PartNumber]);
+            };
 
-                uploadPartRequest.StreamTransferProgress += (sender, eventArgs) =>
-                    {
-                        partsProgress[uploadPartRequest.PartNumber] = eventArgs.TransferredBytes;
-                        Console.WriteLine("Part " + uploadPartRequest.PartNumber + " transferred bytes: " + partsProgress[uploadPartRequest.PartNumber]);
-                    };
-
-                // Upload part and return response.
-                var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
-
-                _log.Info("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
-                "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
-                ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
-
-                return uploadPartResponse;
-            }
-            catch (Exception e)
+            while (true)
             {
-                if (!(e is TaskCanceledException || e is OperationCanceledException))
+                try
                 {
-                    var logMessage = "UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
-                        "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
-                        ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath +
-                        "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
+                    token.ThrowIfCancellationRequested();
 
-                    if (e is AmazonS3Exception)
-                    {
-                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
-                    }
+                    // Upload part and return response.
+                    var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
 
-                    _log.Error(logMessage);
+                    _log.Info("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
+                    "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
+                    ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
+
+                    return uploadPartResponse;
                 }
+                catch (Exception e)
+                {
+                    if (!(e is TaskCanceledException || e is OperationCanceledException))
+                    {
+                        var logMessage = "UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
+                            "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
+                            ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath +
+                            "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
 
-                throw e;
+                        if (e is AmazonS3Exception)
+                        {
+                            logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                        }
+
+                        _log.Error(logMessage);
+
+                        if (--retries == 0)
+                            throw e;
+                    }
+                    // if the action is paused, throw an exception. The loop is broken.
+                    else
+                        throw e;
+                }
             }
         }
 
@@ -302,51 +311,60 @@ namespace DeepfreezeSDK
             _log.Info("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
                 "\", FilePath = \"" + info.FilePath + "\".");
 
-            try
+            this.SingleUploadProgress = 0;
+
+            var putRequest = new PutObjectRequest()
+            {
+                BucketName = existingBucketName,
+                Key = info.KeyName,
+                FilePath = info.FilePath
+            };
+
+            putRequest.StreamTransferProgress += (sender, eventArgs) =>
+            {
+                this.SingleUploadProgress = eventArgs.TransferredBytes;
+                Console.WriteLine("Single Upload Progress: " + this.SingleUploadProgress);
+            };
+
+            int retries = 2;
+
+            while (true)
             {
                 this.IsUploading = true;
 
-                token.ThrowIfCancellationRequested();
-
-                this.SingleUploadProgress = 0;
-
-                var putRequest = new PutObjectRequest()
+                try
                 {
-                    BucketName = existingBucketName,
-                    Key = info.KeyName,
-                    FilePath = info.FilePath
-                };
+                    token.ThrowIfCancellationRequested();
 
-                putRequest.StreamTransferProgress += (sender, eventArgs) =>
-                {
-                    this.SingleUploadProgress = eventArgs.TransferredBytes;
-                    Console.WriteLine("Single Upload Progress: " + this.SingleUploadProgress);
-                };
+                    var putResponse = await this.s3Client.PutObjectAsync(putRequest, token).ConfigureAwait(false);
 
-                var putResponse = await this.s3Client.PutObjectAsync(putRequest, token).ConfigureAwait(false);
-
-                return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
-            }
-            catch (Exception e) 
-            {
-                if (!(e is TaskCanceledException || e is OperationCanceledException))
-                {
-                    var logMessage = "UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
-                        "\", FilePath = \"" + info.FilePath + "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
-
-                    if (e is AmazonS3Exception)
-                    {
-                        logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
-                    }
-
-                    _log.Error(logMessage);
+                    return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
                 }
+                catch (Exception e)
+                {
+                    if (!(e is TaskCanceledException || e is OperationCanceledException))
+                    {
+                        var logMessage = "UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
+                            "\", FilePath = \"" + info.FilePath + "\" threw " + e.GetType().Name + " with message \"" + e.Message + "\".";
 
-                throw e;
-            }
-            finally
-            {
-                this.IsUploading = false;
+                        if (e is AmazonS3Exception)
+                        {
+                            logMessage += " ErrorType = " + ((AmazonS3Exception)e).ErrorType + ", ErrorCode = " + ((AmazonS3Exception)e).ErrorCode + ".";
+                        }
+
+                        _log.Error(logMessage);
+
+                        if (--retries == 0)
+                            throw e;
+                    }
+                    // if the action is paused, throw an exception. The loop is broken.
+                    else
+                        throw e;
+                }
+                finally
+                {
+                    this.IsUploading = false;
+                }
             }
         }
 
@@ -456,12 +474,12 @@ namespace DeepfreezeSDK
                 {
                     token.ThrowIfCancellationRequested();
 
-                    var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
+                            var finishedTask = await Task<UploadPartResponse>.WhenAny(runningTasks).ConfigureAwait(false);
 
-                    runningTasks.Remove(finishedTask);
+                            runningTasks.Remove(finishedTask);
 
-                    if (finishedTask.Status == TaskStatus.Faulted)
-                        throw finishedTask.Exception;
+                            if (finishedTask.Status == TaskStatus.Faulted)
+                                throw finishedTask.Exception;
 
                     if (partRequests.Count > 0)
                     {
