@@ -217,35 +217,38 @@ namespace DeepfreezeApp
         {
             bool hasException = false;
 
-            this.IsBusy = false;
-            this.IsUploading = true;
-            this.OperationStatus = Enumerations.Status.Uploading;
-            this.ErrorMessage = null;
-
-            this._cts = new CancellationTokenSource();
-            CancellationToken token = this._cts.Token;
-
-            _log.Info("Starting (user clicked the Start button) archive upload with title \"" + this.Archive.Title + "\".");
-
-            // set UserPaused to false and save the local file
-            this.LocalUpload.UserPaused = false;
-            await this.SaveLocalUpload();
-
-            // set timer interval to 5 seconds to catch progress updates
-            this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
-
-            // skip files with IsUploaded = true entirely.
-            var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
-
-            var skippedFilesNum = this.LocalUpload.ArchiveFilesInfo.Count - lstFilesToUpload.Count;
-            if (skippedFilesNum > 0)
-            {
-                _log.Info("Archive upload with title \"" + this.Archive.Title + "\", skipping " + skippedFilesNum +
-                    " files since they are already uploaded.");
-            }
-
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("The upload can't start/resume without an active Internet connection.");
+
+                this.IsBusy = false;
+                this.IsUploading = true;
+                this.OperationStatus = Enumerations.Status.Uploading;
+                this.ErrorMessage = null;
+
+                this._cts = new CancellationTokenSource();
+                CancellationToken token = this._cts.Token;
+
+                _log.Info("Starting archive upload with title \"" + this.Archive.Title + "\".");
+
+                // set UserPaused to false and save the local file
+                this.LocalUpload.UserPaused = false;
+                await this.SaveLocalUpload();
+
+                // set timer interval to 5 seconds to catch progress updates
+                this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
+
+                // skip files with IsUploaded = true entirely.
+                var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
+
+                var skippedFilesNum = this.LocalUpload.ArchiveFilesInfo.Count - lstFilesToUpload.Count;
+                if (skippedFilesNum > 0)
+                {
+                    _log.Info("Archive upload with title \"" + this.Archive.Title + "\", skipping " + skippedFilesNum +
+                        " files since they are already uploaded.");
+                }
+
                 foreach (var info in lstFilesToUpload)
                 {
                     CurrentFileInfo = info;
@@ -335,9 +338,12 @@ namespace DeepfreezeApp
                 this.OperationStatus = Enumerations.Status.Paused;
                 hasException = true;
 
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
+
                 if (!(e is TaskCanceledException || e is OperationCanceledException))
                 {
-                    this.ErrorMessage = e.Message;
+                    this.ErrorMessage += e.Message;
 
                     if (e is AggregateException)
                     {
@@ -383,7 +389,7 @@ namespace DeepfreezeApp
         {
             if (this.OperationStatus == Enumerations.Status.Uploading)
             {
-                this.IsBusy = !isAutomatic; // show busy only if user paused, if it's automatic, it's on application close.
+                this.IsBusy = !isAutomatic; // show busy only if user paused.
                 this.BusyMessage = "Pausing upload...";
                 this.OperationStatus = Enumerations.Status.Paused;
 
@@ -415,6 +421,9 @@ namespace DeepfreezeApp
         {
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("The upload can't be deleted without an active Internet connection.");
+
                 _log.Info("Deleting (user clicked the Delete button) archive upload with title \"" + this.Archive.Title + "\".");
 
                 this.IsBusy = true;
@@ -439,7 +448,10 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                this.ErrorMessage = e.Message;
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
+
+                this.ErrorMessage += e.Message;
             }
             finally
             { this.IsBusy = false; }
@@ -733,7 +745,7 @@ namespace DeepfreezeApp
         /// Save Local Upload to file.
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> SaveLocalUpload()
+        private async Task<bool> SaveLocalUpload(bool useAsync = true)
         {
             if (this.IsBusy || this.LocalUpload == null)
                 return false;
@@ -749,9 +761,12 @@ namespace DeepfreezeApp
 
                 // get the latest progress value
                 this.LocalUpload.Progress = this.Progress;
-                
-                await Task.Run(() => LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8))
-                    .ConfigureAwait(false);
+
+                if (useAsync)
+                    await Task.Run(() => LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8))
+                        .ConfigureAwait(false);
+                else
+                    LocalStorage.WriteJson(this.LocalUpload.SavePath, this.LocalUpload, Encoding.UTF8);
 
                 return true;
             }
@@ -925,10 +940,15 @@ namespace DeepfreezeApp
 
         #region message_handlers
 
+        /// <summary>
+        /// Handle upload action messages for automatic pause and resume functionality.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task Handle(IUploadActionMessage message)
         {
             if (message != null 
-                && message.UploadVM == this)
+                && (message.UploadVM == this || message.UploadVM == null))
             {
                 switch(message.UploadAction)
                 {
@@ -936,7 +956,12 @@ namespace DeepfreezeApp
                         await this.CreateNewUpload();
                         break;
                     case Enumerations.UploadAction.Start:
-                        await this.StartUpload();
+                        // Don't start the upload if it was user paused or if status != pending.
+                        if (!this.LocalUpload.UserPaused && this.Upload.Status == Enumerations.Status.Pending)
+                            await this.StartUpload();
+
+                        if (this.ErrorMessage.Contains(Properties.Resources.NoInternetConnectionMessage))
+                            this.ErrorMessage = null;
                         break;
                     case Enumerations.UploadAction.Pause:
                         await this.PauseUpload(true);
@@ -1013,7 +1038,7 @@ namespace DeepfreezeApp
             this.PauseUpload(true);
 
             // do a final save
-            this.SaveLocalUpload();
+            this.SaveLocalUpload(false);
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();

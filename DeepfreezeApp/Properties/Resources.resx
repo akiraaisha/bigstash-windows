@@ -146,6 +146,12 @@
   <data name="ConnectHeaderText" xml:space="preserve">
     <value>Connect to your Deepfreeze.io Account</value>
   </data>
+  <data name="ConnectionLostMessage" xml:space="preserve">
+    <value>Internet Connection lost. Pausing active uploads...</value>
+  </data>
+  <data name="ConnectionRestoredMessage" xml:space="preserve">
+    <value>Internet Connection restored. Resuming auto-paused uploads...</value>
+  </data>
   <data name="CreatingArchiveText" xml:space="preserve">
     <value>Creating new archive</value>
   </data>
@@ -185,6 +191,9 @@
   </data>
   <data name="MinimizedMessageText" xml:space="preserve">
     <value>Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
+  </data>
+  <data name="NoInternetConnectionMessage" xml:space="preserve">
+    <value>No internet connection found. Please ensure you are connected to a network with Internet access.</value>
   </data>
   <data name="NoUploadsHeaderText" xml:space="preserve">
     <value>There aren't any pending uploads from this app.</value>

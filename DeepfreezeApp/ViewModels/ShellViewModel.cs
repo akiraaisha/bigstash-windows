@@ -14,6 +14,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace DeepfreezeApp
 {
@@ -43,6 +44,9 @@ namespace DeepfreezeApp
         private string _errorMessage;
         private bool _trayExitClicked = false;
         private bool _minimizeBallonTipShown = false;
+
+        private DispatcherTimer _connectionTimer;
+        private bool _isInternetConnected = true;
 
         #endregion
 
@@ -116,6 +120,12 @@ namespace DeepfreezeApp
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
 
+        public bool IsInternetConnected
+        {
+            get { return this._isInternetConnected; }
+            set { this._isInternetConnected = value; NotifyOfPropertyChange(() => IsInternetConnected); }
+        }
+
         #endregion
 
         #region action methods
@@ -168,6 +178,12 @@ namespace DeepfreezeApp
             this._deepfreezeClient = deepfreezeClient;
 
             this._eventAggregator.Subscribe(this);
+
+            // initialize the _connectionTimer
+            this._connectionTimer = new DispatcherTimer();
+            this._connectionTimer.Interval = new TimeSpan(0, 0, 5);
+            this._connectionTimer.Tick += _connectionTimer_Tick;
+            this._connectionTimer.Start();
         }
 
         #endregion
@@ -361,6 +377,11 @@ namespace DeepfreezeApp
                 HasError = true;
                 this.ErrorMessage = e.Message;
 
+                if (!this._deepfreezeClient.IsInternetConnected)
+                {
+                    this.ErrorMessage += "\n" + Properties.Resources.NoInternetConnectionMessage;
+                }
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = ((Exceptions.DfApiException)e).HttpResponse;
@@ -422,6 +443,39 @@ namespace DeepfreezeApp
                 }
                 else
                     callback(true);
+            }
+        }
+
+        /// <summary>
+        /// Handle _connectionTimer ticks and publish messages
+        /// for upload pause/resume on internet connectivity changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _connectionTimer_Tick(object sender, EventArgs e)
+        {
+            var isConnected = this._deepfreezeClient.IsInternetConnected;
+
+            if (this.IsInternetConnected != isConnected)
+            {
+                this.IsInternetConnected = isConnected;
+
+                var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+
+                if (this.IsInternetConnected)
+                {
+                    _log.Warn(Properties.Resources.ConnectionRestoredMessage);
+                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
+                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
+                }
+                else
+                {
+                    _log.Warn(Properties.Resources.ConnectionLostMessage);
+                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
+                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Pause;
+                }
+
+                this._eventAggregator.PublishOnBackgroundThread(uploadActionMessage);
             }
         }
 
