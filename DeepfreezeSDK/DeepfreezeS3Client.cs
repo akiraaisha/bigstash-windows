@@ -399,7 +399,10 @@ namespace DeepfreezeSDK
                 }
 
                 // for each NOT uploaded part, add a pair in the progress dictionary with value = 0
-                partsProgress.Add(i, 0);
+                if (partsProgress.ContainsKey(i))
+                    partsProgress[i] = 0;
+                else
+                    partsProgress.Add(i, 0);
 
                 bool isLastPart = false;
 
@@ -501,6 +504,7 @@ namespace DeepfreezeSDK
 
                 partRequests.Clear();
                 runningTasks.Clear();
+                this.MultipartUploadProgress.Clear();
 
                 throw ex;
             }
