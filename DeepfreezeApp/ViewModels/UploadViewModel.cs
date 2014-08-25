@@ -965,8 +965,9 @@ namespace DeepfreezeApp
                                 await this.StartUpload();
 
                             // Clear the ErrorMessage if it's about internet connectivity loss.
-                            if (this.ErrorMessage.Contains(Properties.Resources.NoInternetConnectionMessage))
+                            if (this.ErrorMessage != null && this.ErrorMessage.Contains(Properties.Resources.NoInternetConnectionMessage))
                                 this.ErrorMessage = null;
+
                             break;
                         }
                     case Enumerations.UploadAction.Pause:
