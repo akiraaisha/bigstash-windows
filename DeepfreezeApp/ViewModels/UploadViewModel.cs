@@ -956,10 +956,14 @@ namespace DeepfreezeApp
                         await this.CreateNewUpload();
                         break;
                     case Enumerations.UploadAction.Start:
+                        if (this.Upload == null)
+                            break;
+
                         // Don't start the upload if it was user paused or if status != pending.
                         if (!this.LocalUpload.UserPaused && this.Upload.Status == Enumerations.Status.Pending)
                             await this.StartUpload();
 
+                        // Clear the ErrorMessage if it's about internet connectivity loss.
                         if (this.ErrorMessage.Contains(Properties.Resources.NoInternetConnectionMessage))
                             this.ErrorMessage = null;
                         break;
