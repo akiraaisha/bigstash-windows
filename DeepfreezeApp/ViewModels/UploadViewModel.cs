@@ -1010,6 +1010,7 @@ namespace DeepfreezeApp
                     {
                         this.OperationStatus = this.Upload.Status;
                         this._refreshProgressTimer.Stop();
+                        this.ErrorMessage = null;
 
                         var notification = IoC.Get<INotificationMessage>();
                         notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
