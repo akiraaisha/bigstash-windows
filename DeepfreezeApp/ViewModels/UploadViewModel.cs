@@ -1001,7 +1001,8 @@ namespace DeepfreezeApp
                         this.Progress = newProgress;
                 }
 
-                if (this.Upload.Status == Enumerations.Status.Uploaded)
+                if (this.Upload.Status == Enumerations.Status.Uploaded
+                    && this._deepfreezeClient.IsInternetConnected)
                 {
                     await this.FetchUploadAsync(this.Upload.Url);
 
