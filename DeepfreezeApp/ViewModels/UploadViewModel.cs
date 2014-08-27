@@ -934,6 +934,10 @@ namespace DeepfreezeApp
             this.LocalUpload = null;
             this.Archive = null;
             this.Upload = null;
+
+            this._refreshProgressTimer.Tick -= Tick;
+            this._refreshProgressTimer.Stop();
+            this._refreshProgressTimer = null;
         }
 
         #endregion
