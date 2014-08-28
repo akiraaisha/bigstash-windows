@@ -460,22 +460,21 @@ namespace DeepfreezeApp
             {
                 this.IsInternetConnected = isConnected;
 
-                var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+                var internetConnectivityMessage = IoC.Get<IInternetConnectivityMessage>();
+                internetConnectivityMessage.IsConnected = this.IsInternetConnected;
 
                 if (this.IsInternetConnected)
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
                     this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
-                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
                 }
                 else
                 {
                     _log.Warn(Properties.Resources.ConnectionLostMessage);
                     this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
-                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Pause;
                 }
 
-                this._eventAggregator.PublishOnBackgroundThread(uploadActionMessage);
+                this._eventAggregator.PublishOnUIThread(internetConnectivityMessage);
             }
         }
 
