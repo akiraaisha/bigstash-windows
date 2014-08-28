@@ -23,7 +23,8 @@ using System.Diagnostics;
 namespace DeepfreezeApp
 {
     [Export(typeof(IUploadViewModel))]
-    public class UploadViewModel : Screen, IUploadViewModel, IHandleWithTask<IUploadActionMessage>
+    public class UploadViewModel : Screen, IUploadViewModel, IHandleWithTask<IUploadActionMessage>,
+        IHandleWithTask<IInternetConnectivityMessage>
     {
         #region fields
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(UploadViewModel));
@@ -338,9 +339,6 @@ namespace DeepfreezeApp
                 this.OperationStatus = Enumerations.Status.Paused;
                 hasException = true;
 
-                if (!this._deepfreezeClient.IsInternetConnected)
-                    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
-
                 if (!(e is TaskCanceledException || e is OperationCanceledException))
                 {
                     this.ErrorMessage += e.Message;
@@ -368,7 +366,10 @@ namespace DeepfreezeApp
                     await this.PauseUpload(true);
 
                 // after pause update _totalProgress, to have correct value.
-                await CalculateTotalUploadedSize();
+                // TEMPORARY: Do this only if internet connectivity is ON,
+                // meaning: ignore it if the pause happened after connectivity loss.
+                if (this._deepfreezeClient.IsInternetConnected)
+                    await CalculateTotalUploadedSize();
 
                 // finally make sure to save the local upload file to preserve the current status of the upload.
                 await this.SaveLocalUpload();
@@ -977,6 +978,31 @@ namespace DeepfreezeApp
                     case Enumerations.UploadAction.Pause:
                         await this.PauseUpload(true);
                         break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle upload action messages for automatic pause and resume functionality.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public async Task Handle(IInternetConnectivityMessage message)
+        {
+            if (this.Upload == null)
+                return;
+
+            if (message != null)
+            {
+                if (message.IsConnected &&
+                    !this.LocalUpload.UserPaused && 
+                    this.Upload.Status == Enumerations.Status.Pending)
+                {
+                    await this.StartUpload();
+                }
+                else
+                {
+                    await this.PauseUpload(true);
                 }
             }
         }
