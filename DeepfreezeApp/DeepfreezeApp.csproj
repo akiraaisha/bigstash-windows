@@ -161,6 +161,7 @@
     <Compile Include="Messages\FetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
+    <Compile Include="Messages\IInternetConnectivityMessage.cs" />
     <Compile Include="Messages\InitiateUploadMessage.cs" />
     <Compile Include="Interfaces\ILoginViewModel.cs" />
     <Compile Include="Converters\InvertBool.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="Interfaces\IUploadManagerViewModel.cs" />
     <Compile Include="Interfaces\IUploadViewModel.cs" />
     <Compile Include="Interfaces\INotificationMessage.cs" />
+    <Compile Include="Messages\InternetConnectivityMessage.cs" />
     <Compile Include="Messages\LoginSuccessMessage.cs" />
     <Compile Include="Converters\EmptyStringToBool.cs" />
     <Compile Include="Messages\LogoutMessage.cs" />
