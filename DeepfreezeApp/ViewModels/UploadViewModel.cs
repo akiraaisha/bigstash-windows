@@ -335,7 +335,10 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                this._refreshProgressTimer.Stop();
+                // if a pause occured because of application shutdown, there's a chance that the timer is null before getting here, so this check is needed.
+                if (this._refreshProgressTimer != null)
+                    this._refreshProgressTimer.Stop(); 
+
                 this.OperationStatus = Enumerations.Status.Paused;
                 hasException = true;
 
@@ -359,7 +362,10 @@ namespace DeepfreezeApp
             if (hasException)
             {
                 // check again for timer stop
-                this._refreshProgressTimer.Stop();
+                // if a pause occured because of application shutdown, there's a chance that the timer is null before getting here, so this check is needed.
+                if (this._refreshProgressTimer != null) 
+                    this._refreshProgressTimer.Stop();
+                
                 // in case of an exception other than operation cancelled (which is thrown by the user's pause action,
                 // make sure to actually send a cancel to all remaining uploading part tasks to abort them.
                 if (this._cts != null && !this._cts.IsCancellationRequested)
