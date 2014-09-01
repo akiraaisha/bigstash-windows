@@ -146,14 +146,14 @@
                                     IsDefault="True"
                                     Content="{Binding UploadButtonContent}"
                                     Width="70"
-                                    Style="{DynamicResource AccentedSquareButtonStyleWithCapital}"
+                                    Style="{DynamicResource AccentedSquareButtonStyleCI}"
                                 />
 
                             <Button x:Name="Reset" 
                                     Content="{Binding CancelButtonContent}"
                                     Width="70"
                                     Margin="20 0 0 0"
-                                    Style="{DynamicResource SquareButtonStyleWithCapital}"
+                                    Style="{DynamicResource SquareButtonStyleCI}"
                                 />
                                       
                         </WrapPanel>

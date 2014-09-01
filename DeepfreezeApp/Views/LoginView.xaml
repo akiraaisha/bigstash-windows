@@ -68,7 +68,7 @@
                 Width="Auto"
                 MinWidth="70"
                 HorizontalAlignment="Left"
-                Style="{DynamicResource AccentedSquareButtonStyleWithCapital}"
+                Style="{DynamicResource AccentedSquareButtonStyleCI}"
                 />
 
             <controls:ProgressRing IsActive="{Binding IsBusy}"

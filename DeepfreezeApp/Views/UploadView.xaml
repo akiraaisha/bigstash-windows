@@ -181,7 +181,7 @@
                         Content="{Binding ResumeButtonContent}"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        Style="{DynamicResource SquareButtonStyleWithCapital}"
+                        Style="{DynamicResource SquareButtonStyleCI}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToStartButtonVisibilityConverter}}"
                         />
 
@@ -191,7 +191,7 @@
                         Content="{Binding PauseButtonContent}"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        Style="{DynamicResource SquareButtonStyleWithCapital}"
+                        Style="{DynamicResource SquareButtonStyleCI}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToPauseButtonVisibilityConverter}}"
                         />
 
@@ -201,7 +201,7 @@
                         Content="{Binding DeleteButtonContent}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Style="{DynamicResource SquareButtonStyleWithCapital}"
+                        Style="{DynamicResource SquareButtonStyleCI}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToDeleteButtonVisibilityConverter}}"
                         />
 
@@ -211,7 +211,7 @@
                         Content="{Binding RemoveButtonContent}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Style="{DynamicResource SquareButtonStyleWithCapital}"
+                        Style="{DynamicResource SquareButtonStyleCI}"
                         Visibility="{Binding OperationStatus, Converter={StaticResource StatusToRemoveButtonVisibilityConverter}}"
                         />
 

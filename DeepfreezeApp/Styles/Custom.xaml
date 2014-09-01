@@ -13,7 +13,8 @@
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
     </Style>
 
-    <Style x:Key="SquareButtonStyleWithCapital"
+    <!--MahApps.Metro SquareButtonStyle case insensitive content-->
+    <Style x:Key="SquareButtonStyleCI"
            TargetType="{x:Type Button}">
         <Setter Property="MinHeight"
                 Value="25" />
@@ -138,8 +139,9 @@
         </Setter>
     </Style>
 
-    <Style x:Key="AccentedSquareButtonStyleWithCapital"
-           BasedOn="{StaticResource SquareButtonStyleWithCapital}"
+    <!--MahApps.Metro AccentedSquareButtonStyle case insensitive content-->
+    <Style x:Key="AccentedSquareButtonStyleCI"
+           BasedOn="{StaticResource SquareButtonStyleCI}"
            TargetType="{x:Type Button}">
         <Setter Property="Background"
                 Value="{DynamicResource AccentColorBrush}" />

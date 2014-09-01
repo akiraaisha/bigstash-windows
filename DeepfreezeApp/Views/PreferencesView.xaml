@@ -58,7 +58,7 @@
 
             <Button x:Name="ExportLog"
                     Width="70"
-                    Style="{DynamicResource SquareButtonStyleWithCapital}"
+                    Style="{DynamicResource SquareButtonStyleCI}"
                     Content="{Binding DebugButtonContent}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
