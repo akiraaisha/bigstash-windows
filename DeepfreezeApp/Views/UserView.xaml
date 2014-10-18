@@ -79,7 +79,7 @@
                 Content="{Binding LogoutString}"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Style="{DynamicResource SquareButtonStyle}"
+                Style="{DynamicResource SquareButtonStyleCI}"
                 Margin="0 10 0 0"
                 />
         </Grid>
