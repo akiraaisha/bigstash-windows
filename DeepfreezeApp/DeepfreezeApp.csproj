@@ -145,6 +145,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utilities.cs" />
     <Compile Include="Converters\BoolToVisibility.cs" />
     <Compile Include="Converters\LongSizeToStringConverter.cs" />
     <Compile Include="Converters\LongToSizeString.cs" />

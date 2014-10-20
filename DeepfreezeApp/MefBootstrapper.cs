@@ -15,6 +15,8 @@ using DeepfreezeModel;
 using System.Threading.Tasks;
 using Custom.Windows;
 using System.Deployment.Application;
+using Microsoft.Win32;
+using System.Reflection;
 
 namespace DeepfreezeApp
 {
@@ -80,7 +82,18 @@ namespace DeepfreezeApp
             else
             {
                 // Else go on with normal startup.
+ 
+                bool firstDeployedRun = ApplicationDeployment.IsNetworkDeployed &&
+                    ApplicationDeployment.CurrentDeployment.IsFirstRun;
 
+                // Change default ClickOnce icon in Programs and Features entry.
+                // This should execute only on the first app instance run after
+                // a network deployment.
+                if (firstDeployedRun)
+                {
+                    SetAddRemoveProgramsIcon();
+                }
+                
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
                 Log.Info("Starting up a new instance of Deepfreeze.io for Windows.");
@@ -242,6 +255,46 @@ namespace DeepfreezeApp
                     );
 
             Log.Info("Setting Deepfreeze log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
+        }
+
+        /// <summary>
+        /// Set the deepfreeze icon in Control Panel's Programs and Features entry 
+        /// for the Deepfreeze for Windows application.
+        /// </summary>
+        private static void SetAddRemoveProgramsIcon()
+        {
+            try
+            {
+                string installDirPath = Utilities.GetInstallDirectoryInfo().ToString();
+                string iconSourcePath = Path.Combine(installDirPath, "deepfreeze.ico");
+
+                if (!File.Exists(iconSourcePath))
+                    return;
+
+                RegistryKey uninstallKeyParentFolder = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+                IList<string> uninstallSubKeyNames = uninstallKeyParentFolder.GetSubKeyNames().ToList();
+                
+                foreach (string uninstallSubKeyName in uninstallSubKeyNames)
+                {
+                    RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
+                    object diplayNameValue = subKey.GetValue("DisplayName");
+
+                    // if subKey points to the correct Deepfreeze for Windows entry
+                    // then update its DisplayIcon key value.
+                    if (diplayNameValue != null &&
+                        diplayNameValue.ToString() == Properties.Settings.Default.ApplicationFullName)
+                    {
+                        subKey.SetValue("DisplayIcon", iconSourcePath);
+                        break;
+                    }
+                    else
+                    {
+                        // Close all other keys.
+                        subKey.Close();
+                    }
+                }
+            }
+            catch (Exception ex) { }
         }
 
         #endregion
