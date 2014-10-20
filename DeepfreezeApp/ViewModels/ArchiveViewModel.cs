@@ -92,13 +92,13 @@ namespace DeepfreezeApp
             get { return this._errorCreatingArchive; }
             set { this._errorCreatingArchive = value; NotifyOfPropertyChange(() => ErrorCreatingArchive); }
         }
-        
+
         public string ArchiveTitle
         {
             get { return this._archiveTitle; }
-            set 
-            { 
-                this._archiveTitle = value; 
+            set
+            {
+                this._archiveTitle = value;
                 NotifyOfPropertyChange(() => ArchiveTitle);
                 NotifyOfPropertyChange(() => CanUpload);
             }
@@ -107,9 +107,9 @@ namespace DeepfreezeApp
         public string ArchiveSizeText
         {
             get { return this._archiveSizeText; }
-            set 
-            { 
-                this._archiveSizeText = value; 
+            set
+            {
+                this._archiveSizeText = value;
                 NotifyOfPropertyChange(() => ArchiveSizeText);
                 NotifyOfPropertyChange(() => CanUpload);
             }
@@ -234,7 +234,7 @@ namespace DeepfreezeApp
 
                         HasChosenFiles = true;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
                         IsReset = true;
@@ -290,7 +290,7 @@ namespace DeepfreezeApp
                     _log.Warn("CreateArchiveAsync returned null.");
 
                 // reset the view
-                this.Reset(); 
+                this.Reset();
             }
             catch (Exception e)
             {
@@ -304,7 +304,7 @@ namespace DeepfreezeApp
                     _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
                 }
             }
-            finally 
+            finally
             {
                 IsBusy = false;
             }
@@ -348,7 +348,7 @@ namespace DeepfreezeApp
                 var files = new List<string>();
                 var directories = new List<string>();
 
-                foreach(var p in paths)
+                foreach (var p in paths)
                 {
                     FileAttributes attr = File.GetAttributes(p);
 
@@ -366,38 +366,39 @@ namespace DeepfreezeApp
                     if (dirFiles.Count() > 0)
                     {
                         await Task.Run(() =>
+                        {
+                            foreach (var f in dirFiles)
                             {
-                                foreach (var f in dirFiles)
+                                var info = new FileInfo(f);
+
+                                // Check that the archive size does not exceed the maximum allowed file size.
+                                // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
+                                // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
+                                if (info.Length > MAX_ALLOWED_FILE_SIZE)
+                                    throw new Exception("The file " + f + " exceeds the maximum allowed archive size of " +
+                                        LongToSizeString.ConvertToString((double)MAX_ALLOWED_FILE_SIZE) + ".");
+
+                                var archiveFileInfo = new ArchiveFileInfo()
                                 {
-                                    var info = new FileInfo(f);
+                                    FileName = info.Name,
+                                    KeyName = f.Replace(this._baseDirectory, "").Replace('\\', '/'),
+                                    FilePath = f,
+                                    Size = info.Length,
+                                    LastModified = info.LastWriteTimeUtc,
+                                    IsUploaded = false
+                                };
 
-                                    // Check that the archive size does not exceed the maximum allowed file size.
-                                    // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
-                                    // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
-                                    if (info.Length > MAX_ALLOWED_FILE_SIZE)
-                                        throw new Exception("The file " + f + " exceeds the maximum allowed archive size of 100 GB.");
+                                this._archiveInfo.Add(archiveFileInfo);
 
-                                    var archiveFileInfo = new ArchiveFileInfo()
-                                    {
-                                        FileName = info.Name,
-                                        KeyName = f.Replace(this._baseDirectory, "").Replace('\\', '/'),
-                                        FilePath = f,
-                                        Size = info.Length,
-                                        LastModified = info.LastWriteTimeUtc,
-                                        IsUploaded = false
-                                    };
-
-                                    this._archiveInfo.Add(archiveFileInfo);
-
-                                    size += archiveFileInfo.Size;
-                                }
+                                size += archiveFileInfo.Size;
                             }
+                        }
                         );
                     }
                 }
-                
+
                 // do the same for each individually selected files.
-                foreach(var f in files)
+                foreach (var f in files)
                 {
                     var info = new FileInfo(f);
 
@@ -405,7 +406,7 @@ namespace DeepfreezeApp
                     // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
                     // Since DF supports part size of 5 MB, archive size must not exceed 5 MB * 10000
                     if (info.Length > MAX_ALLOWED_FILE_SIZE)
-                        throw new Exception("The file " + info + " exceeds the maximum allowed archive size of " + 
+                        throw new Exception("The file " + info + " exceeds the maximum allowed archive size of " +
                             LongToSizeString.ConvertToString((double)MAX_ALLOWED_FILE_SIZE) + ".");
 
                     var archiveFileInfo = new ArchiveFileInfo()
@@ -428,7 +429,17 @@ namespace DeepfreezeApp
 
                 // check that the archive size fits in user's DF storage.
                 if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
-                    throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
+                {
+                    // get the userviewmodel to refresh stats.
+                    // we could use the messaging service, but we actually need to wait until the stats are refreshed
+                    // before checking the sizes again. Sending a message is a fire and forget style, so that couldn't work here.
+                    var userVM = IoC.Get<IUserViewModel>() as UserViewModel;
+                    await userVM.RefreshUser();
+
+                    if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
+                        throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
+                }
+
 
                 // suggest an archive title
                 if (directories.Count == 1)
