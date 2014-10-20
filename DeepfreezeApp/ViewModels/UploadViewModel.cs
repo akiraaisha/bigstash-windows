@@ -452,6 +452,9 @@ namespace DeepfreezeApp
                 var removeUploadMessage = IoC.Get<IRemoveUploadViewModelMessage>();
                 removeUploadMessage.UploadVMToRemove = this;
                 this._eventAggregator.PublishOnBackgroundThread(removeUploadMessage);
+
+                // send a message to refresh user storage stats.
+                this._eventAggregator.PublishOnCurrentThread(IoC.Get<IRefreshUserMessage>());
             }
             catch (Exception e)
             {
