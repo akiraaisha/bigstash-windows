@@ -456,7 +456,9 @@ namespace DeepfreezeApp
         {
             var isConnected = this._deepfreezeClient.IsInternetConnected;
 
-            if (this.IsInternetConnected != isConnected)
+            var uploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
+
+            if (this.IsInternetConnected != isConnected && uploadManagerVM.Uploads.Count > 0)
             {
                 this.IsInternetConnected = isConnected;
 
@@ -466,12 +468,20 @@ namespace DeepfreezeApp
                 if (this.IsInternetConnected)
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
-                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
+
+                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused).Count();
+
+                    if (autoPausedUploadsCount > 0)
+                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
                 }
                 else
                 {
                     _log.Warn(Properties.Resources.ConnectionLostMessage);
-                    this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
+
+                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => x.IsUploading).Count();
+
+                    if (autoPausedUploadsCount > 0)
+                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
                 }
 
                 this._eventAggregator.PublishOnUIThread(internetConnectivityMessage);

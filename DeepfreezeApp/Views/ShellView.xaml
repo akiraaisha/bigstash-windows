@@ -85,8 +85,8 @@
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
                         IconSource="/deepfreeze_tray.ico"
                         ToolTipText="Deepfreeze.io for Windows"
-                        MenuActivation="LeftOrRightClick"
-                        cal:Message.Attach="[Event TrayMouseDoubleClick] = [Action ShowShellWindow()]"
+                        MenuActivation="RightClick"
+                        cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
                         >
 
             <tb:TaskbarIcon.ContextMenu>
