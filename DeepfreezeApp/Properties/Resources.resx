@@ -235,6 +235,9 @@
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>
   </data>
+  <data name="StatusErrorNotificationText" xml:space="preserve">
+    <value>There was an error freezing Archive</value>
+  </data>
   <data name="StatusErrorText" xml:space="preserve">
     <value>Error</value>
   </data>

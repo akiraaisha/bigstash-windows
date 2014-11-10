@@ -376,6 +376,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error freezing Archive.
+        /// </summary>
+        internal static string StatusErrorNotificationText {
+            get {
+                return ResourceManager.GetString("StatusErrorNotificationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         internal static string StatusErrorText {
