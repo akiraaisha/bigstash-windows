@@ -1045,14 +1045,26 @@ namespace DeepfreezeApp
                 {
                     await this.FetchUploadAsync(this.Upload.Url);
 
-                    if (this.Upload.Status == Enumerations.Status.Completed)
+                    if (this.Upload.Status == Enumerations.Status.Completed ||
+                        this.Upload.Status == Enumerations.Status.Error)
                     {
                         this.OperationStatus = this.Upload.Status;
                         this._refreshProgressTimer.Stop();
                         this.ErrorMessage = null;
 
                         var notification = IoC.Get<INotificationMessage>();
-                        notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+
+                        bool isCompleted = this.Upload.Status == Enumerations.Status.Completed; // else status is error
+
+                        if (isCompleted)
+                        {
+                            notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+                        }
+                        else
+                        {
+                            notification.Message = Properties.Resources.StatusErrorNotificationText + " " + this.Archive.Key + ".";
+                        }
+
                         this._eventAggregator.PublishOnBackgroundThread(notification);
                     }
                 }
