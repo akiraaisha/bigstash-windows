@@ -469,7 +469,7 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
 
                     if (autoPausedUploadsCount > 0)
                         this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
