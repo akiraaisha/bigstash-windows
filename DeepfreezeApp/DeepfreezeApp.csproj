@@ -16,7 +16,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>C:\deepfreeze-deploy\</PublishUrl>
+    <PublishUrl>https://www.deepfreeze.io/apps/windows/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -97,8 +97,9 @@
     <Reference Include="Caliburn.Micro.Platform">
       <HintPath>..\packages\Caliburn.Micro.2.0.0\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="Custom.Windows">
-      <HintPath>..\packages\Custom.Windows.1.0.2.1\lib\net40\Custom.Windows.dll</HintPath>
+    <Reference Include="Custom.Windows, Version=1.1.0.0, Culture=neutral, PublicKeyToken=8816f6d3bef7aa8b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Custom.Windows.1.1.0.0\lib\net40\Custom.Windows.dll</HintPath>
     </Reference>
     <Reference Include="Hardcodet.Wpf.TaskbarNotification, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -145,6 +146,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IAboutViewModel.cs" />
+    <Compile Include="Messages\CheckForUpdatesMessage.cs" />
+    <Compile Include="Messages\ICheckForUpdateMessage.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Converters\BoolToVisibility.cs" />
     <Compile Include="Converters\LongSizeToStringConverter.cs" />
@@ -189,6 +193,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\AboutViewModel.cs" />
     <Compile Include="ViewModels\UploadManagerViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />
@@ -245,6 +250,10 @@
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AboutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UploadManagerView.xaml">
       <SubType>Designer</SubType>
