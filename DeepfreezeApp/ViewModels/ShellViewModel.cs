@@ -32,11 +32,13 @@ namespace DeepfreezeApp
         private ArchiveViewModel _archiveVM;
         private LoginViewModel _loginVM;
         private PreferencesViewModel _preferencesVM;
+        private AboutViewModel _aboutVM;
         private UploadManagerViewModel _uploadManagerVM;
 
         private MetroWindow _shellWindow;
         private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
+        private bool _isAboutFlyoutOpen = false;
 
         private bool _isBusy = false;
         private bool _hasError = false;
@@ -102,6 +104,12 @@ namespace DeepfreezeApp
             set { this._preferencesVM = value; NotifyOfPropertyChange(() => PreferencesVM); }
         }
 
+        public AboutViewModel AboutVM
+        {
+            get { return this._aboutVM; }
+            set { this._aboutVM = value; NotifyOfPropertyChange(() => AboutVM); }
+        }
+
         public UploadManagerViewModel UploadManagerVM
         {
             get { return this._uploadManagerVM; }
@@ -114,8 +122,20 @@ namespace DeepfreezeApp
             set { this._isPreferencesFlyoutOpen = value; NotifyOfPropertyChange(() => IsPreferencesFlyoutOpen); }
         }
 
+        public bool IsAboutFlyoutOpen
+        {
+            get { return this._isAboutFlyoutOpen; }
+            set { this._isAboutFlyoutOpen = value; NotifyOfPropertyChange(() => IsAboutFlyoutOpen); }
+        }
+
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
+
+        public string AboutHeader
+        { get { return Properties.Resources.AboutHeader; } }
+
+        public string AboutButtonTooltip
+        { get { return Properties.Resources.AboutButtonTooltip; } }
 
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
@@ -136,6 +156,29 @@ namespace DeepfreezeApp
         public void TogglePreferencesFlyout()
         {
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
+
+            if (IsPreferencesFlyoutOpen)
+            {
+                IsAboutFlyoutOpen = false;
+            }
+        }
+
+        public void ToggleAboutFlyout()
+        {
+            IsAboutFlyoutOpen = !IsAboutFlyoutOpen;
+
+            if (IsAboutFlyoutOpen)
+            {
+                IsPreferencesFlyoutOpen = false;
+
+                // send a message with the aggregator to check for updates
+                // only if the user has automatic updates settings enabled.\
+                if (Properties.Settings.Default.DoAutomaticUpdates)
+                {
+                    var checkForUpdateMessage = IoC.Get<ICheckForUpdateMessage>() as CheckForUpdatesMessage;
+                    this._eventAggregator.PublishOnUIThread(checkForUpdateMessage);
+                }
+            }
         }
 
         public void ShowShellWindow()
@@ -203,6 +246,7 @@ namespace DeepfreezeApp
 
             InstatiateArchiveViewModel();
             InstatiatePreferencesViewModel();
+            InstatiateAboutViewModel();
             InstatiateUploadManagerViewModel();
         }
 
@@ -350,6 +394,7 @@ namespace DeepfreezeApp
 
                         InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();
+                        InstatiateAboutViewModel();
                         InstatiateUploadManagerViewModel();
                     }
                     else
@@ -528,6 +573,18 @@ namespace DeepfreezeApp
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
             }
             this.ActivateItem(PreferencesVM);
+        }
+
+        /// <summary>
+        /// Instatiate a new AboutViewModel and activate it.
+        /// </summary>
+        private void InstatiateAboutViewModel()
+        {
+            if (AboutVM == null)
+            {
+                AboutVM = IoC.Get<IAboutViewModel>() as AboutViewModel;
+            }
+            this.ActivateItem(AboutVM);
         }
 
         /// <summary>

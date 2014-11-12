@@ -12,9 +12,10 @@
         ResizeMode="CanResizeWithGrip"
         GlowBrush="{DynamicResource GrayBrush7}"
         Style="{DynamicResource MyCleanWindowStyle}"
-        Height="500" 
-        Width="300"
-        MinHeight="550"        
+        Height="600"
+        MinHeight="600"
+        Width="550"
+        MinWidth="550"
         SaveWindowPosition="True"
         >
 
@@ -60,23 +61,55 @@
                 </Rectangle>
                 
             </Button>
-            
+
+            <Button ToolTip="{Binding AboutButtonTooltip}" 
+                    FontFamily="Segoe UI Symbol"
+                    FontSize="16"
+                    Style="{DynamicResource MetroWindowButtonStyle}"
+                    cal:Message.Attach="ToggleAboutFlyout"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                    >
+
+                <Rectangle Width="15"
+                           Height="15">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform"
+                                     Visual="{StaticResource appbar_information}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+
+            </Button>
+
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
 
     <controls:MetroWindow.Flyouts>
-        <controls:FlyoutsControl x:Name="Flytouts">
+        <controls:FlyoutsControl x:Name="Flytouts" >
+            
+            <controls:Flyout x:Name="PreferencesFlyout" 
+                             Header="{Binding PreferencesHeader}"
+                             Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
+
+                <controls:MetroContentControl cal:View.Model="{Binding PreferencesVM}" />
+
+            </controls:Flyout>
+
             <controls:Flyout 
-                x:Name="PreferencesFlyout" 
-                Header="{Binding PreferencesHeader}"
-                Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
+                x:Name="AboutFlyout" 
+                Header="{Binding AboutHeader}"
+                Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
                 IsModal="True"
                 Theme="Adapt"
                 >
 
-                <ContentControl cal:View.Model="{Binding PreferencesVM}" />
+                <controls:MetroContentControl cal:View.Model="{Binding AboutVM}" />
 
             </controls:Flyout>
+            
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
