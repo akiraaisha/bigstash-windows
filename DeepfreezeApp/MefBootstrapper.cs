@@ -77,7 +77,7 @@ namespace DeepfreezeApp
             // or a newer with the first instance already running.
             // if this is the case, the newer instance shuts down.
             var app = Application as InstanceAwareApplication;
-            if (!(app == null || app.IsFirstInstance))
+            if (!(app == null || app.IsFirstInstance.GetValueOrDefault()))
                 app.Shutdown();
             else
             {
@@ -127,7 +127,7 @@ namespace DeepfreezeApp
         protected override async void OnExit(object sender, EventArgs e)
         {
             var app = Application as InstanceAwareApplication;
-            if ((app != null && app.IsFirstInstance))
+            if ((app != null && app.IsFirstInstance.GetValueOrDefault()))
             {
                 Log.Info("Exiting application.");
 
