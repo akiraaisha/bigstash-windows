@@ -35,10 +35,10 @@
                       Margin="5 5 0 0"
                       FontSize="14"
                       />
-            
+
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Bottom"
+        <!--<StackPanel DockPanel.Dock="Bottom"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
                     Margin="0 0 0 10">
@@ -81,7 +81,7 @@
                        VerticalAlignment="Center"
                        />
             
-        </StackPanel>
+        </StackPanel>-->
         
 
     </DockPanel>
