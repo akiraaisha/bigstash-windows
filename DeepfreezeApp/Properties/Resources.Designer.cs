@@ -61,6 +61,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to About Deepfreeze.io for Windows.
+        /// </summary>
+        internal static string AboutButtonTooltip {
+            get {
+                return ResourceManager.GetString("AboutButtonTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        internal static string AboutHeader {
+            get {
+                return ResourceManager.GetString("AboutHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deepfreeze.io Account.
         /// </summary>
         internal static string ActiveUserHeader {
@@ -93,6 +111,33 @@ namespace DeepfreezeApp.Properties {
         internal static string CancelButtonContent {
             get {
                 return ResourceManager.GetString("CancelButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic check and installation of updates, every time the About page is opened..
+        /// </summary>
+        internal static string CheckForUpdateAutomaticText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateAutomaticText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for update.
+        /// </summary>
+        internal static string CheckForUpdateText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for application updates and install them..
+        /// </summary>
+        internal static string CheckForUpdateTooltip {
+            get {
+                return ResourceManager.GetString("CheckForUpdateTooltip", resourceCulture);
             }
         }
         
@@ -340,6 +385,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Click Restart for changes to take effect..
+        /// </summary>
+        internal static string RestartNeededText {
+            get {
+                return ResourceManager.GetString("RestartNeededText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Resume.
         /// </summary>
         internal static string ResumeButtonContent {
@@ -489,6 +543,15 @@ namespace DeepfreezeApp.Properties {
         internal static string UploadedNotificationText {
             get {
                 return ResourceManager.GetString("UploadedNotificationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deepfreeze.io for Windows is up to date..
+        /// </summary>
+        internal static string UpToDateText {
+            get {
+                return ResourceManager.GetString("UpToDateText", resourceCulture);
             }
         }
         

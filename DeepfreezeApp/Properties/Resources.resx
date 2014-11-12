@@ -117,6 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AboutButtonTooltip" xml:space="preserve">
+    <value>About Deepfreeze.io for Windows</value>
+    <comment>Used for about button tooltip</comment>
+  </data>
+  <data name="AboutHeader" xml:space="preserve">
+    <value>About</value>
+    <comment>Used for about flyout header.</comment>
+  </data>
   <data name="ActiveUserHeader" xml:space="preserve">
     <value>Deepfreeze.io Account</value>
     <comment>Used for active user header in preferences.</comment>
@@ -131,6 +139,16 @@
   <data name="CancelButtonContent" xml:space="preserve">
     <value>Cancel</value>
     <comment>Used for cancel button content.</comment>
+  </data>
+  <data name="CheckForUpdateAutomaticText" xml:space="preserve">
+    <value>Automatic check and installation of updates, every time the About page is opened.</value>
+  </data>
+  <data name="CheckForUpdateText" xml:space="preserve">
+    <value>Check for update</value>
+    <comment>Used for check for update button.</comment>
+  </data>
+  <data name="CheckForUpdateTooltip" xml:space="preserve">
+    <value>Check for application updates and install them.</value>
   </data>
   <data name="ChooseFolderText" xml:space="preserve">
     <value>or choose a folder</value>
@@ -223,6 +241,9 @@
   <data name="RemoveButtonContent" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="RestartNeededText" xml:space="preserve">
+    <value>Click Restart for changes to take effect.</value>
+  </data>
   <data name="ResumeButtonContent" xml:space="preserve">
     <value>Resume</value>
   </data>
@@ -276,6 +297,9 @@
   </data>
   <data name="UploadedNotificationText" xml:space="preserve">
     <value>was successfully uploaded.</value>
+  </data>
+  <data name="UpToDateText" xml:space="preserve">
+    <value>Deepfreeze.io for Windows is up to date.</value>
   </data>
   <data name="UsedText" xml:space="preserve">
     <value> Used / </value>

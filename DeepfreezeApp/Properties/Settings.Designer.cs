@@ -178,5 +178,29 @@ namespace DeepfreezeApp.Properties {
                 this["IsFirstLogin"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RestartAfterUpdate {
+            get {
+                return ((bool)(this["RestartAfterUpdate"]));
+            }
+            set {
+                this["RestartAfterUpdate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DoAutomaticUpdates {
+            get {
+                return ((bool)(this["DoAutomaticUpdates"]));
+            }
+            set {
+                this["DoAutomaticUpdates"] = value;
+            }
+        }
     }
 }
