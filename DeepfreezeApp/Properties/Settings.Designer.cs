@@ -202,5 +202,17 @@ namespace DeepfreezeApp.Properties {
                 this["DoAutomaticUpdates"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DebugServerBaseAddress {
+            get {
+                return ((string)(this["DebugServerBaseAddress"]));
+            }
+            set {
+                this["DebugServerBaseAddress"] = value;
+            }
+        }
     }
 }
