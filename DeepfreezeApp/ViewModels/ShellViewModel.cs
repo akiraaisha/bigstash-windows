@@ -429,10 +429,10 @@ namespace DeepfreezeApp
                 HasError = true;
                 this.ErrorMessage = e.Message;
 
-                if (!this._deepfreezeClient.IsInternetConnected)
-                {
-                    this.ErrorMessage += "\n" + Properties.Resources.NoInternetConnectionMessage;
-                }
+                //if (!this._deepfreezeClient.IsInternetConnected)
+                //{
+                //    this.ErrorMessage += "\n" + Properties.Resources.NoInternetConnectionMessage;
+                //}
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -510,10 +510,11 @@ namespace DeepfreezeApp
 
             var uploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
 
-            if (this.IsInternetConnected != isConnected && uploadManagerVM.Uploads.Count > 0)
-            {
-                this.IsInternetConnected = isConnected;
+            bool connectionStatusChanged = this.IsInternetConnected != isConnected;
+            this.IsInternetConnected = isConnected;
 
+            if (connectionStatusChanged && uploadManagerVM.Uploads.Count > 0)
+            {
                 var internetConnectivityMessage = IoC.Get<IInternetConnectivityMessage>();
                 internetConnectivityMessage.IsConnected = this.IsInternetConnected;
 
