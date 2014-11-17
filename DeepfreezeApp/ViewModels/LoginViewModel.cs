@@ -179,6 +179,9 @@ namespace DeepfreezeApp
 
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't login without an active Internet connection.");
+
                 IsBusy = true;
 
                 _log.Info("Connecting user with email \"" + this.UsernameInput + "\".");
