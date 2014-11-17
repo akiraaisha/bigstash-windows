@@ -180,10 +180,11 @@ namespace DeepfreezeApp
         public async void CheckForUpdate()
         {
             UpdateCheckInfo info = null;
+            this.ErrorMessage = null;
 
             if (!this._deepfreezeClient.IsInternetConnected)
             {
-                this.UpdateMessage = "Can't check for updates without an active Internet connection.";
+                this.ErrorMessage = "Can't check for updates without an active Internet connection.";
                 return;
             }
 
@@ -207,19 +208,19 @@ namespace DeepfreezeApp
                 catch (DeploymentDownloadException dde)
                 {
                     IsBusy = false;
-                    this.UpdateMessage = "The new version of Deepfreeze.io for Windows cannot be downloaded at this time.";
+                    this.ErrorMessage = "The new version of Deepfreeze.io for Windows cannot be downloaded at this time.";
                     return;
                 }
                 catch (InvalidDeploymentException ide)
                 {
                     IsBusy = false;
-                    this.UpdateMessage = "Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application.";
+                    this.ErrorMessage = "Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application.";
                     return;
                 }
                 catch (InvalidOperationException ioe)
                 {
                     IsBusy = false;
-                    this.UpdateMessage = "This application cannot be updated. It is likely not a ClickOnce application.";
+                    this.ErrorMessage = "This application cannot be updated. It is likely not a ClickOnce application.";
                     return;
                 }
 
@@ -245,7 +246,7 @@ namespace DeepfreezeApp
                     catch (DeploymentDownloadException dde)
                     {
                         IsBusy = false;
-                        this.UpdateMessage = "Cannot install the latest version of Deepfreeze.io for Windows. Please check your network or try again later.";
+                        this.ErrorMessage = "Cannot install the latest version of Deepfreeze.io for Windows. Please check your network or try again later.";
                     }
                 }
                 else
