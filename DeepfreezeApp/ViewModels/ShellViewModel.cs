@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows;
 using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace DeepfreezeApp
 {
@@ -370,8 +371,14 @@ namespace DeepfreezeApp
                 }
                 else
                 {
+                    // endpoint.txt does not exist, so set the base address to the Application wide default setting 
+                    // 'ServerBaseAddress' variable.
                     _log.Info("Endpoint file doesn't exist. Setting to default as \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
                     this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
+
+                    // try call SetDebugApiEndpoint(), which exists only in debug mode
+                    // to override the above 'ServerBaseAddress'.
+                    this.SetDebugApiEndpoint();
                 }
 
                 if (IsLoggedIn)
@@ -632,6 +639,27 @@ namespace DeepfreezeApp
             this.UploadManagerVM = null;
 
             InstatiateLoginViewModel(errorMessage);
+        }
+
+        /// <summary>
+        /// Use this method to change the api endpoint for debug only mode.
+        /// This method is called in the 'OnActivate' event and changes the api endpoint
+        /// after the standard way of checking and saving the preferences.djf file,
+        /// which includes a call to save that file before going on with the initialization.
+        /// </summary>
+        [Conditional("DEBUG")]
+        private void SetDebugApiEndpoint()
+        {
+            // set the api endpoint for debug only mode
+            // only if the user setting 'DebugServerBaseAddress' is set.
+            string debugEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+
+            if (!(String.IsNullOrEmpty(debugEndpoint) ||
+                  String.IsNullOrWhiteSpace(debugEndpoint)))
+            {
+                MessageBox.Show("Setting custom endpoint to: " + debugEndpoint);
+                this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+            }
         }
 
         #endregion
