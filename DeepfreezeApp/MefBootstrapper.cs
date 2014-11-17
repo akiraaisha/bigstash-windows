@@ -9,14 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Diagnostics;
+using System.Deployment.Application;
+ 
 
 using Newtonsoft.Json;
 using DeepfreezeModel;
 using System.Threading.Tasks;
 using Custom.Windows;
-using System.Deployment.Application;
-using Microsoft.Win32;
-using System.Reflection;
 
 namespace DeepfreezeApp
 {
@@ -76,8 +76,8 @@ namespace DeepfreezeApp
             // check if this is the first instance running
             // or a newer with the first instance already running.
             // if this is the case, the newer instance shuts down.
-            var app = Application as InstanceAwareApplication;
-            if (!(app == null || app.IsFirstInstance.GetValueOrDefault()))
+            var app = Application.Current as InstanceAwareApplication;
+            if (!(app == null || app.IsFirstInstance))
                 app.Shutdown();
             else
             {
@@ -124,10 +124,10 @@ namespace DeepfreezeApp
             }
         }
 
-        protected override async void OnExit(object sender, EventArgs e)
+        protected override void OnExit(object sender, EventArgs e)
         {
             var app = Application as InstanceAwareApplication;
-            if ((app != null && app.IsFirstInstance.GetValueOrDefault()))
+            if ((app != null && app.IsFirstInstance))
             {
                 Log.Info("Exiting application.");
 
@@ -139,6 +139,10 @@ namespace DeepfreezeApp
                 if (client.IsLogged())
                 {
                     Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+
+                    // Reset the api endpoint to the default 'ServerBaseAddress' before saving the preferences file
+                    // for the last time.
+                    this.ResetDebugServerBaseAddress(client);
 
                     // Save preferences file.
                     LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII);
@@ -271,12 +275,12 @@ namespace DeepfreezeApp
                 if (!File.Exists(iconSourcePath))
                     return;
 
-                RegistryKey uninstallKeyParentFolder = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+                Microsoft.Win32.RegistryKey uninstallKeyParentFolder = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
                 IList<string> uninstallSubKeyNames = uninstallKeyParentFolder.GetSubKeyNames().ToList();
                 
                 foreach (string uninstallSubKeyName in uninstallSubKeyNames)
                 {
-                    RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
+                    Microsoft.Win32.RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
                     object diplayNameValue = subKey.GetValue("DisplayName");
 
                     // if subKey points to the correct Deepfreeze for Windows entry
@@ -295,6 +299,12 @@ namespace DeepfreezeApp
                 }
             }
             catch (Exception ex) { }
+        }
+
+        [Conditional("DEBUG")]
+        private void ResetDebugServerBaseAddress(IDeepfreezeClient client)
+        {
+            client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
         }
 
         #endregion
