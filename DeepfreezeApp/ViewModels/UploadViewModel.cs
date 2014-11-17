@@ -220,13 +220,13 @@ namespace DeepfreezeApp
 
             try
             {
-                if (!this._deepfreezeClient.IsInternetConnected)
-                    throw new Exception("The upload can't start/resume without an active Internet connection.");
-
                 this.IsBusy = false;
                 this.IsUploading = true;
                 this.OperationStatus = Enumerations.Status.Uploading;
                 this.ErrorMessage = null;
+
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("The upload can't start/resume without an active Internet connection.");
 
                 this._cts = new CancellationTokenSource();
                 CancellationToken token = this._cts.Token;
