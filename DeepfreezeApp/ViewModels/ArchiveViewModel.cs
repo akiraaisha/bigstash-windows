@@ -265,12 +265,15 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task Upload()
         {
-            HasChosenFiles = false;
-            IsBusy = true;
-            BusyMessageText = Properties.Resources.CreatingArchiveText;
-
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't upload an archive without an active Internet connection.");
+
+                HasChosenFiles = false;
+                IsBusy = true;
+                BusyMessageText = Properties.Resources.CreatingArchiveText;
+
                 _log.Info("Create new archive, size = " + this._archiveSize + " bytes, title = \"" + ArchiveTitle + "\".");
                 // create a new archive using DF API.
                 var archive = await this._deepfreezeClient.CreateArchiveAsync(this._archiveSize, ArchiveTitle);
