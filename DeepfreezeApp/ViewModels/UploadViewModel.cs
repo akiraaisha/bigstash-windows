@@ -428,6 +428,8 @@ namespace DeepfreezeApp
         {
             try
             {
+                this.ErrorMessage = null;
+
                 if (!this._deepfreezeClient.IsInternetConnected)
                     throw new Exception("The upload can't be deleted without an active Internet connection.");
 
@@ -458,8 +460,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                if (!this._deepfreezeClient.IsInternetConnected)
-                    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
+                //if (!this._deepfreezeClient.IsInternetConnected)
+                //    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
 
                 this.ErrorMessage += e.Message;
             }
