@@ -101,9 +101,15 @@ namespace DeepfreezeApp
 
         public async Task RefreshUser()
         {
-            this.IsBusy = true;
+            this.Reset();
+
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't refresh user stats without an active Internet connection.");
+
+                this.IsBusy = true;
+
                 _log.Info("Fetching User, GET users resource.");
                 var user = await this._deepfreezeClient.GetUserAsync();
 
@@ -154,6 +160,12 @@ namespace DeepfreezeApp
         #endregion
 
         #region private_methods
+
+        private void Reset()
+        {
+            this.ErrorMessage = null;
+        }
+
         #endregion
 
         #region events
