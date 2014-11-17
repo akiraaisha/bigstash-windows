@@ -181,6 +181,12 @@ namespace DeepfreezeApp
         {
             UpdateCheckInfo info = null;
 
+            if (!this._deepfreezeClient.IsInternetConnected)
+            {
+                this.UpdateMessage = "Can't check for updates without an active Internet connection.";
+                return;
+            }
+
             if (ApplicationDeployment.IsNetworkDeployed)
             {
                 ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
