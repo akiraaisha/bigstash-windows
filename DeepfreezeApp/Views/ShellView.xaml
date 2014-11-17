@@ -114,6 +114,10 @@
     </controls:MetroWindow.Flyouts>
 
     <Grid Margin="0 0 0 10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
                         IconSource="/deepfreeze_tray.ico"
@@ -136,54 +140,72 @@
 
         </tb:TaskbarIcon>
 
-        <TextBlock x:Name="ErrorMessage"
+        <StackPanel Background="FloralWhite">
+            
+            <TextBlock Text="Looks like you aren't connected to the internet. Verify that your internet connection is working properly."
+                               TextWrapping="Wrap"
+                               Visibility="{Binding IsInternetConnected, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Top"
+                               Background="FloralWhite"
+                               TextAlignment="Center"
+                               FontSize="16"
+                               Margin="0 5 0 5"
+                               />
+        </StackPanel>
+        
+        <Grid Grid.Row="1">
+
+            <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
-        
-        <Grid Visibility="{Binding HasError, Converter={StaticResource InvertBoolToVisibilityConverter}}">
 
-            <WrapPanel HorizontalAlignment="Center" 
+            <Grid Visibility="{Binding HasError, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+
+                <WrapPanel HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
                    >
 
-                <Label Content="{Binding BusyMessage}" />
+                    <Label Content="{Binding BusyMessage}" />
 
-                <controls:ProgressRing IsActive="{Binding IsBusy}" 
+                    <controls:ProgressRing IsActive="{Binding IsBusy}" 
                                    Width="20" 
                                    Height="20" 
                                    />
 
-            </WrapPanel>
+                </WrapPanel>
 
-            <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-                    VerticalAlignment="Center"
-                    >
+                <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                            VerticalAlignment="Center"
+                            >
 
-                <ContentControl cal:View.Model="{Binding LoginVM}" />
+                    <ContentControl cal:View.Model="{Binding LoginVM}" />
 
-            </StackPanel>
+                </StackPanel>
 
-            <DockPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
+                <DockPanel DockPanel.Dock="Top" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
 
-                <ContentControl cal:View.Model="{Binding ArchiveVM}"
+                    <ContentControl cal:View.Model="{Binding ArchiveVM}"
                             DockPanel.Dock="Top"
                             />
 
-                <ScrollViewer DockPanel.Dock="Top"
+                    <ScrollViewer DockPanel.Dock="Top"
                           VerticalScrollBarVisibility="Auto"
                           >
 
-                    <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
+                        <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
 
-                </ScrollViewer>
+                    </ScrollViewer>
 
-            </DockPanel>
-            
+                </DockPanel>
+
+            </Grid>
+
         </Grid>
 
     </Grid>
