@@ -89,11 +89,11 @@
                    cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenAccountPage()]"
                    />
 
-        <TextBlock
-                x:Name="LoginError"
-                Foreground="Red"
-                TextWrapping="Wrap"
-                Visibility="{Binding HasLoginError, Converter={StaticResource BoolToVisibilityConverter}}"
+        <TextBlock x:Name="LoginError"
+                   Foreground="Red"
+                   TextWrapping="Wrap"
+                   Visibility="{Binding HasLoginError, Converter={StaticResource BoolToVisibilityConverter}}"
+                   HorizontalAlignment="Center"
                 />
 
     </StackPanel>
