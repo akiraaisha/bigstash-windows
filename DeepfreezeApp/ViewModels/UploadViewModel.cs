@@ -346,6 +346,12 @@ namespace DeepfreezeApp
                 {
                     this.ErrorMessage += e.Message;
 
+                    if (e is AmazonS3Exception)
+                    {
+                        this.OperationStatus = Enumerations.Status.Paused;
+                        this.ErrorMessage += " Type: " + ((AmazonS3Exception)e).ErrorCode + ". Try resuming the upload again.";
+                    }
+
                     if (e is AggregateException)
                     {
                         foreach(var inner in ((AggregateException)e).InnerExceptions)
@@ -444,7 +450,14 @@ namespace DeepfreezeApp
                     this.Upload.Status != Enumerations.Status.Completed &&
                     this.Upload.Status != Enumerations.Status.Uploaded)
                 {
-                    var abortSuccess = await this.Abort().ConfigureAwait(false);
+                    try
+                    {
+                        var abortSuccess = await this.Abort().ConfigureAwait(false);
+                    }
+                    catch(AmazonS3Exception ae)
+                    {
+                        // If there's an aws exception when calling abort, just go on with the delete call to the df api.
+                    }
 
                     var deleteSuccess = await this._deepfreezeClient.DeleteUploadAsync(this.Upload).ConfigureAwait(false);
                 }
@@ -666,22 +679,34 @@ namespace DeepfreezeApp
         {
             try
             {
+                // The code below tries to find pending s3 multipart uploads
+                // and sends an abort request for each one found.
+                // Currently the client doesn't support uploading many files in parallel,
+                // that is only one file is uploaded per archive at any given time. So, files
+                // are uploaded sequentially. As a result of this, the filesWithOpenUploads list
+                // should always have only one member max. Regardless, the code is written in 
+                // a way to support more than 1 aborts of not yet completed multipart uploads.
+
+                // get all ArchiveFileInfo for each file to be aborted.
                 var filesWithOpenUploads = this.LocalUpload.ArchiveFilesInfo
                    .Where(x => x.UploadId != null && !x.IsUploaded);
 
-                await Task.Run(() =>
-                    {
-                        Parallel.ForEach(filesWithOpenUploads, async info =>
-                        {
-                            await this._s3Client.AbortMultiPartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, CancellationToken.None)
-                                .ConfigureAwait(false);
-                        }
-                        );
-                    }
-                ).ConfigureAwait(false);
+                // For each ArchiveFileInfo to be aborted, create an async Task making a call to the
+                // _s3Client.AbortMultiPartUploadAsync() method and add it to the abortTasks list.
+                var abortTasks = new List<Task>();
+                foreach(var info in filesWithOpenUploads)
+                {
+                    var task = this._s3Client.AbortMultiPartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, CancellationToken.None);
+
+                    abortTasks.Add(task);
+                }
+
+                // Asynchronously wait for all the abort tasks to end.
+                await Task.WhenAll(abortTasks).ConfigureAwait(false);
                 
                 return true;
             }
+            catch (AggregateException ae) { throw ae; }
             catch (Exception e) { throw e; }
         }
 
@@ -904,7 +929,8 @@ namespace DeepfreezeApp
 
                 if (e is AmazonS3Exception)
                 {
-                    this.ErrorMessage = (e as AmazonS3Exception).Message + " Try starting/refreshing the upload again.";
+                    this.OperationStatus = Enumerations.Status.Paused;
+                    this.ErrorMessage = (e as AmazonS3Exception).Message + " Try resuming the upload again.";
                 }
             }
             finally
