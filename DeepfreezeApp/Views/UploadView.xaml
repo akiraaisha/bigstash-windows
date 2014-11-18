@@ -77,28 +77,6 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <!--<Button Grid.Row="0"
-                    Grid.Column="1"
-                    Height="30" 
-                    Width="30" 
-                    VerticalContentAlignment="Center" 
-                    HorizontalContentAlignment="Center" 
-                    HorizontalAlignment="Right" 
-                    VerticalAlignment="Center" 
-                    Style="{DynamicResource MetroCircleButtonStyle}"
-                    x:Name="RefreshUpload" 
-                    ToolTip="Refresh" 
-                    IsEnabled="{Binding IsUploading, Converter={StaticResource InvertBoolConverter}}"
-                    >
-                
-                <Rectangle Width="13" Height="13" Fill="Black">
-                    <Rectangle.OpacityMask>
-                        <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_refresh}" />
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-                
-            </Button>-->
-
             <StackPanel Grid.Row="0" 
                         Grid.ColumnSpan="2"
                         Margin="0 0 0 5">
