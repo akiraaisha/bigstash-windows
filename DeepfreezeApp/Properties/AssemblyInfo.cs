@@ -7,11 +7,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Deepfreeze for Windows")]
-[assembly: AssemblyDescription("This is the official Windows Desktop client application for the Deepfreeze.io service.")]
+[assembly: AssemblyTitle("BigStash for Windows")]
+[assembly: AssemblyDescription("This is the official Windows Desktop client application for the BigStash service.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The Longaccess Company")]
-[assembly: AssemblyProduct("Deepfreeze for Windows")]
+[assembly: AssemblyProduct("BigStash for Windows")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
