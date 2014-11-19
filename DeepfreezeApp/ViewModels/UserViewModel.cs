@@ -131,7 +131,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                this.ErrorMessage = e.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRefreshingUserStatsGenericText;
             }
             finally 
             { 
