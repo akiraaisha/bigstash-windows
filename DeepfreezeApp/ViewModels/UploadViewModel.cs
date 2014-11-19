@@ -344,23 +344,24 @@ namespace DeepfreezeApp
 
                 if (!(e is TaskCanceledException || e is OperationCanceledException))
                 {
-                    this.ErrorMessage += e.Message;
+                    this.ErrorMessage = Properties.Resources.ErrorUploadingGenericText;
+                    this.OperationStatus = Enumerations.Status.Paused;
 
-                    if (e is AmazonS3Exception)
-                    {
-                        this.OperationStatus = Enumerations.Status.Paused;
-                        this.ErrorMessage += " Type: " + ((AmazonS3Exception)e).ErrorCode + ". Try resuming the upload again.";
-                    }
+                    //if (e is AmazonS3Exception)
+                    //{
+                        
+                    //    this.ErrorMessage += ". Try resuming the upload again.";
+                    //}
 
-                    if (e is AggregateException)
-                    {
-                        foreach(var inner in ((AggregateException)e).InnerExceptions)
-                        {
-                            this.ErrorMessage += "\n" + inner.Message;
-                            if (inner.InnerException != null)
-                                this.ErrorMessage += "\n" + inner.InnerException.Message;
-                        }
-                    }
+                    //if (e is AggregateException)
+                    //{
+                    //    foreach(var inner in ((AggregateException)e).InnerExceptions)
+                    //    {
+                    //        this.ErrorMessage += "\n" + inner.Message;
+                    //        if (inner.InnerException != null)
+                    //            this.ErrorMessage += "\n" + inner.InnerException.Message;
+                    //    }
+                    //}
                 }
             }
 
@@ -476,7 +477,7 @@ namespace DeepfreezeApp
                 //if (!this._deepfreezeClient.IsInternetConnected)
                 //    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
 
-                this.ErrorMessage += e.Message;
+                this.ErrorMessage += Properties.Resources.ErrorDeletingUploadGenericText;
             }
             finally
             { this.IsBusy = false; }
@@ -499,31 +500,8 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             {
-                this.ErrorMessage = e.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRemovingUploadGenericText;
             }
-        }
-
-        /// <summary>
-        /// Refresh upload action. This essentialy calls asynchronously the 
-        /// PrepareUploadAsync private method.
-        /// </summary>
-        /// <returns></returns>
-        public async Task RefreshUpload()
-        {
-            this._isRefreshing = true;
-            this.ErrorMessage = null;
-
-            _log.Info("Refreshing upload (user clicked refresh button) in upload manager.");
-
-            try
-            {
-                await this.PrepareUploadAsync().ConfigureAwait(false);
-            }
-            catch(Exception e) 
-            {
-                this.ErrorMessage = e.Message;
-            }
-            finally { this._isRefreshing = false; }
         }
 
         /// <summary>
@@ -595,13 +573,13 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
+                this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
                 if (this.Upload == null)
                 {
                     // inform the user that she has to manually delete the archive
                     // from the website dashboard.
-                    ErrorMessage += "\nError creating a new upload. Please delete the archive using the Deepfreeze website Dashboard.";
+                    ErrorMessage += "\n" + Properties.Resources.DeleteArchiveFromDashboardGenericText;
                 }
 
                 // for any reason, mark this upload with status failed
@@ -923,14 +901,20 @@ namespace DeepfreezeApp
                     else
                         this.OperationStatus = Enumerations.Status.Error;
 
-                    this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
-                    this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
+                    if (this.OperationStatus == Enumerations.Status.NotFound)
+                    {
+                        this.BusyMessage = "This upload has been deleted from the dashboard. Removing...";
+                        this.RemoveUpload();
+                    }
+                    //this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
+                    //this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
                 }
 
+                // this may get thrown when calculating the actual uploaded size to S3.
                 if (e is AmazonS3Exception)
                 {
                     this.OperationStatus = Enumerations.Status.Paused;
-                    this.ErrorMessage = (e as AmazonS3Exception).Message + " Try resuming the upload again.";
+                    this.ErrorMessage = Properties.Resources.ErrorCalculatingS3UploadSizeText;
                 }
             }
             finally
@@ -1099,7 +1083,7 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Error refreshing progress: " + ex.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
         }
 
