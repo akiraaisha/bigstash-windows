@@ -28,9 +28,9 @@
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>https://www.deepfreeze.io/apps/windows/</InstallUrl>
     <UpdateUrl>https://www.deepfreeze.io/apps/windows/</UpdateUrl>
-    <SupportUrl>https://www.deepfreeze.io/support/</SupportUrl>
+    <SupportUrl>https://www.bigstash.co/support/</SupportUrl>
     <TargetCulture>en</TargetCulture>
-    <ProductName>Deepfreeze.io for Windows</ProductName>
+    <ProductName>BigStash for Windows</ProductName>
     <PublisherName>The Longaccess Company</PublisherName>
     <MinimumRequiredVersion>1.1.1.1</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
