@@ -268,7 +268,7 @@ namespace DeepfreezeApp
         {
             if (message != null)
             {
-                _tray.ShowBalloonTip("Deepfreeze.io for Windows", message.Message, BalloonIcon.Info);
+                _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, BalloonIcon.Info);
             }
         }
 
@@ -303,7 +303,7 @@ namespace DeepfreezeApp
         protected override void OnViewLoaded(object view)
         {
             var v = view as MetroWindow;
-            v.Title = Properties.Settings.Default.ApplicationName;
+            v.Title = Properties.Settings.Default.BigStashApplicationName;
 
             if (v != null)
             {
@@ -488,7 +488,7 @@ namespace DeepfreezeApp
                     if (!this._minimizeBallonTipShown)
                     {
                         this._minimizeBallonTipShown = true;
-                        _tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
+                        _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
                     }
 
                     callback(false); // will cancel close
@@ -525,7 +525,7 @@ namespace DeepfreezeApp
                     int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
 
                     if (autoPausedUploadsCount > 0)
-                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
+                        this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
                 }
                 else
                 {
@@ -534,7 +534,7 @@ namespace DeepfreezeApp
                     int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => x.IsUploading).Count();
 
                     if (autoPausedUploadsCount > 0)
-                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
+                        this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
                 }
 
                 this._eventAggregator.PublishOnUIThread(internetConnectivityMessage);
