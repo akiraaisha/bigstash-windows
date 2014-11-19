@@ -192,7 +192,7 @@ namespace DeepfreezeApp
                 if (token == null)
                 {
                     _log.Warn("CreateTokenAsync returned null.");
-                    throw new Exception();
+                    throw new Exception("CreateTokenAsync returned null.");
                 }
 
                 _log.Info("Created a new Deepfreeze token.");
@@ -206,7 +206,7 @@ namespace DeepfreezeApp
                 if (user == null)
                 {
                     _log.Warn("GetUserAsync returned null.");
-                    throw new Exception();
+                    throw new Exception("GetUserAsync returned null.");
                 }
 
                 // Since the user response contains a valid User, 
@@ -229,8 +229,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                HasLoginError = true;
-                LoginError = e.Message;
+                this.HasLoginError = true;
+                this.LoginError = Properties.Resources.ErrorConnectingGenericText;
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -239,9 +239,18 @@ namespace DeepfreezeApp
                     switch (response.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
-                            LoginError = Properties.Resources.UnauthorizedExceptionMessage;
+                            this.LoginError += Properties.Resources.UnauthorizedExceptionMessage;
                             break;
                     }
+                }
+                else
+                {
+                    // if the exception is not thrown by some DF API call but from the above LocalStorage.WriteJson call
+                    // then update the error log.
+                    _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
+                    if (!this._deepfreezeClient.IsInternetConnected)
+                        this.LoginError = Properties.Resources.ErrorConnectingWithoutInternetText;
                 }
             }
             finally
