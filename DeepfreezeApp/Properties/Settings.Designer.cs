@@ -118,7 +118,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io for Windows")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BigStash for Windows")]
         public string ApplicationFullName {
             get {
                 return ((string)(this["ApplicationFullName"]));
@@ -212,6 +212,33 @@ namespace DeepfreezeApp.Properties {
             }
             set {
                 this["DebugServerBaseAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io")]
+        public string DefaultAppDataApplicationFolderName {
+            get {
+                return ((string)(this["DefaultAppDataApplicationFolderName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("BigStash")]
+        public string BigStashApplicationName {
+            get {
+                return ((string)(this["BigStashApplicationName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/")]
+        public string BigStashURL {
+            get {
+                return ((string)(this["BigStashURL"]));
             }
         }
     }
