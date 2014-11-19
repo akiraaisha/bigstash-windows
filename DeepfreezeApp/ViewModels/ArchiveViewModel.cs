@@ -450,7 +450,7 @@ namespace DeepfreezeApp
                     await userVM.RefreshUser();
 
                     if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
-                        throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
+                        throw new Exception(Properties.Resources.ErrorNotEnoughSpaceGenericText);
                 }
 
 
