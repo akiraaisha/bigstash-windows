@@ -195,7 +195,7 @@ namespace DeepfreezeApp
                     throw new Exception("CreateTokenAsync returned null.");
                 }
 
-                _log.Info("Created a new Deepfreeze token.");
+                _log.Info("Created a new BigStash token.");
 
                 // After creating a new token, set it to be used as default in DeepfreezeClient.
                 this._deepfreezeClient.Settings.ActiveToken = token;
