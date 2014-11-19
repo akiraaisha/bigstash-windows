@@ -315,4 +315,84 @@
   <data name="VersionHeaderText" xml:space="preserve">
     <value>Version</value>
   </data>
+  <data name="DeleteArchiveFromDashboardGenericText" xml:space="preserve">
+    <value>Please delete the archive using the Deepfreeze.io website Dashboard.</value>
+    <comment>Used for displaying a friendly message if there's an error while creating an upload and the returned upload is null.</comment>
+  </data>
+  <data name="ErrorCalculatingS3UploadSizeText" xml:space="preserve">
+    <value>There was an error calculating the total upload progress.</value>
+    <comment>Used for displaying a friendly message if there's an error while calculating the total uploaded size in S3 in the preparing upload phase.</comment>
+  </data>
+  <data name="ErrorCreatingUploadGenericText" xml:space="preserve">
+    <value>There was an error while creating your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while creating an upload.</comment>
+  </data>
+  <data name="ErrorDeletingUploadGenericText" xml:space="preserve">
+    <value>There was an error while deleting your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while deleting an upload.</comment>
+  </data>
+  <data name="ErrorPreparingUploadGenericText" xml:space="preserve">
+    <value>There was an error while preparing your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while preparing an upload (happends once each time the app is started to prepare all the uploads showing in the app, completed or not).</comment>
+  </data>
+  <data name="ErrorRefreshingProgressGenericText" xml:space="preserve">
+    <value>There was an error while checking your upload's progress.</value>
+    <comment>Used for displaying a friendly message if there's an error while refreshing the upload's progress.</comment>
+  </data>
+  <data name="ErrorRemovingUploadGenericText" xml:space="preserve">
+    <value>There was an error while removing your upload from the application.</value>
+    <comment>Used for displaying a friendly message if there's an error while removing an upload.</comment>
+  </data>
+  <data name="ErrorUploadingGenericText" xml:space="preserve">
+    <value>There was an error with your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while uploading.</comment>
+  </data>
+  <data name="ErrorAddingFilesGenericText" xml:space="preserve">
+    <value>There was an error adding your file(s) for upload.</value>
+    <comment>Used for displaying a user friendly message if there's an error while adding files to upload via drag n' drop (maybe the user has no right to read the file(s)).</comment>
+  </data>
+  <data name="ErrorCheckingForUpdateWithoutInternetGenericText" xml:space="preserve">
+    <value>Can't check for updates without an active Internet connection.</value>
+    <comment>Used for displaying a user friendly message if the client tries to check for update without an internet connection.</comment>
+  </data>
+  <data name="ErrorChoosingFolderGenericText" xml:space="preserve">
+    <value>There was an error loading your folder for upload.</value>
+    <comment>Used for displaying a user friendly message if there's an error while choosing a folder to upload (maybe the user has no right to read the folder).</comment>
+  </data>
+  <data name="ErrorCreatingArchiveGenericText" xml:space="preserve">
+    <value>There was an error while creating your archive.</value>
+    <comment>Used for displaying a user friendly message if there's an error while creating a new archive (after sending the relevant DF API request).</comment>
+  </data>
+  <data name="ErrorDownloadingUpdateGenericText" xml:space="preserve">
+    <value>The new version of Deepfreeze.io for Windows cannot be downloaded at this time.</value>
+    <comment>Used for displaying a user friendly message if the client's update cannot be downloaded (maybe the host server is unavailable or the update file is missing).</comment>
+  </data>
+  <data name="ErrorInvalidDeploymentExceptionGenericText" xml:space="preserve">
+    <value>Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application.</value>
+    <comment>Used for displaying a user friendly message if the client installation is not a valid network installation (i.e. the user somehow installed not a valid production setup application) and the check for update fails.</comment>
+  </data>
+  <data name="ErrorInvalidOperationCheckingForUpdateGenericText" xml:space="preserve">
+    <value>This application cannot be updated. It is likely not a ClickOnce application.</value>
+    <comment>Similar to ErrorInvalidDeploymentExceptionGenericText.</comment>
+  </data>
+  <data name="ErrorRefreshingUserStatsGenericText" xml:space="preserve">
+    <value>There was an error while refreshing your account's information.</value>
+    <comment>Used for displaying a user friendly message if there's an error while getting the user account's information (after sending the relevant DF API request).</comment>
+  </data>
+  <data name="ErrorConnectingGenericText" xml:space="preserve">
+    <value>There was an error while trying to connect your account.</value>
+    <comment>Used for displaying a user friendly message if there's an error while trying to log in the user account.</comment>
+  </data>
+  <data name="ErrorConnectingWithoutInternetText" xml:space="preserve">
+    <value>Can't connect your account without an active Internet connection.</value>
+    <comment>Used for displaying a user friendly message if there user tries to log in without an active internet connection.</comment>
+  </data>
+  <data name="ErrorInitializingClientUploadsListGenericText" xml:space="preserve">
+    <value>There was an error while initializing your uploads.</value>
+    <comment>Used for displaying a user friendly message if there's an error while loading the local client data for the uploads list (maybe the local data files are corrupt).</comment>
+  </data>
+  <data name="ErrorInitializingShellViewModelGenericText" xml:space="preserve">
+    <value>There was an error while initializing the application.</value>
+    <comment>Used for displaying a user friendly message if there's an error while initializing the application (loading local user account data).</comment>
+  </data>
 </root>

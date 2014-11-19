@@ -223,6 +223,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please delete the archive using the Deepfreeze.io website Dashboard..
+        /// </summary>
+        internal static string DeleteArchiveFromDashboardGenericText {
+            get {
+                return ResourceManager.GetString("DeleteArchiveFromDashboardGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string DeleteButtonContent {
@@ -255,6 +264,177 @@ namespace DeepfreezeApp.Properties {
         internal static string EmptyFolderSelection {
             get {
                 return ResourceManager.GetString("EmptyFolderSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error adding your file(s) for upload..
+        /// </summary>
+        internal static string ErrorAddingFilesGenericText {
+            get {
+                return ResourceManager.GetString("ErrorAddingFilesGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error calculating the total upload progress..
+        /// </summary>
+        internal static string ErrorCalculatingS3UploadSizeText {
+            get {
+                return ResourceManager.GetString("ErrorCalculatingS3UploadSizeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t check for updates without an active Internet connection..
+        /// </summary>
+        internal static string ErrorCheckingForUpdateWithoutInternetGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCheckingForUpdateWithoutInternetGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error loading your folder for upload..
+        /// </summary>
+        internal static string ErrorChoosingFolderGenericText {
+            get {
+                return ResourceManager.GetString("ErrorChoosingFolderGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while trying to connect your account..
+        /// </summary>
+        internal static string ErrorConnectingGenericText {
+            get {
+                return ResourceManager.GetString("ErrorConnectingGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t connect your account without an active Internet connection..
+        /// </summary>
+        internal static string ErrorConnectingWithoutInternetText {
+            get {
+                return ResourceManager.GetString("ErrorConnectingWithoutInternetText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while creating your archive..
+        /// </summary>
+        internal static string ErrorCreatingArchiveGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCreatingArchiveGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while creating your upload..
+        /// </summary>
+        internal static string ErrorCreatingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCreatingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while deleting your upload..
+        /// </summary>
+        internal static string ErrorDeletingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorDeletingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The new version of Deepfreeze.io for Windows cannot be downloaded at this time..
+        /// </summary>
+        internal static string ErrorDownloadingUpdateGenericText {
+            get {
+                return ResourceManager.GetString("ErrorDownloadingUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while initializing your uploads..
+        /// </summary>
+        internal static string ErrorInitializingClientUploadsListGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInitializingClientUploadsListGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while initializing the application..
+        /// </summary>
+        internal static string ErrorInitializingShellViewModelGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInitializingShellViewModelGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application..
+        /// </summary>
+        internal static string ErrorInvalidDeploymentExceptionGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInvalidDeploymentExceptionGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This application cannot be updated. It is likely not a ClickOnce application..
+        /// </summary>
+        internal static string ErrorInvalidOperationCheckingForUpdateGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInvalidOperationCheckingForUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while preparing your upload..
+        /// </summary>
+        internal static string ErrorPreparingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorPreparingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while checking your upload&apos;s progress..
+        /// </summary>
+        internal static string ErrorRefreshingProgressGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRefreshingProgressGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while refreshing your account&apos;s information..
+        /// </summary>
+        internal static string ErrorRefreshingUserStatsGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRefreshingUserStatsGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while removing your upload from the application..
+        /// </summary>
+        internal static string ErrorRemovingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRemovingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error with your upload..
+        /// </summary>
+        internal static string ErrorUploadingGenericText {
+            get {
+                return ResourceManager.GetString("ErrorUploadingGenericText", resourceCulture);
             }
         }
         
