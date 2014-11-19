@@ -175,7 +175,11 @@ namespace DeepfreezeApp
                 {
                     _log.Error("Error preparing archive, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
                     IsReset = true;
-                    ErrorSelectingFiles = e.Message;
+
+                    this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
+
+                    if (e is UnauthorizedAccessException)
+                        this.ErrorSelectingFiles += " " + e.Message;
                 }
                 finally { IsBusy = false; }
             }
@@ -238,7 +242,11 @@ namespace DeepfreezeApp
                     {
                         _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
                         IsReset = true;
-                        ErrorSelectingFiles = ex.Message;
+
+                        this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
+
+                        if (ex is UnauthorizedAccessException)
+                            this.ErrorSelectingFiles += " " + ex.Message;
                     }
                     finally { IsBusy = false; }
                 }
@@ -298,7 +306,7 @@ namespace DeepfreezeApp
             catch (Exception e)
             {
                 HasChosenFiles = true;
-                ErrorCreatingArchive = e.Message;
+
                 _log.Error("Error creating archive (user clicked upload button), thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
 
                 if (e is Exceptions.DfApiException)
@@ -306,6 +314,8 @@ namespace DeepfreezeApp
                     var response = (e as Exceptions.DfApiException).HttpResponse;
                     _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
                 }
+
+                this.ErrorCreatingArchive = Properties.Resources.ErrorCreatingArchiveGenericText;
             }
             finally
             {
