@@ -427,12 +427,7 @@ namespace DeepfreezeApp
             catch(Exception e)
             {
                 HasError = true;
-                this.ErrorMessage = e.Message;
-
-                //if (!this._deepfreezeClient.IsInternetConnected)
-                //{
-                //    this.ErrorMessage += "\n" + Properties.Resources.NoInternetConnectionMessage;
-                //}
+                this.ErrorMessage = Properties.Resources.ErrorInitializingShellViewModelGenericText;
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -447,6 +442,11 @@ namespace DeepfreezeApp
                             this.Disconnect("Your previous session is no longer valid. Please connect again.");
                             break;
                     }
+                }
+                else
+                {
+                    // for every exception other than DfApiException update the error log.
+                    _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 }
             }
             finally 
