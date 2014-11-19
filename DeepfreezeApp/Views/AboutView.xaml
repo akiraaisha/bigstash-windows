@@ -32,7 +32,7 @@
     <TabControl DockPanel.Dock="Top" Style="{DynamicResource SimpleMetroTabControl}"
                     SelectedIndex="0"
                     >
-            <TabItem Header="About Deepfreeze.io" 
+            <TabItem Header="About BigStash" 
                      Style="{DynamicResource SimpleMetroTabItem}"
                      >
 
