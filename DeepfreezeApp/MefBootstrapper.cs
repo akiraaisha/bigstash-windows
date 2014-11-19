@@ -269,8 +269,9 @@ namespace DeepfreezeApp
         {
             try
             {
+                string iconName = "bigstash_windows_icon.ico";
                 string installDirPath = Utilities.GetInstallDirectoryInfo().ToString();
-                string iconSourcePath = Path.Combine(installDirPath, "deepfreeze.ico");
+                string iconSourcePath = Path.Combine(installDirPath, iconName);
 
                 if (!File.Exists(iconSourcePath))
                     return;

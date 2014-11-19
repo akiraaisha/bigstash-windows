@@ -75,7 +75,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>deepfreeze.ico</ApplicationIcon>
+    <ApplicationIcon>bigstash_windows_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -294,6 +294,7 @@
   <ItemGroup>
     <Resource Include="Resources\WindowsIcons-license.txt" />
     <Resource Include="Resources\Entypo-license.txt" />
+    <Resource Include="bigstash_windows_icon.ico" />
     <Content Include="deepfreeze.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
