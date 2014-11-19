@@ -21,6 +21,7 @@ namespace DeepfreezeApp
     {
         #region members
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(AboutViewModel));
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -209,18 +210,21 @@ namespace DeepfreezeApp
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
+                    _log.Error("CheckForUpdate threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
                     return;
                 }
                 catch (InvalidDeploymentException ide)
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorInvalidDeploymentExceptionGenericText;
+                    _log.Error("CheckForUpdate threw " + ide.GetType().ToString() + " with message \"" + ide.Message + "\".");
                     return;
                 }
                 catch (InvalidOperationException ioe)
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorInvalidOperationCheckingForUpdateGenericText;
+                    _log.Error("CheckForUpdate threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
                     return;
                 }
 
@@ -247,6 +251,7 @@ namespace DeepfreezeApp
                     {
                         IsBusy = false;
                         this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
+                        _log.Error("CheckForUpdate threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
                     }
                 }
                 else
