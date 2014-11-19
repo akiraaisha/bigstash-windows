@@ -144,7 +144,8 @@ namespace DeepfreezeApp
                 return localUploads.OrderByDescending(x => x.SavePath).ToList();
             }
             catch (Exception e) 
-            { 
+            {
+                _log.Error("ReadLocalUploads threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 throw e; 
             }
         }
@@ -279,7 +280,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                this.ErrorMessage = e.Message;
+                this.ErrorMessage = Properties.Resources.ErrorInitializingClientUploadsListGenericText;
             }
             finally
             {
