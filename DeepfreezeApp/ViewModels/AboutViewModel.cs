@@ -174,7 +174,7 @@ namespace DeepfreezeApp
 
         public void OpenDeepfreezePage()
         {
-            var authority = new Uri(Properties.Settings.Default.ServerBaseAddress).Authority;
+            var authority = new Uri(Properties.Settings.Default.BigStashURL).Authority;
             Process.Start(authority);
         }
 
