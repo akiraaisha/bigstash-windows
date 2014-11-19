@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutButtonTooltip" xml:space="preserve">
-    <value>About Deepfreeze.io for Windows</value>
+    <value>About BigStash for Windows</value>
     <comment>Used for about button tooltip</comment>
   </data>
   <data name="AboutHeader" xml:space="preserve">
@@ -126,7 +126,7 @@
     <comment>Used for about flyout header.</comment>
   </data>
   <data name="ActiveUserHeader" xml:space="preserve">
-    <value>Deepfreeze.io Account</value>
+    <value>BigStash Account</value>
     <comment>Used for active user header in preferences.</comment>
   </data>
   <data name="ArchiveTitleHelperText" xml:space="preserve">
@@ -162,7 +162,7 @@
     <comment>Used for connect button content.</comment>
   </data>
   <data name="ConnectHeaderText" xml:space="preserve">
-    <value>Connect to your Deepfreeze.io Account</value>
+    <value>Connect to your BigStash Account</value>
   </data>
   <data name="ConnectionLostMessage" xml:space="preserve">
     <value>Internet Connection lost. Pausing active uploads...</value>
@@ -177,7 +177,7 @@
     <value>Open Log</value>
   </data>
   <data name="DebugHelpText" xml:space="preserve">
-    <value>If you're experiencing problems with Deepfreeze.io for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
+    <value>If you're experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
   </data>
   <data name="DeleteButtonContent" xml:space="preserve">
     <value>Delete</value>
@@ -201,14 +201,13 @@
     <value>Forgot your password?</value>
   </data>
   <data name="ForgotPasswordURL" xml:space="preserve">
-    <value>https://www.deepfreeze.io/o/password_reset/</value>
-    <comment>Change this for production.</comment>
+    <value>https://www.bigstash.co/password_reset/</value>
   </data>
   <data name="FreeText" xml:space="preserve">
     <value> Free / </value>
   </data>
   <data name="MinimizedMessageText" xml:space="preserve">
-    <value>Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
+    <value>BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
   </data>
   <data name="NoInternetConnectionMessage" xml:space="preserve">
     <value>No internet connection found. Please ensure you are connected to a network with Internet access.</value>
@@ -251,7 +250,7 @@
     <value>Don't know your password?</value>
   </data>
   <data name="SetPasswordURL" xml:space="preserve">
-    <value>https://www.deepfreeze.io/account/</value>
+    <value>https://www.bigstash.co/account/</value>
   </data>
   <data name="StatusCompletedText" xml:space="preserve">
     <value>Completed</value>
@@ -288,7 +287,7 @@
     <value>Total Uploads: </value>
   </data>
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
-    <value>Could not authenticate. Please enter your Deepfreeze.io account credentials.</value>
+    <value>Could not authenticate. Please enter your BigStash account credentials.</value>
     <comment>Used for informing the user about wrong username/password combination.</comment>
   </data>
   <data name="UploadButtonContent" xml:space="preserve">
@@ -299,7 +298,7 @@
     <value>was successfully uploaded.</value>
   </data>
   <data name="UpToDateText" xml:space="preserve">
-    <value>Deepfreeze.io for Windows is up to date.</value>
+    <value>BigStash for Windows is up to date.</value>
   </data>
   <data name="UsedText" xml:space="preserve">
     <value> Used / </value>
@@ -316,7 +315,7 @@
     <value>Version</value>
   </data>
   <data name="DeleteArchiveFromDashboardGenericText" xml:space="preserve">
-    <value>Please delete the archive using the Deepfreeze.io website Dashboard.</value>
+    <value>Please delete the archive using the BigStash website Dashboard.</value>
     <comment>Used for displaying a friendly message if there's an error while creating an upload and the returned upload is null.</comment>
   </data>
   <data name="ErrorCalculatingS3UploadSizeText" xml:space="preserve">
@@ -364,11 +363,11 @@
     <comment>Used for displaying a user friendly message if there's an error while creating a new archive (after sending the relevant DF API request).</comment>
   </data>
   <data name="ErrorDownloadingUpdateGenericText" xml:space="preserve">
-    <value>The new version of Deepfreeze.io for Windows cannot be downloaded at this time.</value>
+    <value>The new version of BigStash for Windows cannot be downloaded at this time.</value>
     <comment>Used for displaying a user friendly message if the client's update cannot be downloaded (maybe the host server is unavailable or the update file is missing).</comment>
   </data>
   <data name="ErrorInvalidDeploymentExceptionGenericText" xml:space="preserve">
-    <value>Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application.</value>
+    <value>Cannot check for a new version of BigStash for Windows. Please reinstall the application.</value>
     <comment>Used for displaying a user friendly message if the client installation is not a valid network installation (i.e. the user somehow installed not a valid production setup application) and the check for update fails.</comment>
   </data>
   <data name="ErrorInvalidOperationCheckingForUpdateGenericText" xml:space="preserve">
@@ -394,5 +393,9 @@
   <data name="ErrorInitializingShellViewModelGenericText" xml:space="preserve">
     <value>There was an error while initializing the application.</value>
     <comment>Used for displaying a user friendly message if there's an error while initializing the application (loading local user account data).</comment>
+  </data>
+  <data name="ErrorNotEnoughSpaceGenericText" xml:space="preserve">
+    <value>Your remaining BigStash storage is not sufficient for the size of this archive. Consider buying more storage.</value>
+    <comment>Used for displaying a user friendly message if the user tries to upload an archive but there's not enough space in her BigStash account.</comment>
   </data>
 </root>

@@ -61,7 +61,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About Deepfreeze.io for Windows.
+        ///   Looks up a localized string similar to About BigStash for Windows.
         /// </summary>
         internal static string AboutButtonTooltip {
             get {
@@ -79,7 +79,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.io Account.
+        ///   Looks up a localized string similar to BigStash Account.
         /// </summary>
         internal static string ActiveUserHeader {
             get {
@@ -169,7 +169,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect to your Deepfreeze.io Account.
+        ///   Looks up a localized string similar to Connect to your BigStash Account.
         /// </summary>
         internal static string ConnectHeaderText {
             get {
@@ -214,7 +214,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Deepfreeze.io for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
@@ -223,7 +223,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please delete the archive using the Deepfreeze.io website Dashboard..
+        ///   Looks up a localized string similar to Please delete the archive using the BigStash website Dashboard..
         /// </summary>
         internal static string DeleteArchiveFromDashboardGenericText {
             get {
@@ -349,7 +349,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The new version of Deepfreeze.io for Windows cannot be downloaded at this time..
+        ///   Looks up a localized string similar to The new version of BigStash for Windows cannot be downloaded at this time..
         /// </summary>
         internal static string ErrorDownloadingUpdateGenericText {
             get {
@@ -376,7 +376,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application..
+        ///   Looks up a localized string similar to Cannot check for a new version of BigStash for Windows. Please reinstall the application..
         /// </summary>
         internal static string ErrorInvalidDeploymentExceptionGenericText {
             get {
@@ -390,6 +390,15 @@ namespace DeepfreezeApp.Properties {
         internal static string ErrorInvalidOperationCheckingForUpdateGenericText {
             get {
                 return ResourceManager.GetString("ErrorInvalidOperationCheckingForUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your remaining BigStash storage is not sufficient for the size of this archive. Consider buying more storage..
+        /// </summary>
+        internal static string ErrorNotEnoughSpaceGenericText {
+            get {
+                return ResourceManager.GetString("ErrorNotEnoughSpaceGenericText", resourceCulture);
             }
         }
         
@@ -457,7 +466,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.deepfreeze.io/o/password_reset/.
+        ///   Looks up a localized string similar to https://www.bigstash.co/password_reset/.
         /// </summary>
         internal static string ForgotPasswordURL {
             get {
@@ -475,7 +484,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        ///   Looks up a localized string similar to BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
         /// </summary>
         internal static string MinimizedMessageText {
             get {
@@ -592,7 +601,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.deepfreeze.io/account/.
+        ///   Looks up a localized string similar to https://www.bigstash.co/account/.
         /// </summary>
         internal static string SetPasswordURL {
             get {
@@ -700,7 +709,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze.io account credentials..
+        ///   Looks up a localized string similar to Could not authenticate. Please enter your BigStash account credentials..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {
@@ -727,7 +736,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.io for Windows is up to date..
+        ///   Looks up a localized string similar to BigStash for Windows is up to date..
         /// </summary>
         internal static string UpToDateText {
             get {
