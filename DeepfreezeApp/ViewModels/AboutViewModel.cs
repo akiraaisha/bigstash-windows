@@ -184,7 +184,7 @@ namespace DeepfreezeApp
 
             if (!this._deepfreezeClient.IsInternetConnected)
             {
-                this.ErrorMessage = "Can't check for updates without an active Internet connection.";
+                this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateWithoutInternetGenericText;
                 return;
             }
 
@@ -208,19 +208,19 @@ namespace DeepfreezeApp
                 catch (DeploymentDownloadException dde)
                 {
                     IsBusy = false;
-                    this.ErrorMessage = "The new version of Deepfreeze.io for Windows cannot be downloaded at this time.";
+                    this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
                     return;
                 }
                 catch (InvalidDeploymentException ide)
                 {
                     IsBusy = false;
-                    this.ErrorMessage = "Cannot check for a new version of Deepfreeze.io for Windows. Please reinstall the application.";
+                    this.ErrorMessage = Properties.Resources.ErrorInvalidDeploymentExceptionGenericText;
                     return;
                 }
                 catch (InvalidOperationException ioe)
                 {
                     IsBusy = false;
-                    this.ErrorMessage = "This application cannot be updated. It is likely not a ClickOnce application.";
+                    this.ErrorMessage = Properties.Resources.ErrorInvalidOperationCheckingForUpdateGenericText;
                     return;
                 }
 
@@ -246,7 +246,7 @@ namespace DeepfreezeApp
                     catch (DeploymentDownloadException dde)
                     {
                         IsBusy = false;
-                        this.ErrorMessage = "Cannot install the latest version of Deepfreeze.io for Windows. Please check your network or try again later.";
+                        this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
                     }
                 }
                 else
