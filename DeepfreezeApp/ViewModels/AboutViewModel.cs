@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
+using System.ComponentModel;
 using System.Deployment.Application;
 
 using Caliburn.Micro;
@@ -193,6 +194,33 @@ namespace DeepfreezeApp
             {
                 ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
 
+                DeploymentProgressChangedEventHandler progressEventHandler = (sender, eventArgs) =>
+                {
+                    string action = "";
+                    switch(eventArgs.State)
+                    {
+                        case DeploymentProgressState.DownloadingApplicationFiles:
+                            action = "Downloading... ";
+                            this.UpdateMessage = action + eventArgs.ProgressPercentage + "%";
+                            break;
+                    }
+                };
+
+                ad.UpdateProgressChanged += progressEventHandler;
+
+                AsyncCompletedEventHandler completedEventHandler = (sender, eventArgs) =>
+                {
+                    ad.UpdateProgressChanged -= progressEventHandler;
+                    this.RestartNeeded = true;
+                    this.IsBusy = false;
+                    this.UpdateMessage = "Update completed successfully. Click above to restart.";
+
+                    Properties.Settings.Default.RestartAfterUpdate = true;
+                    Properties.Settings.Default.Save();
+                };
+
+                ad.UpdateCompleted += completedEventHandler;
+
                 try
                 {
                     IsUpToDate = false;
@@ -200,7 +228,7 @@ namespace DeepfreezeApp
 
                     this.UpdateMessage = "Checking for update...";
 
-                    info = ad.CheckForDetailedUpdate(false);
+                    info = await Task.Run(() => ad.CheckForDetailedUpdate(false));
 
                     // insert a delay here so the user has a chance to actually see the messages
                     // and know that the check is ongoing.
@@ -233,26 +261,6 @@ namespace DeepfreezeApp
                     try
                     {
                         this.UpdateMessage = "Updating to latest version...";
-
-                        // insert a delay here so the user has a chance to actually see the messages
-                        // and know that the update is installing.
-                        await Task.Delay(1000);
-
-                        ad.UpdateProgressChanged += (sender, eventArgs) =>
-                        {
-                            this.UpdateMessage = "Updating to latest version... " + eventArgs.ProgressPercentage + "%";
-                        };
-
-                        ad.UpdateCompleted += (sender, eventArgs) =>
-                        {
-                            this.RestartNeeded = true;
-                            this.IsBusy = false;
-                            this.UpdateMessage = "Update completed successfully. Click above to restart.";
-
-                            Properties.Settings.Default.RestartAfterUpdate = true;
-                            Properties.Settings.Default.Save();
-                        };
-
                         ad.UpdateAsync();
                     }
                     catch (DeploymentDownloadException dde)
