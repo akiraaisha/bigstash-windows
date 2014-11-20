@@ -161,7 +161,7 @@ namespace DeepfreezeApp
             try
             {
                 string desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-                string newLogPath = Path.Combine(desktopPath, Properties.Settings.Default.LogFileName);
+                string newLogPath = Path.Combine(desktopPath, "BigStash" + Properties.Settings.Default.LogFileName);
                 File.Copy(Properties.Settings.Default.LogFilePath, newLogPath, true);
 
                 Process.Start(newLogPath);
