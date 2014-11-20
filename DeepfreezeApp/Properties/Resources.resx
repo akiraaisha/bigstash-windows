@@ -177,7 +177,7 @@
     <value>Open Log</value>
   </data>
   <data name="DebugHelpText" xml:space="preserve">
-    <value>If you're experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "DFLog.txt".</value>
+    <value>If you're experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "BigStashLog.txt".</value>
   </data>
   <data name="DeleteButtonContent" xml:space="preserve">
     <value>Delete</value>

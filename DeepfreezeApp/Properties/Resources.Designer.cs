@@ -214,7 +214,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
