@@ -303,7 +303,7 @@ namespace DeepfreezeApp
         protected override void OnViewLoaded(object view)
         {
             var v = view as MetroWindow;
-            v.Title = Properties.Settings.Default.BigStashApplicationName;
+            v.Title = Properties.Settings.Default.ApplicationName;
 
             if (v != null)
             {
