@@ -112,9 +112,21 @@ namespace DeepfreezeApp
                 // in Application.Properties for use in this application instance.
                 SetApplicationPathsProperties();
 
-                // if LOCALAPPDATA\Deepfreeze.io doesn't exist, create it.
+                // if LOCALAPPDATA\BigStash doesn't exist, create it.
                 CreateLocalApplicationDataDirectory();
 
+                // If this version is network deployed, is the first instance run after installing/updating
+                // and is equal to the 1st release of Bigstash for Windows (version 1.2.0) then migrate old deepfreeze application data.
+                if (ApplicationDeployment.IsNetworkDeployed &&
+                    ApplicationDeployment.CurrentDeployment.IsFirstRun &&
+                    ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0")
+                {
+                    // Migrate deepfreeze data to bigstash app data directory.
+                    // This step is needed for all clients updating from any Deepfreeze.io app version
+                    // to any BigStash version.
+                    MigrateDeepfreezeData();
+                }
+                
                 DisplayRootViewFor<IShell>();
 
                 // Catch with args and forward a message with them
@@ -204,11 +216,11 @@ namespace DeepfreezeApp
             // if LOCALAPPDATA\Deepfreeze.io doesn't exist, create it.
             try
             {
-                if (!Directory.Exists(Properties.Settings.Default.LocalAppDataDFFolder))
+                if (!Directory.Exists(Properties.Settings.Default.ApplicationDataFolder))
                 {
                     Log.Info("Creating LocalAppData BigStash directory.");
 
-                    Directory.CreateDirectory(Properties.Settings.Default.LocalAppDataDFFolder);
+                    Directory.CreateDirectory(Properties.Settings.Default.ApplicationDataFolder);
                 }
             }
             catch (Exception ex) { }
@@ -218,46 +230,46 @@ namespace DeepfreezeApp
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             
-            // %APPDATA\Deepfreeze.io\
-            Properties.Settings.Default.LocalAppDataDFFolder =
+            // %APPDATA\BigStash\
+            Properties.Settings.Default.ApplicationDataFolder =
                 Path.Combine(
                     localAppData,
                     Properties.Settings.Default.ApplicationName
                 );
 
-            Log.Info("Setting LocalAppData BigStash directory path as \"" + Properties.Settings.Default.LocalAppDataDFFolder + "\".");
+            Log.Info("Setting LocalAppData BigStash directory path as \"" + Properties.Settings.Default.ApplicationDataFolder + "\".");
 
-            // %APPDATA\Deepfreeze.io\preferences.json
+            // %APPDATA\BigStash\preferences.json
             Properties.Settings.Default.SettingsFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.SettingsFileName
                     );
 
             Log.Info("Setting BigStash preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
-            // %APPDATA\Deepfreeze.io\uploads\
+            // %APPDATA\BigStash\uploads\
             Properties.Settings.Default.UploadsFolderPath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.UploadsFolderName
                     );
 
             Log.Info("Setting BigStash local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
 
-            // %APPDATA\Deepfreeze.io\endpoint.json
+            // %APPDATA\BigStash\endpoint.json
             Properties.Settings.Default.EndpointFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.EndpointFileName
                     );
 
             Log.Info("Setting BigStash endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
 
-            // %APPDATA\Deepfreeze.io\DFLog.txt
+            // %APPDATA\BigStash\DFLog.txt
             Properties.Settings.Default.LogFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.LogFileName
                     );
 
@@ -320,6 +332,37 @@ namespace DeepfreezeApp
             else
                 client.ApplicationVersion = "debug";
 
+        }
+
+        private void MigrateDeepfreezeData()
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var deepfreezeFolderPath = Path.Combine(localAppData, Properties.Settings.Default.DeepfreezeApplicationFolderName);
+
+
+            // If Deepfreeze.io local app data folder exists, then copy all it's content's to BigStash folder,
+            // except for the old log file.
+            if (Directory.Exists(deepfreezeFolderPath))
+            {
+                Log.Info("Migrating Deepfreeze data to BigStash application data directory.");
+
+                try
+                {
+                    Utilities.DirectoryCopy(deepfreezeFolderPath, Properties.Settings.Default.ApplicationDataFolder, true);
+
+                    // Delete old DFLog files copied to the BigStash directory since they're now useless.
+                    var oldLogs = Directory.GetFiles(Properties.Settings.Default.ApplicationDataFolder, "DFLog*").ToList();
+                    foreach(var log in oldLogs)
+                    {
+                        File.Delete(log);
+                    }
+
+                    // Delete the Deepfreeze.io directory.
+                    Directory.Delete(deepfreezeFolderPath, true);
+                }
+                catch(Exception e)
+                { }
+            }
         }
 
         #endregion
