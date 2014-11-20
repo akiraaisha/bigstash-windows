@@ -238,14 +238,22 @@ namespace DeepfreezeApp
                         // and know that the update is installing.
                         await Task.Delay(1000);
 
+                        ad.UpdateProgressChanged += (sender, eventArgs) =>
+                        {
+                            this.UpdateMessage = "Updating to latest version... " + eventArgs.ProgressPercentage + "%";
+                        };
+
+                        ad.UpdateCompleted += (sender, eventArgs) =>
+                        {
+                            this.RestartNeeded = true;
+                            this.IsBusy = false;
+                            this.UpdateMessage = "Update completed successfully. Click above to restart.";
+
+                            Properties.Settings.Default.RestartAfterUpdate = true;
+                            Properties.Settings.Default.Save();
+                        };
+
                         ad.UpdateAsync();
-
-                        this.RestartNeeded = true;
-                        this.IsBusy = false;
-                        this.UpdateMessage = "Update completed successfully. Click above to restart.";
-
-                        Properties.Settings.Default.RestartAfterUpdate = true;
-                        Properties.Settings.Default.Save();
                     }
                     catch (DeploymentDownloadException dde)
                     {
