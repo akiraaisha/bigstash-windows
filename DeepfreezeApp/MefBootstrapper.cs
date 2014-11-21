@@ -95,11 +95,11 @@ namespace DeepfreezeApp
                 }
 
                 // get the application version to be used in user agent header of api requests.
-                SetVersionForUserAgent();
+                var currentVersion = SetVersionForUserAgent();
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-                Log.Info("Starting up a new instance of BigStash for Windows.");
+                Log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 Log.Info("*****************************************************");
                 Log.Info("*****************************************************");
                 Log.Info("*********                                  **********");
@@ -121,6 +121,13 @@ namespace DeepfreezeApp
                     ApplicationDeployment.CurrentDeployment.IsFirstRun &&
                     ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0")
                 {
+                    // Open the blog post page relative to the BigStash update.
+                    if (!(String.IsNullOrEmpty(Properties.Settings.Default.BigStashBlogURL) ||
+                        String.IsNullOrWhiteSpace(Properties.Settings.Default.BigStashBlogURL)))
+                    {
+                        Process.Start(Properties.Settings.Default.BigStashBlogURL);
+                    }
+
                     // Migrate deepfreeze data to bigstash app data directory.
                     // This step is needed for all clients updating from any Deepfreeze.io app version
                     // to any BigStash version.
@@ -323,7 +330,7 @@ namespace DeepfreezeApp
             client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
         }
 
-        private void SetVersionForUserAgent()
+        private string SetVersionForUserAgent()
         {
             var client = IoC.Get<IDeepfreezeClient>();
 
@@ -332,6 +339,7 @@ namespace DeepfreezeApp
             else
                 client.ApplicationVersion = "debug";
 
+            return client.ApplicationVersion;
         }
 
         private void MigrateDeepfreezeData()
