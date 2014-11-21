@@ -199,6 +199,33 @@ namespace DeepfreezeApp
         public string RemoveButtonContent
         { get { return Properties.Resources.RemoveButtonContent; } }
 
+        public string ResumeButtonTooltipText
+        { 
+            get 
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.ResumeButtonDisabledTooltipText; 
+            } 
+        }
+
+        public string DeleteButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.DeleteButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
         #endregion
 
         #region action_methods
@@ -220,13 +247,13 @@ namespace DeepfreezeApp
 
             try
             {
-                if (!this._deepfreezeClient.IsInternetConnected)
-                    throw new Exception("The upload can't start/resume without an active Internet connection.");
-
                 this.IsBusy = false;
                 this.IsUploading = true;
                 this.OperationStatus = Enumerations.Status.Uploading;
                 this.ErrorMessage = null;
+
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("The upload can't start/resume without an active Internet connection.");
 
                 this._cts = new CancellationTokenSource();
                 CancellationToken token = this._cts.Token;
@@ -344,17 +371,24 @@ namespace DeepfreezeApp
 
                 if (!(e is TaskCanceledException || e is OperationCanceledException))
                 {
-                    this.ErrorMessage += e.Message;
+                    this.ErrorMessage = Properties.Resources.ErrorUploadingGenericText;
+                    this.OperationStatus = Enumerations.Status.Paused;
 
-                    if (e is AggregateException)
-                    {
-                        foreach(var inner in ((AggregateException)e).InnerExceptions)
-                        {
-                            this.ErrorMessage += "\n" + inner.Message;
-                            if (inner.InnerException != null)
-                                this.ErrorMessage += "\n" + inner.InnerException.Message;
-                        }
-                    }
+                    //if (e is AmazonS3Exception)
+                    //{
+                        
+                    //    this.ErrorMessage += ". Try resuming the upload again.";
+                    //}
+
+                    //if (e is AggregateException)
+                    //{
+                    //    foreach(var inner in ((AggregateException)e).InnerExceptions)
+                    //    {
+                    //        this.ErrorMessage += "\n" + inner.Message;
+                    //        if (inner.InnerException != null)
+                    //            this.ErrorMessage += "\n" + inner.InnerException.Message;
+                    //    }
+                    //}
                 }
             }
 
@@ -428,6 +462,8 @@ namespace DeepfreezeApp
         {
             try
             {
+                this.ErrorMessage = null;
+
                 if (!this._deepfreezeClient.IsInternetConnected)
                     throw new Exception("The upload can't be deleted without an active Internet connection.");
 
@@ -442,7 +478,14 @@ namespace DeepfreezeApp
                     this.Upload.Status != Enumerations.Status.Completed &&
                     this.Upload.Status != Enumerations.Status.Uploaded)
                 {
-                    var abortSuccess = await this.Abort().ConfigureAwait(false);
+                    try
+                    {
+                        var abortSuccess = await this.Abort().ConfigureAwait(false);
+                    }
+                    catch(AmazonS3Exception ae)
+                    {
+                        // If there's an aws exception when calling abort, just go on with the delete call to the df api.
+                    }
 
                     var deleteSuccess = await this._deepfreezeClient.DeleteUploadAsync(this.Upload).ConfigureAwait(false);
                 }
@@ -458,10 +501,10 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                if (!this._deepfreezeClient.IsInternetConnected)
-                    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
+                //if (!this._deepfreezeClient.IsInternetConnected)
+                //    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
 
-                this.ErrorMessage += e.Message;
+                this.ErrorMessage += Properties.Resources.ErrorDeletingUploadGenericText;
             }
             finally
             { this.IsBusy = false; }
@@ -484,31 +527,8 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             {
-                this.ErrorMessage = e.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRemovingUploadGenericText;
             }
-        }
-
-        /// <summary>
-        /// Refresh upload action. This essentialy calls asynchronously the 
-        /// PrepareUploadAsync private method.
-        /// </summary>
-        /// <returns></returns>
-        public async Task RefreshUpload()
-        {
-            this._isRefreshing = true;
-            this.ErrorMessage = null;
-
-            _log.Info("Refreshing upload (user clicked refresh button) in upload manager.");
-
-            try
-            {
-                await this.PrepareUploadAsync().ConfigureAwait(false);
-            }
-            catch(Exception e) 
-            {
-                this.ErrorMessage = e.Message;
-            }
-            finally { this._isRefreshing = false; }
         }
 
         /// <summary>
@@ -580,13 +600,13 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
+                this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
                 if (this.Upload == null)
                 {
                     // inform the user that she has to manually delete the archive
                     // from the website dashboard.
-                    ErrorMessage += "\nError creating a new upload. Please delete the archive using the Deepfreeze website Dashboard.";
+                    ErrorMessage += "\n" + Properties.Resources.DeleteArchiveFromDashboardGenericText;
                 }
 
                 // for any reason, mark this upload with status failed
@@ -664,22 +684,34 @@ namespace DeepfreezeApp
         {
             try
             {
+                // The code below tries to find pending s3 multipart uploads
+                // and sends an abort request for each one found.
+                // Currently the client doesn't support uploading many files in parallel,
+                // that is only one file is uploaded per archive at any given time. So, files
+                // are uploaded sequentially. As a result of this, the filesWithOpenUploads list
+                // should always have only one member max. Regardless, the code is written in 
+                // a way to support more than 1 aborts of not yet completed multipart uploads.
+
+                // get all ArchiveFileInfo for each file to be aborted.
                 var filesWithOpenUploads = this.LocalUpload.ArchiveFilesInfo
                    .Where(x => x.UploadId != null && !x.IsUploaded);
 
-                await Task.Run(() =>
-                    {
-                        Parallel.ForEach(filesWithOpenUploads, async info =>
-                        {
-                            await this._s3Client.AbortMultiPartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, CancellationToken.None)
-                                .ConfigureAwait(false);
-                        }
-                        );
-                    }
-                ).ConfigureAwait(false);
+                // For each ArchiveFileInfo to be aborted, create an async Task making a call to the
+                // _s3Client.AbortMultiPartUploadAsync() method and add it to the abortTasks list.
+                var abortTasks = new List<Task>();
+                foreach(var info in filesWithOpenUploads)
+                {
+                    var task = this._s3Client.AbortMultiPartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, CancellationToken.None);
+
+                    abortTasks.Add(task);
+                }
+
+                // Asynchronously wait for all the abort tasks to end.
+                await Task.WhenAll(abortTasks).ConfigureAwait(false);
                 
                 return true;
             }
+            catch (AggregateException ae) { throw ae; }
             catch (Exception e) { throw e; }
         }
 
@@ -896,13 +928,20 @@ namespace DeepfreezeApp
                     else
                         this.OperationStatus = Enumerations.Status.Error;
 
-                    this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
-                    this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
+                    if (this.OperationStatus == Enumerations.Status.NotFound)
+                    {
+                        this.BusyMessage = "This upload has been deleted from the dashboard. Removing...";
+                        this.RemoveUpload();
+                    }
+                    //this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
+                    //this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
                 }
 
+                // this may get thrown when calculating the actual uploaded size to S3.
                 if (e is AmazonS3Exception)
                 {
-                    this.ErrorMessage = (e as AmazonS3Exception).Message + " Try starting/refreshing the upload again.";
+                    this.OperationStatus = Enumerations.Status.Paused;
+                    this.ErrorMessage = Properties.Resources.ErrorCalculatingS3UploadSizeText;
                 }
             }
             finally
@@ -1003,6 +1042,12 @@ namespace DeepfreezeApp
 
             if (message != null)
             {
+                // Notify the bound property IsInternetConnected to refresh
+                // the 'Enabled' status of the 'Resume' and 'Delete' buttons.
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.ResumeButtonTooltipText);
+                NotifyOfPropertyChange(() => this.DeleteButtonTooltipText);
+
                 if (message.IsConnected &&
                     !this.LocalUpload.UserPaused && 
                     this.Upload.Status == Enumerations.Status.Pending)
@@ -1045,21 +1090,33 @@ namespace DeepfreezeApp
                 {
                     await this.FetchUploadAsync(this.Upload.Url);
 
-                    if (this.Upload.Status == Enumerations.Status.Completed)
+                    if (this.Upload.Status == Enumerations.Status.Completed ||
+                        this.Upload.Status == Enumerations.Status.Error)
                     {
                         this.OperationStatus = this.Upload.Status;
                         this._refreshProgressTimer.Stop();
                         this.ErrorMessage = null;
 
                         var notification = IoC.Get<INotificationMessage>();
-                        notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+
+                        bool isCompleted = this.Upload.Status == Enumerations.Status.Completed; // else status is error
+
+                        if (isCompleted)
+                        {
+                            notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+                        }
+                        else
+                        {
+                            notification.Message = Properties.Resources.StatusErrorNotificationText + " " + this.Archive.Key + ".";
+                        }
+
                         this._eventAggregator.PublishOnBackgroundThread(notification);
                     }
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Error refreshing progress: " + ex.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
         }
 

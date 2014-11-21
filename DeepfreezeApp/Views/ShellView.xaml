@@ -5,16 +5,17 @@
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:DeepfreezeApp"
         xmlns:tb="http://www.hardcodet.net/taskbar"
-        Title="Deepfreeze.io"
+        Title="BigStash"
         TitleCaps="False"
-        Icon="..\deepfreeze.ico"
+        Icon="..\bigstash_windows_icon.ico"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         GlowBrush="{DynamicResource GrayBrush7}"
         Style="{DynamicResource MyCleanWindowStyle}"
-        Height="500" 
-        Width="300"
-        MinHeight="550"        
+        Height="600"
+        MinHeight="600"
+        Width="550"
+        MinWidth="550"
         SaveWindowPosition="True"
         >
 
@@ -60,31 +61,67 @@
                 </Rectangle>
                 
             </Button>
-            
+
+            <Button ToolTip="{Binding AboutButtonTooltip}" 
+                    FontFamily="Segoe UI Symbol"
+                    FontSize="16"
+                    Style="{DynamicResource MetroWindowButtonStyle}"
+                    cal:Message.Attach="ToggleAboutFlyout"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                    >
+
+                <Rectangle Width="15"
+                           Height="15">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Uniform"
+                                     Visual="{StaticResource appbar_information}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+
+            </Button>
+
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
 
     <controls:MetroWindow.Flyouts>
-        <controls:FlyoutsControl x:Name="Flytouts">
+        <controls:FlyoutsControl x:Name="Flytouts" >
+            
+            <controls:Flyout x:Name="PreferencesFlyout" 
+                             Header="{Binding PreferencesHeader}"
+                             Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
+
+                <controls:MetroContentControl cal:View.Model="{Binding PreferencesVM}" />
+
+            </controls:Flyout>
+
             <controls:Flyout 
-                x:Name="PreferencesFlyout" 
-                Header="{Binding PreferencesHeader}"
-                Position="Right" IsOpen="{Binding IsPreferencesFlyoutOpen}"
+                x:Name="AboutFlyout" 
+                Header="{Binding AboutHeader}"
+                Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
                 IsModal="True"
                 Theme="Adapt"
                 >
 
-                <ContentControl cal:View.Model="{Binding PreferencesVM}" />
+                <controls:MetroContentControl cal:View.Model="{Binding AboutVM}" />
 
             </controls:Flyout>
+            
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
     <Grid Margin="0 0 0 10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
-                        IconSource="/deepfreeze_tray.ico"
-                        ToolTipText="Deepfreeze.io for Windows"
+                        IconSource="/bigstash_windows_icon.ico"
+                        ToolTipText="BigStash for Windows"
                         MenuActivation="RightClick"
                         cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
                         >
@@ -103,54 +140,72 @@
 
         </tb:TaskbarIcon>
 
-        <TextBlock x:Name="ErrorMessage"
+        <StackPanel Background="FloralWhite">
+            
+            <TextBlock Text="Looks like you aren't connected to the internet. Verify that your internet connection is working properly."
+                               TextWrapping="Wrap"
+                               Visibility="{Binding IsInternetConnected, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Top"
+                               Background="FloralWhite"
+                               TextAlignment="Center"
+                               FontSize="16"
+                               Margin="0 5 0 5"
+                               />
+        </StackPanel>
+        
+        <Grid Grid.Row="1">
+
+            <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
-        
-        <Grid Visibility="{Binding HasError, Converter={StaticResource InvertBoolToVisibilityConverter}}">
 
-            <WrapPanel HorizontalAlignment="Center" 
+            <Grid Visibility="{Binding HasError, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+
+                <WrapPanel HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
                    >
 
-                <Label Content="{Binding BusyMessage}" />
+                    <Label Content="{Binding BusyMessage}" />
 
-                <controls:ProgressRing IsActive="{Binding IsBusy}" 
+                    <controls:ProgressRing IsActive="{Binding IsBusy}" 
                                    Width="20" 
                                    Height="20" 
                                    />
 
-            </WrapPanel>
+                </WrapPanel>
 
-            <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-                    VerticalAlignment="Center"
-                    >
+                <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                            VerticalAlignment="Center"
+                            >
 
-                <ContentControl cal:View.Model="{Binding LoginVM}" />
+                    <ContentControl cal:View.Model="{Binding LoginVM}" />
 
-            </StackPanel>
+                </StackPanel>
 
-            <DockPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
+                <DockPanel DockPanel.Dock="Top" Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
 
-                <ContentControl cal:View.Model="{Binding ArchiveVM}"
+                    <ContentControl cal:View.Model="{Binding ArchiveVM}"
                             DockPanel.Dock="Top"
                             />
 
-                <ScrollViewer DockPanel.Dock="Top"
+                    <ScrollViewer DockPanel.Dock="Top"
                           VerticalScrollBarVisibility="Auto"
                           >
 
-                    <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
+                        <ContentControl cal:View.Model="{Binding UploadManagerVM}" />
 
-                </ScrollViewer>
+                    </ScrollViewer>
 
-            </DockPanel>
-            
+                </DockPanel>
+
+            </Grid>
+
         </Grid>
 
     </Grid>

@@ -134,6 +134,7 @@
 
                         <TextBox x:Name="ArchiveTitle"
                                  Margin="5 5 5 0"
+                                 MaxLength="255"
                                  controls:TextboxHelper.Watermark="{Binding ArchiveTitleHelperText}" 
                                  />
 
@@ -147,6 +148,8 @@
                                     Content="{Binding UploadButtonContent}"
                                     Width="70"
                                     Style="{DynamicResource AccentedSquareButtonStyleCI}"
+                                    ToolTip="{Binding UploadButtonTooltipText}"
+                                    ToolTipService.ShowOnDisabled="True"
                                 />
 
                             <Button x:Name="Reset" 

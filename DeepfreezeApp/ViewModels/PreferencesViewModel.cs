@@ -98,7 +98,6 @@ namespace DeepfreezeApp
             get { return Properties.Settings.Default.MinimizeOnClose; }
             set { Properties.Settings.Default.MinimizeOnClose = value; Properties.Settings.Default.Save(); NotifyOfPropertyChange(() => this.MinimizeOnClose); }
         }
-
         #endregion
 
         #region methods
@@ -116,28 +115,6 @@ namespace DeepfreezeApp
             {
                 registryKey.DeleteValue(curAssembly.GetName().Name, false);
             }
-        }
-
-        public void ExportLog()
-        {
-            try
-            {
-                string desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-                string newLogPath = Path.Combine(desktopPath, Properties.Settings.Default.LogFileName);
-                File.Copy(Properties.Settings.Default.LogFilePath, newLogPath, true);
-
-                Process.Start(newLogPath);
-            }
-            catch (Exception e)
-            {
-                this.ErrorMessage = e.Message;
-            }
-        }
-
-        public void OpenDeepfreezePage()
-        {
-            var authority = new Uri(Properties.Settings.Default.ServerBaseAddress).Authority;
-            Process.Start(authority);
         }
 
         #endregion

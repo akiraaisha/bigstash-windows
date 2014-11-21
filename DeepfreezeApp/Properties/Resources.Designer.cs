@@ -61,7 +61,25 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.io Account.
+        ///   Looks up a localized string similar to About BigStash for Windows.
+        /// </summary>
+        internal static string AboutButtonTooltip {
+            get {
+                return ResourceManager.GetString("AboutButtonTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        internal static string AboutHeader {
+            get {
+                return ResourceManager.GetString("AboutHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BigStash Account.
         /// </summary>
         internal static string ActiveUserHeader {
             get {
@@ -97,6 +115,51 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatic check and installation of updates, every time the About page is opened..
+        /// </summary>
+        internal static string CheckForUpdateAutomaticText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateAutomaticText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t check for update without an Internet connection..
+        /// </summary>
+        internal static string CheckForUpdateDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for application updates and install them..
+        /// </summary>
+        internal static string CheckForUpdateEnabledTooltipText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for update.
+        /// </summary>
+        internal static string CheckForUpdateText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for update....
+        /// </summary>
+        internal static string CheckingForUpdateText {
+            get {
+                return ResourceManager.GetString("CheckingForUpdateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to or choose a folder.
         /// </summary>
         internal static string ChooseFolderText {
@@ -124,7 +187,16 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect to your Deepfreeze.io Account.
+        ///   Looks up a localized string similar to You can&apos;t connect your account without an active Internet connection..
+        /// </summary>
+        internal static string ConnectButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("ConnectButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect to your BigStash Account.
         /// </summary>
         internal static string ConnectHeaderText {
             get {
@@ -169,11 +241,20 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with Deepfreeze.io for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;DFLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
                 return ResourceManager.GetString("DebugHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please delete the archive using the BigStash website Dashboard..
+        /// </summary>
+        internal static string DeleteArchiveFromDashboardGenericText {
+            get {
+                return ResourceManager.GetString("DeleteArchiveFromDashboardGenericText", resourceCulture);
             }
         }
         
@@ -187,11 +268,29 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t delete your upload without an active Internet connection..
+        /// </summary>
+        internal static string DeleteButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("DeleteButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disconnect.
         /// </summary>
         internal static string DisconnectButtonContent {
             get {
                 return ResourceManager.GetString("DisconnectButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading... .
+        /// </summary>
+        internal static string DowloadingUpdateText {
+            get {
+                return ResourceManager.GetString("DowloadingUpdateText", resourceCulture);
             }
         }
         
@@ -214,6 +313,186 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error adding your file(s) for upload..
+        /// </summary>
+        internal static string ErrorAddingFilesGenericText {
+            get {
+                return ResourceManager.GetString("ErrorAddingFilesGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error calculating the total upload progress..
+        /// </summary>
+        internal static string ErrorCalculatingS3UploadSizeText {
+            get {
+                return ResourceManager.GetString("ErrorCalculatingS3UploadSizeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t check for updates without an active Internet connection..
+        /// </summary>
+        internal static string ErrorCheckingForUpdateWithoutInternetGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCheckingForUpdateWithoutInternetGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error loading your folder for upload..
+        /// </summary>
+        internal static string ErrorChoosingFolderGenericText {
+            get {
+                return ResourceManager.GetString("ErrorChoosingFolderGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while trying to connect your account..
+        /// </summary>
+        internal static string ErrorConnectingGenericText {
+            get {
+                return ResourceManager.GetString("ErrorConnectingGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t connect your account without an active Internet connection..
+        /// </summary>
+        internal static string ErrorConnectingWithoutInternetText {
+            get {
+                return ResourceManager.GetString("ErrorConnectingWithoutInternetText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while creating your archive..
+        /// </summary>
+        internal static string ErrorCreatingArchiveGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCreatingArchiveGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while creating your upload..
+        /// </summary>
+        internal static string ErrorCreatingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorCreatingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while deleting your upload..
+        /// </summary>
+        internal static string ErrorDeletingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorDeletingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The new version of BigStash for Windows cannot be downloaded at this time..
+        /// </summary>
+        internal static string ErrorDownloadingUpdateGenericText {
+            get {
+                return ResourceManager.GetString("ErrorDownloadingUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while initializing your uploads..
+        /// </summary>
+        internal static string ErrorInitializingClientUploadsListGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInitializingClientUploadsListGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while initializing the application..
+        /// </summary>
+        internal static string ErrorInitializingShellViewModelGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInitializingShellViewModelGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot check for a new version of BigStash for Windows. Please reinstall the application..
+        /// </summary>
+        internal static string ErrorInvalidDeploymentExceptionGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInvalidDeploymentExceptionGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This application cannot be updated. It is likely not a ClickOnce application..
+        /// </summary>
+        internal static string ErrorInvalidOperationCheckingForUpdateGenericText {
+            get {
+                return ResourceManager.GetString("ErrorInvalidOperationCheckingForUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your remaining BigStash storage is not sufficient for the size of this archive. Consider buying more storage..
+        /// </summary>
+        internal static string ErrorNotEnoughSpaceGenericText {
+            get {
+                return ResourceManager.GetString("ErrorNotEnoughSpaceGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while preparing your upload..
+        /// </summary>
+        internal static string ErrorPreparingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorPreparingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while checking your upload&apos;s progress..
+        /// </summary>
+        internal static string ErrorRefreshingProgressGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRefreshingProgressGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while refreshing your account&apos;s information..
+        /// </summary>
+        internal static string ErrorRefreshingUserStatsGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRefreshingUserStatsGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while removing your upload from the application..
+        /// </summary>
+        internal static string ErrorRemovingUploadGenericText {
+            get {
+                return ResourceManager.GetString("ErrorRemovingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error with your upload..
+        /// </summary>
+        internal static string ErrorUploadingGenericText {
+            get {
+                return ResourceManager.GetString("ErrorUploadingGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
         internal static string ExitHeader {
@@ -232,7 +511,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.deepfreeze.io/o/password_reset/.
+        ///   Looks up a localized string similar to https://www.bigstash.co/password_reset/.
         /// </summary>
         internal static string ForgotPasswordURL {
             get {
@@ -250,7 +529,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deepfreeze.io will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        ///   Looks up a localized string similar to BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
         /// </summary>
         internal static string MinimizedMessageText {
             get {
@@ -331,11 +610,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t refresh your storage information without an active Internet connection..
+        /// </summary>
+        internal static string RefreshButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("RefreshButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh your storage information..
+        /// </summary>
+        internal static string RefreshButtonEnabledTooltipText {
+            get {
+                return ResourceManager.GetString("RefreshButtonEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         internal static string RemoveButtonContent {
             get {
                 return ResourceManager.GetString("RemoveButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click Restart for changes to take effect..
+        /// </summary>
+        internal static string RestartNeededText {
+            get {
+                return ResourceManager.GetString("RestartNeededText", resourceCulture);
             }
         }
         
@@ -349,6 +655,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t resume your upload without an active Internet connection..
+        /// </summary>
+        internal static string ResumeButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("ResumeButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Don&apos;t know your password?.
         /// </summary>
         internal static string SetPasswordText {
@@ -358,7 +673,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.deepfreeze.io/account/.
+        ///   Looks up a localized string similar to https://www.bigstash.co/account/.
         /// </summary>
         internal static string SetPasswordURL {
             get {
@@ -372,6 +687,15 @@ namespace DeepfreezeApp.Properties {
         internal static string StatusCompletedText {
             get {
                 return ResourceManager.GetString("StatusCompletedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error freezing Archive.
+        /// </summary>
+        internal static string StatusErrorNotificationText {
+            get {
+                return ResourceManager.GetString("StatusErrorNotificationText", resourceCulture);
             }
         }
         
@@ -457,11 +781,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not authenticate. Please enter your Deepfreeze.io account credentials..
+        ///   Looks up a localized string similar to Could not authenticate. Please enter your BigStash account credentials..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {
                 return ResourceManager.GetString("UnauthorizedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update completed successfully. Click the icon above to restart..
+        /// </summary>
+        internal static string UpdateCompletedText {
+            get {
+                return ResourceManager.GetString("UpdateCompletedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version information is outdated..
+        /// </summary>
+        internal static string UpdateVersionInfoOutdatedText {
+            get {
+                return ResourceManager.GetString("UpdateVersionInfoOutdatedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating to latest version... .
+        /// </summary>
+        internal static string UpdatingToLatestVersionText {
+            get {
+                return ResourceManager.GetString("UpdatingToLatestVersionText", resourceCulture);
             }
         }
         
@@ -475,11 +826,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t create your archive and start uploading it without an active Internet connection..
+        /// </summary>
+        internal static string UploadButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("UploadButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create your archive and start uploading it..
+        /// </summary>
+        internal static string UploadButtonEnabledTooltipText {
+            get {
+                return ResourceManager.GetString("UploadButtonEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to was successfully uploaded..
         /// </summary>
         internal static string UploadedNotificationText {
             get {
                 return ResourceManager.GetString("UploadedNotificationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BigStash for Windows is up to date..
+        /// </summary>
+        internal static string UpToDateText {
+            get {
+                return ResourceManager.GetString("UpToDateText", resourceCulture);
             }
         }
         

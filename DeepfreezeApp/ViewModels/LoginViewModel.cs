@@ -16,7 +16,7 @@ using System.Windows.Input;
 namespace DeepfreezeApp
 {
     [Export(typeof(ILoginViewModel))]
-    public class LoginViewModel : Screen, ILoginViewModel
+    public class LoginViewModel : Screen, ILoginViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -161,6 +161,20 @@ namespace DeepfreezeApp
         public string SetPasswordText
         { get { return Properties.Resources.SetPasswordText; } }
 
+        public bool IsInternetConnected
+        { get { return this._deepfreezeClient.IsInternetConnected; } }
+
+        public string ConnectButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.ConnectButtonDisabledTooltipText;
+            }
+        }
+
         #endregion
 
         #region action methods
@@ -179,6 +193,9 @@ namespace DeepfreezeApp
 
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't login without an active Internet connection.");
+
                 IsBusy = true;
 
                 _log.Info("Connecting user with email \"" + this.UsernameInput + "\".");
@@ -189,10 +206,10 @@ namespace DeepfreezeApp
                 if (token == null)
                 {
                     _log.Warn("CreateTokenAsync returned null.");
-                    throw new Exception();
+                    throw new Exception("CreateTokenAsync returned null.");
                 }
 
-                _log.Info("Created a new Deepfreeze token.");
+                _log.Info("Created a new BigStash token.");
 
                 // After creating a new token, set it to be used as default in DeepfreezeClient.
                 this._deepfreezeClient.Settings.ActiveToken = token;
@@ -203,7 +220,7 @@ namespace DeepfreezeApp
                 if (user == null)
                 {
                     _log.Warn("GetUserAsync returned null.");
-                    throw new Exception();
+                    throw new Exception("GetUserAsync returned null.");
                 }
 
                 // Since the user response contains a valid User, 
@@ -226,8 +243,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                HasLoginError = true;
-                LoginError = e.Message;
+                this.HasLoginError = true;
+                this.LoginError = Properties.Resources.ErrorConnectingGenericText;
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -236,9 +253,18 @@ namespace DeepfreezeApp
                     switch (response.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
-                            LoginError = Properties.Resources.UnauthorizedExceptionMessage;
+                            this.LoginError += Properties.Resources.UnauthorizedExceptionMessage;
                             break;
                     }
+                }
+                else
+                {
+                    // if the exception is not thrown by some DF API call but from the above LocalStorage.WriteJson call
+                    // then update the error log.
+                    _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
+                    if (!this._deepfreezeClient.IsInternetConnected)
+                        this.LoginError = Properties.Resources.ErrorConnectingWithoutInternetText;
                 }
             }
             finally
@@ -363,17 +389,32 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region message_handlers
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.ConnectButtonTooltipText);
+            }
+        }
+
+        #endregion
+
         #region events
 
         protected override void OnActivate()
         {
             this.Reset();
+            this._eventAggregator.Subscribe(this);
             base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
         {
             this.Reset();
+            this._eventAggregator.Unsubscribe(this);
             base.OnDeactivate(close);
         }
 

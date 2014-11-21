@@ -1,5 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                    >
 
     <Style x:Key="DescriptionHeaderStyle" TargetType="Label">
         <Setter Property="FontSize" Value="18" />
@@ -147,6 +149,208 @@
                 Value="{DynamicResource AccentColorBrush}" />
         <Setter Property="Foreground"
                 Value="{DynamicResource IdealForegroundColorBrush}" />
+    </Style>
+
+    <Style TargetType="{x:Type TabControl}"
+           x:Key="SimpleMetroTabControl">
+            <Setter Property="Background"
+                Value="{x:Null}" />
+            <Setter Property="BorderBrush"
+                Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="ColumnDefinition0" />
+                                <ColumnDefinition x:Name="ColumnDefinition1"
+                                              Width="0" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="RowDefinition0"
+                                           Height="Auto" />
+                                <RowDefinition x:Name="RowDefinition1"
+                                           Height="*" />
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="HeaderPanel"
+                                  Grid.Column="0"
+                                  IsItemsHost="true"
+                                  Grid.Row="0"
+                                  KeyboardNavigation.TabIndex="1"
+                                  Panel.ZIndex="1" />
+                            <Border x:Name="ContentPanel"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                Grid.Column="0"
+                                KeyboardNavigation.DirectionalNavigation="Contained"
+                                Grid.Row="1"
+                                KeyboardNavigation.TabIndex="2"
+                                KeyboardNavigation.TabNavigation="Local">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                              ContentSource="SelectedContent"
+                                              Margin="{TemplateBinding Padding}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="TabStripPlacement"
+                                 Value="Bottom">
+                                <Setter Property="Grid.Row"
+                                    TargetName="HeaderPanel"
+                                    Value="1" />
+                                <Setter Property="Grid.Row"
+                                    TargetName="ContentPanel"
+                                    Value="0" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition0"
+                                    Value="*" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition1"
+                                    Value="Auto" />
+                                <Setter Property="Margin"
+                                    TargetName="HeaderPanel"
+                                    Value="2,0,2,2" />
+                            </Trigger>
+                            <Trigger Property="TabStripPlacement"
+                                 Value="Left">
+                                <Setter Property="Grid.Row"
+                                    TargetName="HeaderPanel"
+                                    Value="0" />
+                                <Setter Property="Grid.Row"
+                                    TargetName="ContentPanel"
+                                    Value="0" />
+                                <Setter Property="Grid.Column"
+                                    TargetName="HeaderPanel"
+                                    Value="0" />
+                                <Setter Property="Grid.Column"
+                                    TargetName="ContentPanel"
+                                    Value="1" />
+                                <Setter Property="Width"
+                                    TargetName="ColumnDefinition0"
+                                    Value="Auto" />
+                                <Setter Property="Width"
+                                    TargetName="ColumnDefinition1"
+                                    Value="*" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition0"
+                                    Value="*" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition1"
+                                    Value="0" />
+                                <Setter Property="Margin"
+                                    TargetName="HeaderPanel"
+                                    Value="2,2,0,2" />
+                            </Trigger>
+                            <Trigger Property="TabStripPlacement"
+                                 Value="Right">
+                                <Setter Property="Grid.Row"
+                                    TargetName="HeaderPanel"
+                                    Value="0" />
+                                <Setter Property="Grid.Row"
+                                    TargetName="ContentPanel"
+                                    Value="0" />
+                                <Setter Property="Grid.Column"
+                                    TargetName="HeaderPanel"
+                                    Value="1" />
+                                <Setter Property="Grid.Column"
+                                    TargetName="ContentPanel"
+                                    Value="0" />
+                                <Setter Property="Width"
+                                    TargetName="ColumnDefinition0"
+                                    Value="*" />
+                                <Setter Property="Width"
+                                    TargetName="ColumnDefinition1"
+                                    Value="Auto" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition0"
+                                    Value="*" />
+                                <Setter Property="Height"
+                                    TargetName="RowDefinition1"
+                                    Value="0" />
+                                <Setter Property="Margin"
+                                    TargetName="HeaderPanel"
+                                    Value="0,2,2,2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    <Style TargetType="TabItem"
+           x:Key="SimpleMetroTabItem">
+        <Setter Property="FocusVisualStyle"
+                Value="{x:Null}" />
+        <Setter Property="IsTabStop"
+                Value="False" />
+        <Setter Property="Padding"
+                Value="6,2,6,2" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="Stretch" />
+        <Setter Property="VerticalContentAlignment"
+                Value="Stretch" />
+        <Setter Property="MinWidth"
+                Value="5" />
+        <Setter Property="MinHeight"
+                Value="5" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BlackBrush}" />
+        <Setter Property="Background"
+                Value="Transparent" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource BlackBrush}" />
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
+        <!-- special property for header font size -->
+        <Setter Property="Controls:ControlsHelper.HeaderFontSize"
+                Value="12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Border"
+                            Margin="{TemplateBinding Padding}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                        <ContentPresenter x:Name="ContentSite"
+                                          Margin="2,1,2,1"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          TextElement.FontSize="16"
+                                          TextElement.FontStretch="{TemplateBinding Controls:ControlsHelper.HeaderFontStretch}"
+                                          TextElement.FontWeight="{TemplateBinding Controls:ControlsHelper.HeaderFontWeight}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"
+                                          ContentSource="Header"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected"
+                                 Value="true">
+                            <Setter Property="TextElement.Foreground"
+                                    TargetName="ContentSite"
+                                    Value="{DynamicResource BlackBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected"
+                                 Value="false">
+                            <Setter Property="TextElement.Foreground"
+                                    TargetName="ContentSite"
+                                    Value="{DynamicResource GrayNormalBrush}" />
+                        </Trigger>
+                        <Trigger SourceName="ContentSite"
+                                 Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="TextElement.Foreground"
+                                    TargetName="ContentSite"
+                                    Value="{DynamicResource GrayHoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

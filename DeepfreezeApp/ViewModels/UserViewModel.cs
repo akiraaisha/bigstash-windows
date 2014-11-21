@@ -13,7 +13,8 @@ using System.IO;
 namespace DeepfreezeApp
 {
     [Export(typeof(IUserViewModel))]
-    public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>
+    public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>,
+        IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -95,15 +96,37 @@ namespace DeepfreezeApp
             } 
         }
 
+        public string RefreshButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return Properties.Resources.RefreshButtonEnabledTooltipText;
+                else
+                    return Properties.Resources.RefreshButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
         #endregion
 
         #region action_methods
 
         public async Task RefreshUser()
         {
-            this.IsBusy = true;
+            this.Reset();
+
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't refresh user stats without an active Internet connection.");
+
+                this.IsBusy = true;
+
                 _log.Info("Fetching User, GET users resource.");
                 var user = await this._deepfreezeClient.GetUserAsync();
 
@@ -125,7 +148,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                this.ErrorMessage = e.Message;
+                this.ErrorMessage = Properties.Resources.ErrorRefreshingUserStatsGenericText;
             }
             finally 
             { 
@@ -151,9 +174,24 @@ namespace DeepfreezeApp
             await this.RefreshUser();
         }
 
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.RefreshButtonTooltipText);
+            }
+        }
+
         #endregion
 
         #region private_methods
+
+        private void Reset()
+        {
+            this.ErrorMessage = null;
+        }
+
         #endregion
 
         #region events

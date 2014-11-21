@@ -64,6 +64,8 @@ namespace DeepfreezeSDK
             }
         }
 
+        public string ApplicationVersion { get; set; }
+
         #region methods_for_consuming_DF_API
 
         /// <summary>
@@ -137,7 +139,7 @@ namespace DeepfreezeSDK
             Token token = new Token();
 
             var requestUri = new UriBuilder(this.Settings.ApiEndpoint + _tokenUri).Uri;
-            var name = @"{""name"":""Deepfreeze.io for Windows on " + Environment.MachineName + @"""}";
+            var name = @"{""name"":""BigStash for Windows on " + Environment.MachineName + @"""}";
             var requestContent = new StringContent(name, Encoding.UTF8, "application/json");
 
             try
@@ -720,7 +722,7 @@ namespace DeepfreezeSDK
             
             // set use agent header
             // TODO: should reflect the production version along with some platform information.
-            message.Headers.UserAgent.Add(new ProductInfoHeaderValue("deepfreeze-windows-desktop", "alpha"));
+            message.Headers.UserAgent.Add(new ProductInfoHeaderValue("bigstash-windows-desktop", this.ApplicationVersion));
 
             // set host header
             message.Headers.Host = message.RequestUri.Authority;

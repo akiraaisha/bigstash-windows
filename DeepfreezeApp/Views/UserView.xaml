@@ -100,7 +100,9 @@
                     VerticalAlignment="Center" 
                     Style="{DynamicResource MetroCircleButtonStyle}"
                     x:Name="RefreshUser" 
-                    ToolTip="Refresh" 
+                    ToolTip="{Binding RefreshButtonTooltipText}"
+                    ToolTipService.ShowOnDisabled="True"
+                    IsEnabled="{Binding IsInternetConnected}"
                     Margin="0 0 5 0"
                     >
 

@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows;
 using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace DeepfreezeApp
 {
@@ -32,11 +33,13 @@ namespace DeepfreezeApp
         private ArchiveViewModel _archiveVM;
         private LoginViewModel _loginVM;
         private PreferencesViewModel _preferencesVM;
+        private AboutViewModel _aboutVM;
         private UploadManagerViewModel _uploadManagerVM;
 
         private MetroWindow _shellWindow;
         private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
+        private bool _isAboutFlyoutOpen = false;
 
         private bool _isBusy = false;
         private bool _hasError = false;
@@ -102,6 +105,12 @@ namespace DeepfreezeApp
             set { this._preferencesVM = value; NotifyOfPropertyChange(() => PreferencesVM); }
         }
 
+        public AboutViewModel AboutVM
+        {
+            get { return this._aboutVM; }
+            set { this._aboutVM = value; NotifyOfPropertyChange(() => AboutVM); }
+        }
+
         public UploadManagerViewModel UploadManagerVM
         {
             get { return this._uploadManagerVM; }
@@ -114,8 +123,20 @@ namespace DeepfreezeApp
             set { this._isPreferencesFlyoutOpen = value; NotifyOfPropertyChange(() => IsPreferencesFlyoutOpen); }
         }
 
+        public bool IsAboutFlyoutOpen
+        {
+            get { return this._isAboutFlyoutOpen; }
+            set { this._isAboutFlyoutOpen = value; NotifyOfPropertyChange(() => IsAboutFlyoutOpen); }
+        }
+
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
+
+        public string AboutHeader
+        { get { return Properties.Resources.AboutHeader; } }
+
+        public string AboutButtonTooltip
+        { get { return Properties.Resources.AboutButtonTooltip; } }
 
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
@@ -136,6 +157,29 @@ namespace DeepfreezeApp
         public void TogglePreferencesFlyout()
         {
             IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
+
+            if (IsPreferencesFlyoutOpen)
+            {
+                IsAboutFlyoutOpen = false;
+            }
+        }
+
+        public void ToggleAboutFlyout()
+        {
+            IsAboutFlyoutOpen = !IsAboutFlyoutOpen;
+
+            if (IsAboutFlyoutOpen)
+            {
+                IsPreferencesFlyoutOpen = false;
+
+                // send a message with the aggregator to check for updates
+                // only if the user has automatic updates settings enabled.\
+                if (Properties.Settings.Default.DoAutomaticUpdates)
+                {
+                    var checkForUpdateMessage = IoC.Get<ICheckForUpdateMessage>() as CheckForUpdatesMessage;
+                    this._eventAggregator.PublishOnUIThread(checkForUpdateMessage);
+                }
+            }
         }
 
         public void ShowShellWindow()
@@ -203,6 +247,7 @@ namespace DeepfreezeApp
 
             InstatiateArchiveViewModel();
             InstatiatePreferencesViewModel();
+            InstatiateAboutViewModel();
             InstatiateUploadManagerViewModel();
         }
 
@@ -223,7 +268,7 @@ namespace DeepfreezeApp
         {
             if (message != null)
             {
-                _tray.ShowBalloonTip("Deepfreeze.io for Windows", message.Message, BalloonIcon.Info);
+                _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, BalloonIcon.Info);
             }
         }
 
@@ -326,8 +371,14 @@ namespace DeepfreezeApp
                 }
                 else
                 {
+                    // endpoint.txt does not exist, so set the base address to the Application wide default setting 
+                    // 'ServerBaseAddress' variable.
                     _log.Info("Endpoint file doesn't exist. Setting to default as \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
                     this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
+
+                    // try call SetDebugApiEndpoint(), which exists only in debug mode
+                    // to override the above 'ServerBaseAddress'.
+                    this.SetDebugApiEndpoint();
                 }
 
                 if (IsLoggedIn)
@@ -350,6 +401,7 @@ namespace DeepfreezeApp
 
                         InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();
+                        InstatiateAboutViewModel();
                         InstatiateUploadManagerViewModel();
                     }
                     else
@@ -375,12 +427,7 @@ namespace DeepfreezeApp
             catch(Exception e)
             {
                 HasError = true;
-                this.ErrorMessage = e.Message;
-
-                if (!this._deepfreezeClient.IsInternetConnected)
-                {
-                    this.ErrorMessage += "\n" + Properties.Resources.NoInternetConnectionMessage;
-                }
+                this.ErrorMessage = Properties.Resources.ErrorInitializingShellViewModelGenericText;
 
                 if (e is Exceptions.DfApiException)
                 {
@@ -395,6 +442,11 @@ namespace DeepfreezeApp
                             this.Disconnect("Your previous session is no longer valid. Please connect again.");
                             break;
                     }
+                }
+                else
+                {
+                    // for every exception other than DfApiException update the error log.
+                    _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 }
             }
             finally 
@@ -436,7 +488,7 @@ namespace DeepfreezeApp
                     if (!this._minimizeBallonTipShown)
                     {
                         this._minimizeBallonTipShown = true;
-                        _tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
+                        _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
                     }
 
                     callback(false); // will cancel close
@@ -458,10 +510,11 @@ namespace DeepfreezeApp
 
             var uploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
 
-            if (this.IsInternetConnected != isConnected && uploadManagerVM.Uploads.Count > 0)
-            {
-                this.IsInternetConnected = isConnected;
+            bool connectionStatusChanged = this.IsInternetConnected != isConnected;
+            this.IsInternetConnected = isConnected;
 
+            if (connectionStatusChanged)
+            {
                 var internetConnectivityMessage = IoC.Get<IInternetConnectivityMessage>();
                 internetConnectivityMessage.IsConnected = this.IsInternetConnected;
 
@@ -469,10 +522,10 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
 
                     if (autoPausedUploadsCount > 0)
-                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
+                        this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
                 }
                 else
                 {
@@ -481,7 +534,7 @@ namespace DeepfreezeApp
                     int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => x.IsUploading).Count();
 
                     if (autoPausedUploadsCount > 0)
-                        this._tray.ShowBalloonTip("Deepfreeze.io for Windows", Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
+                        this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
                 }
 
                 this._eventAggregator.PublishOnUIThread(internetConnectivityMessage);
@@ -531,6 +584,18 @@ namespace DeepfreezeApp
         }
 
         /// <summary>
+        /// Instatiate a new AboutViewModel and activate it.
+        /// </summary>
+        private void InstatiateAboutViewModel()
+        {
+            if (AboutVM == null)
+            {
+                AboutVM = IoC.Get<IAboutViewModel>() as AboutViewModel;
+            }
+            this.ActivateItem(AboutVM);
+        }
+
+        /// <summary>
         /// Instatiate a new UploadManagerViewModel and activate it.
         /// </summary>
         private void InstatiateUploadManagerViewModel()
@@ -575,6 +640,27 @@ namespace DeepfreezeApp
             this.UploadManagerVM = null;
 
             InstatiateLoginViewModel(errorMessage);
+        }
+
+        /// <summary>
+        /// Use this method to change the api endpoint for debug only mode.
+        /// This method is called in the 'OnActivate' event and changes the api endpoint
+        /// after the standard way of checking and saving the preferences.djf file,
+        /// which includes a call to save that file before going on with the initialization.
+        /// </summary>
+        [Conditional("DEBUG")]
+        private void SetDebugApiEndpoint()
+        {
+            // set the api endpoint for debug only mode
+            // only if the user setting 'DebugServerBaseAddress' is set.
+            string debugEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+
+            if (!(String.IsNullOrEmpty(debugEndpoint) ||
+                  String.IsNullOrWhiteSpace(debugEndpoint)))
+            {
+                MessageBox.Show("Setting custom endpoint to: " + debugEndpoint);
+                this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+            }
         }
 
         #endregion

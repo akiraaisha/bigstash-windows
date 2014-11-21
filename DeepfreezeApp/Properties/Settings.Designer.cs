@@ -26,18 +26,18 @@ namespace DeepfreezeApp.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LocalAppDataDFFolder {
+        public string ApplicationDataFolder {
             get {
-                return ((string)(this["LocalAppDataDFFolder"]));
+                return ((string)(this["ApplicationDataFolder"]));
             }
             set {
-                this["LocalAppDataDFFolder"] = value;
+                this["ApplicationDataFolder"] = value;
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BigStash")]
         public string ApplicationName {
             get {
                 return ((string)(this["ApplicationName"]));
@@ -118,7 +118,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io for Windows")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BigStash for Windows")]
         public string ApplicationFullName {
             get {
                 return ((string)(this["ApplicationFullName"]));
@@ -127,7 +127,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DFLog.txt")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Log.txt")]
         public string LogFileName {
             get {
                 return ((string)(this["LogFileName"]));
@@ -176,6 +176,72 @@ namespace DeepfreezeApp.Properties {
             }
             set {
                 this["IsFirstLogin"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RestartAfterUpdate {
+            get {
+                return ((bool)(this["RestartAfterUpdate"]));
+            }
+            set {
+                this["RestartAfterUpdate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DoAutomaticUpdates {
+            get {
+                return ((bool)(this["DoAutomaticUpdates"]));
+            }
+            set {
+                this["DoAutomaticUpdates"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DebugServerBaseAddress {
+            get {
+                return ((string)(this["DebugServerBaseAddress"]));
+            }
+            set {
+                this["DebugServerBaseAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Deepfreeze.io")]
+        public string DeepfreezeApplicationFolderName {
+            get {
+                return ((string)(this["DeepfreezeApplicationFolderName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/")]
+        public string BigStashURL {
+            get {
+                return ((string)(this["BigStashURL"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BigStashBlogURL {
+            get {
+                return ((string)(this["BigStashBlogURL"]));
+            }
+            set {
+                this["BigStashBlogURL"] = value;
             }
         }
     }

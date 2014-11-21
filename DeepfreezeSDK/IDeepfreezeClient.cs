@@ -22,6 +22,8 @@ namespace DeepfreezeSDK
 
         bool IsInternetConnected { get; }
 
+        string ApplicationVersion { get; set; }
+
         /// <summary>
         /// Create a new Deepfreeze API token using user credentials.
         /// </summary>

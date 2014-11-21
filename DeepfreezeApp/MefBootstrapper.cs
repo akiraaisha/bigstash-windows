@@ -9,14 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Diagnostics;
+using System.Deployment.Application;
+ 
 
 using Newtonsoft.Json;
 using DeepfreezeModel;
 using System.Threading.Tasks;
 using Custom.Windows;
-using System.Deployment.Application;
-using Microsoft.Win32;
-using System.Reflection;
 
 namespace DeepfreezeApp
 {
@@ -76,7 +76,7 @@ namespace DeepfreezeApp
             // check if this is the first instance running
             // or a newer with the first instance already running.
             // if this is the case, the newer instance shuts down.
-            var app = Application as InstanceAwareApplication;
+            var app = Application.Current as InstanceAwareApplication;
             if (!(app == null || app.IsFirstInstance))
                 app.Shutdown();
             else
@@ -93,15 +93,18 @@ namespace DeepfreezeApp
                 {
                     SetAddRemoveProgramsIcon();
                 }
-                
+
+                // get the application version to be used in user agent header of api requests.
+                var currentVersion = SetVersionForUserAgent();
+
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-                Log.Info("Starting up a new instance of Deepfreeze.io for Windows.");
+                Log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 Log.Info("*****************************************************");
                 Log.Info("*****************************************************");
-                Log.Info("*******                                       *******");
-                Log.Info("*******       Deepfreeze.io for Windows       *******");
-                Log.Info("*******                                       *******");
+                Log.Info("*********                                  **********");
+                Log.Info("*********       BigStash for Windows       **********");
+                Log.Info("*********                                  **********");
                 Log.Info("*****************************************************");
                 Log.Info("*****************************************************");
 
@@ -109,9 +112,28 @@ namespace DeepfreezeApp
                 // in Application.Properties for use in this application instance.
                 SetApplicationPathsProperties();
 
-                // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
+                // if LOCALAPPDATA\BigStash doesn't exist, create it.
                 CreateLocalApplicationDataDirectory();
 
+                // If this version is network deployed, is the first instance run after installing/updating
+                // and is equal to the 1st release of Bigstash for Windows (version 1.2.0) then migrate old deepfreeze application data.
+                if (ApplicationDeployment.IsNetworkDeployed &&
+                    ApplicationDeployment.CurrentDeployment.IsFirstRun &&
+                    ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0")
+                {
+                    // Open the blog post page relative to the BigStash update.
+                    if (!(String.IsNullOrEmpty(Properties.Settings.Default.BigStashBlogURL) ||
+                        String.IsNullOrWhiteSpace(Properties.Settings.Default.BigStashBlogURL)))
+                    {
+                        Process.Start(Properties.Settings.Default.BigStashBlogURL);
+                    }
+
+                    // Migrate deepfreeze data to bigstash app data directory.
+                    // This step is needed for all clients updating from any Deepfreeze.io app version
+                    // to any BigStash version.
+                    MigrateDeepfreezeData();
+                }
+                
                 DisplayRootViewFor<IShell>();
 
                 // Catch with args and forward a message with them
@@ -124,7 +146,7 @@ namespace DeepfreezeApp
             }
         }
 
-        protected override async void OnExit(object sender, EventArgs e)
+        protected override void OnExit(object sender, EventArgs e)
         {
             var app = Application as InstanceAwareApplication;
             if ((app != null && app.IsFirstInstance))
@@ -139,6 +161,10 @@ namespace DeepfreezeApp
                 if (client.IsLogged())
                 {
                     Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+
+                    // Reset the api endpoint to the default 'ServerBaseAddress' before saving the preferences file
+                    // for the last time.
+                    this.ResetDebugServerBaseAddress(client);
 
                     // Save preferences file.
                     LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII);
@@ -194,14 +220,14 @@ namespace DeepfreezeApp
 
         private void CreateLocalApplicationDataDirectory()
         {
-            // if LOCALAPPDATA\Deepfreeze doesn't exist, create it.
+            // if LOCALAPPDATA\Deepfreeze.io doesn't exist, create it.
             try
             {
-                if (!Directory.Exists(Properties.Settings.Default.LocalAppDataDFFolder))
+                if (!Directory.Exists(Properties.Settings.Default.ApplicationDataFolder))
                 {
-                    Log.Info("Creating LocalAppData Deepfreeze directory.");
+                    Log.Info("Creating LocalAppData BigStash directory.");
 
-                    Directory.CreateDirectory(Properties.Settings.Default.LocalAppDataDFFolder);
+                    Directory.CreateDirectory(Properties.Settings.Default.ApplicationDataFolder);
                 }
             }
             catch (Exception ex) { }
@@ -211,75 +237,76 @@ namespace DeepfreezeApp
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             
-            // %APPDATA\Deepfreeze\
-            Properties.Settings.Default.LocalAppDataDFFolder =
+            // %APPDATA\BigStash\
+            Properties.Settings.Default.ApplicationDataFolder =
                 Path.Combine(
                     localAppData,
                     Properties.Settings.Default.ApplicationName
                 );
 
-            Log.Info("Setting LocalAppData Deepfreeze directory path as \"" + Properties.Settings.Default.LocalAppDataDFFolder + "\".");
+            Log.Info("Setting LocalAppData BigStash directory path as \"" + Properties.Settings.Default.ApplicationDataFolder + "\".");
 
-            // %APPDATA\Deepfreeze\preferences.json
+            // %APPDATA\BigStash\preferences.json
             Properties.Settings.Default.SettingsFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.SettingsFileName
                     );
 
-            Log.Info("Setting Deepfreeze preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
+            Log.Info("Setting BigStash preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
-            // %APPDATA\Deepfreeze\uploads\
+            // %APPDATA\BigStash\uploads\
             Properties.Settings.Default.UploadsFolderPath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.UploadsFolderName
                     );
 
-            Log.Info("Setting Deepfreeze local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
+            Log.Info("Setting BigStash local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
 
-            // %APPDATA\Deepfreeze\endpoint.json
+            // %APPDATA\BigStash\endpoint.json
             Properties.Settings.Default.EndpointFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.EndpointFileName
                     );
 
-            Log.Info("Setting Deepfreeze endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
+            Log.Info("Setting BigStash endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
 
-            // %APPDATA\Deepfreeze\DFLog.txt
+            // %APPDATA\BigStash\DFLog.txt
             Properties.Settings.Default.LogFilePath =
                     Path.Combine(
-                        Properties.Settings.Default.LocalAppDataDFFolder,
+                        Properties.Settings.Default.ApplicationDataFolder,
                         Properties.Settings.Default.LogFileName
                     );
 
-            Log.Info("Setting Deepfreeze log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
+            Log.Info("Setting BigStash log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
         }
 
         /// <summary>
         /// Set the deepfreeze icon in Control Panel's Programs and Features entry 
-        /// for the Deepfreeze for Windows application.
+        /// for the BigStash for Windows application.
         /// </summary>
         private static void SetAddRemoveProgramsIcon()
         {
             try
             {
+                string iconName = "bigstash_windows_icon.ico";
                 string installDirPath = Utilities.GetInstallDirectoryInfo().ToString();
-                string iconSourcePath = Path.Combine(installDirPath, "deepfreeze.ico");
+                string iconSourcePath = Path.Combine(installDirPath, iconName);
 
                 if (!File.Exists(iconSourcePath))
                     return;
 
-                RegistryKey uninstallKeyParentFolder = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+                Microsoft.Win32.RegistryKey uninstallKeyParentFolder = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
                 IList<string> uninstallSubKeyNames = uninstallKeyParentFolder.GetSubKeyNames().ToList();
                 
                 foreach (string uninstallSubKeyName in uninstallSubKeyNames)
                 {
-                    RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
+                    Microsoft.Win32.RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
                     object diplayNameValue = subKey.GetValue("DisplayName");
 
-                    // if subKey points to the correct Deepfreeze for Windows entry
+                    // if subKey points to the correct BigStash for Windows entry
                     // then update its DisplayIcon key value.
                     if (diplayNameValue != null &&
                         diplayNameValue.ToString() == Properties.Settings.Default.ApplicationFullName)
@@ -295,6 +322,55 @@ namespace DeepfreezeApp
                 }
             }
             catch (Exception ex) { }
+        }
+
+        [Conditional("DEBUG")]
+        private void ResetDebugServerBaseAddress(IDeepfreezeClient client)
+        {
+            client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
+        }
+
+        private string SetVersionForUserAgent()
+        {
+            var client = IoC.Get<IDeepfreezeClient>();
+
+            if (ApplicationDeployment.IsNetworkDeployed)
+                client.ApplicationVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
+            else
+                client.ApplicationVersion = "debug";
+
+            return client.ApplicationVersion;
+        }
+
+        private void MigrateDeepfreezeData()
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var deepfreezeFolderPath = Path.Combine(localAppData, Properties.Settings.Default.DeepfreezeApplicationFolderName);
+
+
+            // If Deepfreeze.io local app data folder exists, then copy all it's content's to BigStash folder,
+            // except for the old log file.
+            if (Directory.Exists(deepfreezeFolderPath))
+            {
+                Log.Info("Migrating Deepfreeze data to BigStash application data directory.");
+
+                try
+                {
+                    Utilities.DirectoryCopy(deepfreezeFolderPath, Properties.Settings.Default.ApplicationDataFolder, true);
+
+                    // Delete old DFLog files copied to the BigStash directory since they're now useless.
+                    var oldLogs = Directory.GetFiles(Properties.Settings.Default.ApplicationDataFolder, "DFLog*").ToList();
+                    foreach(var log in oldLogs)
+                    {
+                        File.Delete(log);
+                    }
+
+                    // Delete the Deepfreeze.io directory.
+                    Directory.Delete(deepfreezeFolderPath, true);
+                }
+                catch(Exception e)
+                { }
+            }
         }
 
         #endregion

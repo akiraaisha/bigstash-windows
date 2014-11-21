@@ -14,7 +14,7 @@ using DeepfreezeModel;
 namespace DeepfreezeApp
 {
     [Export(typeof(IArchiveViewModel))]
-    public class ArchiveViewModel : Screen, IArchiveViewModel
+    public class ArchiveViewModel : Screen, IArchiveViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region fields
 
@@ -127,6 +127,22 @@ namespace DeepfreezeApp
             set { this._busyMessageText = value; NotifyOfPropertyChange(() => BusyMessageText); }
         }
 
+        public string UploadButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return Properties.Resources.UploadButtonEnabledTooltipText;
+                else
+                    return Properties.Resources.UploadButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
         #endregion
 
         #region action methods
@@ -175,7 +191,11 @@ namespace DeepfreezeApp
                 {
                     _log.Error("Error preparing archive, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
                     IsReset = true;
-                    ErrorSelectingFiles = e.Message;
+
+                    this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
+
+                    if (e is UnauthorizedAccessException)
+                        this.ErrorSelectingFiles += " " + e.Message;
                 }
                 finally { IsBusy = false; }
             }
@@ -238,7 +258,11 @@ namespace DeepfreezeApp
                     {
                         _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
                         IsReset = true;
-                        ErrorSelectingFiles = ex.Message;
+
+                        this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
+
+                        if (ex is UnauthorizedAccessException)
+                            this.ErrorSelectingFiles += " " + ex.Message;
                     }
                     finally { IsBusy = false; }
                 }
@@ -254,7 +278,8 @@ namespace DeepfreezeApp
             {
                 return !String.IsNullOrEmpty(ArchiveTitle) &&
                        !String.IsNullOrWhiteSpace(ArchiveTitle) &&
-                       this._archiveSize > 0;
+                       this._archiveSize > 0 &&
+                       this.IsInternetConnected;
             }
         }
 
@@ -265,12 +290,15 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task Upload()
         {
-            HasChosenFiles = false;
-            IsBusy = true;
-            BusyMessageText = Properties.Resources.CreatingArchiveText;
-
             try
             {
+                if (!this._deepfreezeClient.IsInternetConnected)
+                    throw new Exception("Can't upload an archive without an active Internet connection.");
+
+                HasChosenFiles = false;
+                IsBusy = true;
+                BusyMessageText = Properties.Resources.CreatingArchiveText;
+
                 _log.Info("Create new archive, size = " + this._archiveSize + " bytes, title = \"" + ArchiveTitle + "\".");
                 // create a new archive using DF API.
                 var archive = await this._deepfreezeClient.CreateArchiveAsync(this._archiveSize, ArchiveTitle);
@@ -295,7 +323,7 @@ namespace DeepfreezeApp
             catch (Exception e)
             {
                 HasChosenFiles = true;
-                ErrorCreatingArchive = e.Message;
+
                 _log.Error("Error creating archive (user clicked upload button), thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
 
                 if (e is Exceptions.DfApiException)
@@ -303,6 +331,8 @@ namespace DeepfreezeApp
                     var response = (e as Exceptions.DfApiException).HttpResponse;
                     _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
                 }
+
+                this.ErrorCreatingArchive = Properties.Resources.ErrorCreatingArchiveGenericText;
             }
             finally
             {
@@ -437,7 +467,7 @@ namespace DeepfreezeApp
                     await userVM.RefreshUser();
 
                     if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
-                        throw new Exception("Your remaining Deepfreeze storage is not sufficient for the size of this archive.\nConsider buying more storage.");
+                        throw new Exception(Properties.Resources.ErrorNotEnoughSpaceGenericText);
                 }
 
 
@@ -459,16 +489,33 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region message_handlers
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.UploadButtonTooltipText);
+                NotifyOfPropertyChange(() => this.CanUpload);
+            }
+        }
+
+        #endregion
+
         #region events
 
         protected override void OnActivate()
         {
+            this._eventAggregator.Subscribe(this);
+
             base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
         {
             this.Reset();
+            this._eventAggregator.Unsubscribe(this);
 
             base.OnDeactivate(close);
         }
