@@ -513,7 +513,7 @@ namespace DeepfreezeApp
             bool connectionStatusChanged = this.IsInternetConnected != isConnected;
             this.IsInternetConnected = isConnected;
 
-            if (connectionStatusChanged && uploadManagerVM.Uploads.Count > 0)
+            if (connectionStatusChanged)
             {
                 var internetConnectivityMessage = IoC.Get<IInternetConnectivityMessage>();
                 internetConnectivityMessage.IsConnected = this.IsInternetConnected;
