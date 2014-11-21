@@ -124,20 +124,29 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Check for update.
+        ///   Looks up a localized string similar to You can&apos;t check for update without an Internet connection..
         /// </summary>
-        internal static string CheckForUpdateText {
+        internal static string CheckForUpdateDisabledTooltipText {
             get {
-                return ResourceManager.GetString("CheckForUpdateText", resourceCulture);
+                return ResourceManager.GetString("CheckForUpdateDisabledTooltipText", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Check for application updates and install them..
         /// </summary>
-        internal static string CheckForUpdateTooltip {
+        internal static string CheckForUpdateEnabledTooltipText {
             get {
-                return ResourceManager.GetString("CheckForUpdateTooltip", resourceCulture);
+                return ResourceManager.GetString("CheckForUpdateEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for update.
+        /// </summary>
+        internal static string CheckForUpdateText {
+            get {
+                return ResourceManager.GetString("CheckForUpdateText", resourceCulture);
             }
         }
         
@@ -174,6 +183,15 @@ namespace DeepfreezeApp.Properties {
         internal static string ConnectButtonContent {
             get {
                 return ResourceManager.GetString("ConnectButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t connect your account without an active Internet connection..
+        /// </summary>
+        internal static string ConnectButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("ConnectButtonDisabledTooltipText", resourceCulture);
             }
         }
         
@@ -246,6 +264,15 @@ namespace DeepfreezeApp.Properties {
         internal static string DeleteButtonContent {
             get {
                 return ResourceManager.GetString("DeleteButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t delete your upload without an active Internet connection..
+        /// </summary>
+        internal static string DeleteButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("DeleteButtonDisabledTooltipText", resourceCulture);
             }
         }
         
@@ -583,6 +610,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t refresh your storage information without an active Internet connection..
+        /// </summary>
+        internal static string RefreshButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("RefreshButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh your storage information..
+        /// </summary>
+        internal static string RefreshButtonEnabledTooltipText {
+            get {
+                return ResourceManager.GetString("RefreshButtonEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         internal static string RemoveButtonContent {
@@ -606,6 +651,15 @@ namespace DeepfreezeApp.Properties {
         internal static string ResumeButtonContent {
             get {
                 return ResourceManager.GetString("ResumeButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t resume your upload without an active Internet connection..
+        /// </summary>
+        internal static string ResumeButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("ResumeButtonDisabledTooltipText", resourceCulture);
             }
         }
         
@@ -768,6 +822,24 @@ namespace DeepfreezeApp.Properties {
         internal static string UploadButtonContent {
             get {
                 return ResourceManager.GetString("UploadButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can&apos;t create your archive and start uploading it without an active Internet connection..
+        /// </summary>
+        internal static string UploadButtonDisabledTooltipText {
+            get {
+                return ResourceManager.GetString("UploadButtonDisabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create your archive and start uploading it..
+        /// </summary>
+        internal static string UploadButtonEnabledTooltipText {
+            get {
+                return ResourceManager.GetString("UploadButtonEnabledTooltipText", resourceCulture);
             }
         }
         

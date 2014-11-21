@@ -147,7 +147,7 @@
     <value>Check for update</value>
     <comment>Used for check for update button.</comment>
   </data>
-  <data name="CheckForUpdateTooltip" xml:space="preserve">
+  <data name="CheckForUpdateEnabledTooltipText" xml:space="preserve">
     <value>Check for application updates and install them.</value>
   </data>
   <data name="ChooseFolderText" xml:space="preserve">
@@ -401,8 +401,14 @@
   <data name="CheckingForUpdateText" xml:space="preserve">
     <value>Checking for update...</value>
   </data>
+  <data name="DeleteButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't delete your upload without an active Internet connection.</value>
+  </data>
   <data name="DowloadingUpdateText" xml:space="preserve">
     <value>Downloading... </value>
+  </data>
+  <data name="ResumeButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't resume your upload without an active Internet connection.</value>
   </data>
   <data name="UpdateCompletedText" xml:space="preserve">
     <value>Update completed successfully. Click the icon above to restart.</value>
@@ -412,5 +418,23 @@
   </data>
   <data name="UpdatingToLatestVersionText" xml:space="preserve">
     <value>Updating to latest version... </value>
+  </data>
+  <data name="CheckForUpdateDisabledTooltipText" xml:space="preserve">
+    <value>You can't check for update without an Internet connection.</value>
+  </data>
+  <data name="RefreshButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't refresh your storage information without an active Internet connection.</value>
+  </data>
+  <data name="RefreshButtonEnabledTooltipText" xml:space="preserve">
+    <value>Refresh your storage information.</value>
+  </data>
+  <data name="UploadButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't create your archive and start uploading it without an active Internet connection.</value>
+  </data>
+  <data name="UploadButtonEnabledTooltipText" xml:space="preserve">
+    <value>Create your archive and start uploading it.</value>
+  </data>
+  <data name="ConnectButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't connect your account without an active Internet connection.</value>
   </data>
 </root>
