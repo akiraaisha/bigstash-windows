@@ -232,5 +232,17 @@ namespace DeepfreezeApp.Properties {
                 return ((string)(this["BigStashURL"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BigStashBlogURL {
+            get {
+                return ((string)(this["BigStashBlogURL"]));
+            }
+            set {
+                this["BigStashBlogURL"] = value;
+            }
+        }
     }
 }
