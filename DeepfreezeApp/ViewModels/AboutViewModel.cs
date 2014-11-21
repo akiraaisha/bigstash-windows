@@ -200,7 +200,7 @@ namespace DeepfreezeApp
                     switch(eventArgs.State)
                     {
                         case DeploymentProgressState.DownloadingApplicationFiles:
-                            action = "Downloading... ";
+                            action = Properties.Resources.DowloadingUpdateText;
                             this.UpdateMessage = action + eventArgs.ProgressPercentage + "%";
                             break;
                     }
@@ -213,7 +213,7 @@ namespace DeepfreezeApp
                     ad.UpdateProgressChanged -= progressEventHandler;
                     this.RestartNeeded = true;
                     this.IsBusy = false;
-                    this.UpdateMessage = "Update completed successfully. Click above to restart.";
+                    this.UpdateMessage = Properties.Resources.UpdateCompletedText;
 
                     Properties.Settings.Default.RestartAfterUpdate = true;
                     Properties.Settings.Default.Save();
@@ -226,7 +226,7 @@ namespace DeepfreezeApp
                     IsUpToDate = false;
                     this.IsBusy = true;
 
-                    this.UpdateMessage = "Checking for update...";
+                    this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
 
                     info = await Task.Run(() => ad.CheckForDetailedUpdate(false));
 
@@ -255,12 +255,19 @@ namespace DeepfreezeApp
                     _log.Error("CheckForUpdate threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
                     return;
                 }
+                finally
+                {
+                    if (String.IsNullOrEmpty(this.ErrorMessage))
+                    {
+                        this.UpdateMessage = Properties.Resources.UpdateVersionInfoOutdatedText;
+                    }
+                }
 
                 if (info.UpdateAvailable)
                 {
                     try
                     {
-                        this.UpdateMessage = "Updating to latest version...";
+                        this.UpdateMessage = Properties.Resources.UpdatingToLatestVersionText;
                         ad.UpdateAsync();
                     }
                     catch (DeploymentDownloadException dde)
