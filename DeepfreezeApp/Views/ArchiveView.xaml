@@ -148,6 +148,8 @@
                                     Content="{Binding UploadButtonContent}"
                                     Width="70"
                                     Style="{DynamicResource AccentedSquareButtonStyleCI}"
+                                    ToolTip="{Binding UploadButtonTooltipText}"
+                                    ToolTipService.ShowOnDisabled="True"
                                 />
 
                             <Button x:Name="Reset" 

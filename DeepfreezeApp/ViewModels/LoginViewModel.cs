@@ -16,7 +16,7 @@ using System.Windows.Input;
 namespace DeepfreezeApp
 {
     [Export(typeof(ILoginViewModel))]
-    public class LoginViewModel : Screen, ILoginViewModel
+    public class LoginViewModel : Screen, ILoginViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -160,6 +160,20 @@ namespace DeepfreezeApp
 
         public string SetPasswordText
         { get { return Properties.Resources.SetPasswordText; } }
+
+        public bool IsInternetConnected
+        { get { return this._deepfreezeClient.IsInternetConnected; } }
+
+        public string ConnectButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.ConnectButtonDisabledTooltipText;
+            }
+        }
 
         #endregion
 
@@ -375,17 +389,32 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region message_handlers
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.ConnectButtonTooltipText);
+            }
+        }
+
+        #endregion
+
         #region events
 
         protected override void OnActivate()
         {
             this.Reset();
+            this._eventAggregator.Subscribe(this);
             base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
         {
             this.Reset();
+            this._eventAggregator.Unsubscribe(this);
             base.OnDeactivate(close);
         }
 

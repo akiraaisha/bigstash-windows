@@ -199,6 +199,33 @@ namespace DeepfreezeApp
         public string RemoveButtonContent
         { get { return Properties.Resources.RemoveButtonContent; } }
 
+        public string ResumeButtonTooltipText
+        { 
+            get 
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.ResumeButtonDisabledTooltipText; 
+            } 
+        }
+
+        public string DeleteButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return null;
+                else
+                    return Properties.Resources.DeleteButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
         #endregion
 
         #region action_methods
@@ -1015,6 +1042,12 @@ namespace DeepfreezeApp
 
             if (message != null)
             {
+                // Notify the bound property IsInternetConnected to refresh
+                // the 'Enabled' status of the 'Resume' and 'Delete' buttons.
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.ResumeButtonTooltipText);
+                NotifyOfPropertyChange(() => this.DeleteButtonTooltipText);
+
                 if (message.IsConnected &&
                     !this.LocalUpload.UserPaused && 
                     this.Upload.Status == Enumerations.Status.Pending)

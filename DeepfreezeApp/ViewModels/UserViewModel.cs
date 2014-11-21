@@ -13,7 +13,8 @@ using System.IO;
 namespace DeepfreezeApp
 {
     [Export(typeof(IUserViewModel))]
-    public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>
+    public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>,
+        IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -95,6 +96,22 @@ namespace DeepfreezeApp
             } 
         }
 
+        public string RefreshButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return Properties.Resources.RefreshButtonEnabledTooltipText;
+                else
+                    return Properties.Resources.RefreshButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
         #endregion
 
         #region action_methods
@@ -155,6 +172,15 @@ namespace DeepfreezeApp
         public async Task Handle(IRefreshUserMessage message)
         {
             await this.RefreshUser();
+        }
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.RefreshButtonTooltipText);
+            }
         }
 
         #endregion

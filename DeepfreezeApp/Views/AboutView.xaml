@@ -125,10 +125,11 @@
                     <TextBlock HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Text="{Binding CheckForUpdateText}"
-                               Cursor="Hand"
-                               Foreground="Blue"
+                               Cursor="{Binding CheckForUpdateCursor}"
+                               Foreground="{Binding CheckForUpdateForeground}"
                                cal:Message.Attach="[Event MouseLeftButtonUp] = [Action CheckForUpdate()]"
                                ToolTipService.ShowDuration="30000"
+                               ToolTipService.ShowOnDisabled="True"
                                FontSize="14"
                                Visibility="{Binding ShowCheckForUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
                                >

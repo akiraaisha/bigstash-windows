@@ -18,7 +18,8 @@ using Custom.Windows;
 namespace DeepfreezeApp
 {
     [Export(typeof(IAboutViewModel))]
-    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<ICheckForUpdateMessage>
+    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<ICheckForUpdateMessage>,
+        IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -133,7 +134,15 @@ namespace DeepfreezeApp
         { get { return Properties.Resources.CheckForUpdateText; } }
 
         public string CheckForUpdateTooltip
-        { get { return Properties.Resources.CheckForUpdateTooltip; } }
+        { 
+            get 
+            {
+                if (this.IsInternetConnected)
+                    return Properties.Resources.CheckForUpdateEnabledTooltipText;
+                else
+                    return Properties.Resources.CheckForUpdateDisabledTooltipText;
+            } 
+        }
 
         public bool ShowCheckForUpdate
         { get { return !(IsBusy || this.RestartNeeded); } }
@@ -150,6 +159,33 @@ namespace DeepfreezeApp
                 Properties.Settings.Default.Save();
                 NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
                 NotifyOfPropertyChange(() => ShowCheckForUpdate);
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
+        }
+
+        public System.Windows.Media.Brush CheckForUpdateForeground
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return System.Windows.Media.Brushes.Blue;
+                else
+                    return System.Windows.Media.Brushes.Gray;
+            }
+        }
+
+        public System.Windows.Input.Cursor CheckForUpdateCursor
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return System.Windows.Input.Cursors.Hand;
+                else
+                    return System.Windows.Input.Cursors.No;
             }
         }
 
@@ -319,6 +355,17 @@ namespace DeepfreezeApp
             if (message != null && !RestartNeeded)
             {
                 this.CheckForUpdate();
+            }
+        }
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.CheckForUpdateTooltip);
+                NotifyOfPropertyChange(() => this.CheckForUpdateForeground);
+                NotifyOfPropertyChange(() => this.CheckForUpdateCursor);
             }
         }
 

@@ -14,7 +14,7 @@ using DeepfreezeModel;
 namespace DeepfreezeApp
 {
     [Export(typeof(IArchiveViewModel))]
-    public class ArchiveViewModel : Screen, IArchiveViewModel
+    public class ArchiveViewModel : Screen, IArchiveViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region fields
 
@@ -125,6 +125,22 @@ namespace DeepfreezeApp
         {
             get { return this._busyMessageText; }
             set { this._busyMessageText = value; NotifyOfPropertyChange(() => BusyMessageText); }
+        }
+
+        public string UploadButtonTooltipText
+        {
+            get
+            {
+                if (this.IsInternetConnected)
+                    return Properties.Resources.UploadButtonEnabledTooltipText;
+                else
+                    return Properties.Resources.UploadButtonDisabledTooltipText;
+            }
+        }
+
+        public bool IsInternetConnected
+        {
+            get { return this._deepfreezeClient.IsInternetConnected; }
         }
 
         #endregion
@@ -262,7 +278,8 @@ namespace DeepfreezeApp
             {
                 return !String.IsNullOrEmpty(ArchiveTitle) &&
                        !String.IsNullOrWhiteSpace(ArchiveTitle) &&
-                       this._archiveSize > 0;
+                       this._archiveSize > 0 &&
+                       this.IsInternetConnected;
             }
         }
 
@@ -472,16 +489,33 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region message_handlers
+
+        public void Handle(IInternetConnectivityMessage message)
+        {
+            if (message != null)
+            {
+                NotifyOfPropertyChange(() => this.IsInternetConnected);
+                NotifyOfPropertyChange(() => this.UploadButtonTooltipText);
+                NotifyOfPropertyChange(() => this.CanUpload);
+            }
+        }
+
+        #endregion
+
         #region events
 
         protected override void OnActivate()
         {
+            this._eventAggregator.Subscribe(this);
+
             base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
         {
             this.Reset();
+            this._eventAggregator.Unsubscribe(this);
 
             base.OnDeactivate(close);
         }
