@@ -398,4 +398,19 @@
     <value>Your remaining BigStash storage is not sufficient for the size of this archive. Consider buying more storage.</value>
     <comment>Used for displaying a user friendly message if the user tries to upload an archive but there's not enough space in her BigStash account.</comment>
   </data>
+  <data name="CheckingForUpdateText" xml:space="preserve">
+    <value>Checking for update...</value>
+  </data>
+  <data name="DowloadingUpdateText" xml:space="preserve">
+    <value>Downloading... </value>
+  </data>
+  <data name="UpdateCompletedText" xml:space="preserve">
+    <value>Update completed successfully. Click the icon above to restart.</value>
+  </data>
+  <data name="UpdateVersionInfoOutdatedText" xml:space="preserve">
+    <value>Version information is outdated.</value>
+  </data>
+  <data name="UpdatingToLatestVersionText" xml:space="preserve">
+    <value>Updating to latest version... </value>
+  </data>
 </root>

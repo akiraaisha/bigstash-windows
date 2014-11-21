@@ -142,6 +142,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Checking for update....
+        /// </summary>
+        internal static string CheckingForUpdateText {
+            get {
+                return ResourceManager.GetString("CheckingForUpdateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to or choose a folder.
         /// </summary>
         internal static string ChooseFolderText {
@@ -246,6 +255,15 @@ namespace DeepfreezeApp.Properties {
         internal static string DisconnectButtonContent {
             get {
                 return ResourceManager.GetString("DisconnectButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading... .
+        /// </summary>
+        internal static string DowloadingUpdateText {
+            get {
+                return ResourceManager.GetString("DowloadingUpdateText", resourceCulture);
             }
         }
         
@@ -714,6 +732,33 @@ namespace DeepfreezeApp.Properties {
         internal static string UnauthorizedExceptionMessage {
             get {
                 return ResourceManager.GetString("UnauthorizedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update completed successfully. Click the icon above to restart..
+        /// </summary>
+        internal static string UpdateCompletedText {
+            get {
+                return ResourceManager.GetString("UpdateCompletedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version information is outdated..
+        /// </summary>
+        internal static string UpdateVersionInfoOutdatedText {
+            get {
+                return ResourceManager.GetString("UpdateVersionInfoOutdatedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating to latest version... .
+        /// </summary>
+        internal static string UpdatingToLatestVersionText {
+            get {
+                return ResourceManager.GetString("UpdatingToLatestVersionText", resourceCulture);
             }
         }
         
