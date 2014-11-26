@@ -7,6 +7,7 @@ using System.ComponentModel.Composition;
 
 namespace DeepfreezeApp
 {
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     [Export(typeof(IRemoveUploadViewModelMessage))]
     public class RemoveUploadViewModelMessage : IRemoveUploadViewModelMessage
     {
