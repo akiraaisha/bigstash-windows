@@ -28,6 +28,8 @@ namespace DeepfreezeApp
         private BindableCollection<UploadViewModel> _uploads = new BindableCollection<UploadViewModel>();
         private string _errorMessage;
 
+        private static object _removeLock = new Object();
+
         #endregion
 
         #region UploadViewModelFactory
@@ -252,10 +254,16 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(IRemoveUploadViewModelMessage message)
         {
-            this.Uploads.Remove(message.UploadVMToRemove);
-            this.CloseItem(message.UploadVMToRemove);
-            message.UploadVMToRemove = null;
-            NotifyOfPropertyChange(() => TotalUploadsText);
+            if (this.Uploads.Contains(message.UploadVMToRemove))
+            {
+                lock (_removeLock)
+                {
+                    this.Uploads.Remove(message.UploadVMToRemove);
+                    this.CloseItem(message.UploadVMToRemove);
+                    message.UploadVMToRemove = null;
+                    NotifyOfPropertyChange(() => TotalUploadsText);
+                }
+            }
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,6 +51,75 @@ namespace DeepfreezeModel
             Create,
             Start,
             Pause
+        }
+
+        public enum FileCategory
+        {
+            [StringValue("Normal")]
+            Normal,
+
+            [StringValue("Invalid characters in filename")]
+            InvalidCharacterInName,
+
+            [StringValue("File with metadata")]
+            MetadataFile,
+
+            [StringValue("Temporary file")]
+            TemporaryFile,
+
+            [StringValue("Trailing periods or whitespace in filename")]
+            TrailingPeriodsOrWhiteSpaceInName,
+
+            [StringValue("Ignored system file")]
+            IgnoredSystemFile,
+
+            [StringValue("Filename too long")]
+            FileNameTooLong,
+
+            [StringValue("Unsynced online file")]
+            UnsyncedOnlineFile,
+
+            [StringValue("Restricted directory")]
+            RestrictedDirectory
+        }
+    }
+
+    /// <summary>
+    /// This class defines an attribute that represents the string value of an enum.
+    /// It can be used in cases where an enumeration has different than int represation.
+    /// </summary>
+    public class StringValueAttribute : Attribute
+    {
+        public string StringValue { get; protected set; }
+
+        public StringValueAttribute(string value)
+        {
+            this.StringValue = value;
+        }
+    }
+
+    public static class EnumExtension
+    {
+        /// <summary>
+        /// Gets the string representation of a given enum value. A StringValue has to 
+        /// be assigned to the items of an enumeration in order for this method to work.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string GetStringValue(this Enum value)
+        {
+            // Get the type
+            Type type = value.GetType();
+
+            // Get fieldinfo for this type
+            FieldInfo fieldInfo = type.GetField(value.ToString());
+
+            // Get the stringvalue attributes
+            StringValueAttribute[] attribs = fieldInfo.GetCustomAttributes(
+                typeof(StringValueAttribute), false) as StringValueAttribute[];
+
+            // Return the first if there was a match.
+            return attribs.Length > 0 ? attribs[0].StringValue : null;
         }
     }
 }

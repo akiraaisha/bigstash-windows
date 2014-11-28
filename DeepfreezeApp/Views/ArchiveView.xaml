@@ -5,11 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeepfreezeApp"
              xmlns:cal="http://www.caliburnproject.org"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    
+
     <UserControl.Resources>
+        
         <ResourceDictionary>
             <local:BoolToVisibility x:Key="BoolToVisibilityConverter" />
             <local:ValueConverterGroup x:Key="InvertBoolToVisibilityConverter">
@@ -22,7 +25,19 @@
                 <local:BoolToVisibility />
             </local:ValueConverterGroup>
             <local:LongSizeToStringConverter x:Key="LongSizeToStringConverter" />
+
+            <!--<Style x:Key="HyperlinkButton" TargetType="Button">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>-->
+
         </ResourceDictionary>
+        
     </UserControl.Resources>
     <Grid>
         <StackPanel>
@@ -138,8 +153,66 @@
                                  controls:TextboxHelper.Watermark="{Binding ArchiveTitleHelperText}" 
                                  />
 
-                        <TextBlock Text="{Binding ArchiveSizeText}"
-                                    Margin="5 0 5 0"/>
+                        <WrapPanel Margin="5 0 5 0">
+                            
+                            <TextBlock Text="{Binding ArchiveSizeText}"
+                                       />
+                            
+                            <TextBlock Text="{Binding TotalFilesToArchiveText}"
+                                       />
+                            
+                            <TextBlock Text="{Binding TotalFilesToExcludeText}"
+                                       TextDecorations="Underline"
+                                       Cursor="Hand"
+                                       cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ExportInvalidFilesList()]"
+                                       Visibility="{Binding HasInvalidFiles, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       />
+                            
+                        </WrapPanel>
+
+                        <!--<TextBlock TextWrapping="Wrap"
+                                   Foreground="Red"
+                                   Margin="5 5 5 5"
+                                   HorizontalAlignment="Stretch"
+                                   Visibility="{Binding HasInvalidFiles, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   >
+                            <TextBlock.Inlines>
+                                <Span>
+                                    <Span.Inlines>
+                                        <Run Text="{Binding InvalidFilesTextFirstPart, Mode=OneWay}" />
+                                        <TextBlock Text="{Binding SomeFilesText}"
+                                                   Cursor="Hand"
+                                                   Foreground="Blue"
+                                                   TextDecorations="Underline"
+                                                   cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ExportInvalidFilesList()]"
+                                                   ToolTipService.ShowDuration="30000"
+                                                   >
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding SomeFilesHelpText}"
+                                                TextWrapping="Wrap"
+                                                Width="400"
+                                                />
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                        <Run Text="{Binding InvalidFilesTextSecondPart, Mode=OneWay}" />
+                                        <TextBlock Text="FAQ"
+                                                   Cursor="Hand"
+                                                   Foreground="Blue"
+                                                   TextDecorations="Underline"
+                                                   cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenNameRulesFAQURL()]"
+                                                   ToolTipService.ShowDuration="30000"
+                                                   >
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding NameRulesFAQURLHelpText}"
+                                                TextWrapping="Wrap"
+                                                />
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                    <Run Text="{Binding InvalidFilesTextThirdPart, Mode=OneWay}" />
+                                    </Span.Inlines>
+                                </Span>
+                            </TextBlock.Inlines>
+                        </TextBlock>-->
 
                         <WrapPanel HorizontalAlignment="Stretch" Margin="5 5 0 0">
 
@@ -176,5 +249,6 @@
                 
             </Border>
         </StackPanel>
+
     </Grid>
 </UserControl>

@@ -107,8 +107,9 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro">
-      <HintPath>..\packages\MahApps.Metro.0.13.1.0\lib\net45\MahApps.Metro.dll</HintPath>
+    <Reference Include="MahApps.Metro, Version=0.14.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MahApps.Metro.0.14.0.0\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -124,7 +125,7 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.0.13.1.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <HintPath>..\packages\MahApps.Metro.0.14.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -146,6 +147,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IAboutViewModel.cs" />
+    <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
+    <Compile Include="Interfaces\IMessageBoxViewModel.cs" />
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
     <Compile Include="Messages\ICheckForUpdateMessage.cs" />
     <Compile Include="Utilities.cs" />
@@ -193,6 +196,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\AboutViewModel.cs" />
+    <Compile Include="ViewModels\ExcludedFilesViewModel.cs" />
+    <Compile Include="ViewModels\MessageBoxViewModel.cs" />
     <Compile Include="ViewModels\UploadManagerViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />
@@ -211,11 +216,15 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="WindowManagerExtensions.cs" />
     <Content Include="..\Log4Net.config">
       <Link>Log4Net.config</Link>
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\Entypo.ttf" />
+    <Resource Include="Resources\Entypo-license.txt" />
+    <Resource Include="Resources\WindowsIcons-license.txt" />
     <Resource Include="deepfreeze_tray.ico" />
     <None Include="..\longaccess.pfx">
       <Link>longaccess.pfx</Link>
@@ -228,7 +237,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -250,7 +258,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Styles\Modal.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AboutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ExcludedFilesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MessageBoxView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -292,8 +312,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\WindowsIcons-license.txt" />
-    <Resource Include="Resources\Entypo-license.txt" />
     <Resource Include="bigstash_windows_icon.ico" />
     <Content Include="deepfreeze.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -244,5 +244,14 @@ namespace DeepfreezeApp.Properties {
                 this["BigStashBlogURL"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/faq/#Why-are-some-of-my-files-not-being-uploaded")]
+        public string BigStashNameRulesFAQURL {
+            get {
+                return ((string)(this["BigStashNameRulesFAQURL"]));
+            }
+        }
     }
 }

@@ -88,6 +88,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to application-specific data.
+        /// </summary>
+        internal static string AppDataDirExplanationText {
+            get {
+                return ResourceManager.GetString("AppDataDirExplanationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter a title for your new Archive..
         /// </summary>
         internal static string ArchiveTitleHelperText {
@@ -165,6 +174,24 @@ namespace DeepfreezeApp.Properties {
         internal static string ChooseFolderText {
             get {
                 return ResourceManager.GetString("ChooseFolderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to or click cancel to cancel the archive creation.
+        /// </summary>
+        internal static string ClickCancelToCancelText {
+            get {
+                return ResourceManager.GetString("ClickCancelToCancelText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click save to receive the full list as a text file..
+        /// </summary>
+        internal static string ClickSaveToExportFileListText {
+            get {
+                return ResourceManager.GetString("ClickSaveToExportFileListText", resourceCulture);
             }
         }
         
@@ -493,11 +520,38 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The following files were not archived. You can read our FAQ about why some files are not archived here.
+        /// </summary>
+        internal static string ExcludedFilesTextFileParagraph {
+            get {
+                return ResourceManager.GetString("ExcludedFilesTextFileParagraph", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Excluded files from new archive .
+        /// </summary>
+        internal static string ExcludedFilesTitle {
+            get {
+                return ResourceManager.GetString("ExcludedFilesTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
         internal static string ExitHeader {
             get {
                 return ResourceManager.GetString("ExitHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following files were not archived:.
+        /// </summary>
+        internal static string FollowingFilesNotArchivedText {
+            get {
+                return ResourceManager.GetString("FollowingFilesNotArchivedText", resourceCulture);
             }
         }
         
@@ -534,6 +588,15 @@ namespace DeepfreezeApp.Properties {
         internal static string MinimizedMessageText {
             get {
                 return ResourceManager.GetString("MinimizedMessageText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click to open the BigStash FAQ website page..
+        /// </summary>
+        internal static string NameRulesFAQURLHelpText {
+            get {
+                return ResourceManager.GetString("NameRulesFAQURLHelpText", resourceCulture);
             }
         }
         
@@ -646,6 +709,51 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string RestrictedSelectionWarningFifthPartText {
+            get {
+                return ResourceManager.GetString("RestrictedSelectionWarningFifthPartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your selection includes the following folder.
+        /// </summary>
+        internal static string RestrictedSelectionWarningFirstPartText {
+            get {
+                return ResourceManager.GetString("RestrictedSelectionWarningFirstPartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tip: You can just create a compressed file and archive it with us..
+        /// </summary>
+        internal static string RestrictedSelectionWarningFourthPartText {
+            get {
+                return ResourceManager.GetString("RestrictedSelectionWarningFourthPartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to which cannot be archived:.
+        /// </summary>
+        internal static string RestrictedSelectionWarningSecondPartText {
+            get {
+                return ResourceManager.GetString("RestrictedSelectionWarningSecondPartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to We will go ahead and try to create the archive without.
+        /// </summary>
+        internal static string RestrictedSelectionWarningThirdPartText {
+            get {
+                return ResourceManager.GetString("RestrictedSelectionWarningThirdPartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Resume.
         /// </summary>
         internal static string ResumeButtonContent {
@@ -741,6 +849,24 @@ namespace DeepfreezeApp.Properties {
         internal static string StatusUploadingText {
             get {
                 return ResourceManager.GetString("StatusUploadingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to this folder.
+        /// </summary>
+        internal static string ThisFolderText {
+            get {
+                return ResourceManager.GetString("ThisFolderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to those folders.
+        /// </summary>
+        internal static string ThoseFoldersText {
+            get {
+                return ResourceManager.GetString("ThoseFoldersText", resourceCulture);
             }
         }
         
@@ -894,6 +1020,33 @@ namespace DeepfreezeApp.Properties {
         internal static string VersionHeaderText {
             get {
                 return ResourceManager.GetString("VersionHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        internal static string WarningTitleText {
+            get {
+                return ResourceManager.GetString("WarningTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (Why?).
+        /// </summary>
+        internal static string WhyFilesWereExcludedShortText {
+            get {
+                return ResourceManager.GetString("WhyFilesWereExcludedShortText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows system files.
+        /// </summary>
+        internal static string WindowsDirExplanationText {
+            get {
+                return ResourceManager.GetString("WindowsDirExplanationText", resourceCulture);
             }
         }
     }

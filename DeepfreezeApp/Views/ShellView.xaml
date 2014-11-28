@@ -17,6 +17,7 @@
         Width="550"
         MinWidth="550"
         SaveWindowPosition="True"
+        IconEdgeMode="Aliased"
         >
 
     <Window.Resources>
