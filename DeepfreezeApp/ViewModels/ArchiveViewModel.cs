@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Windows;
+using System.Windows.Documents;
+using System.Diagnostics;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
 using DeepfreezeModel;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System.Windows.Threading;
+using System.Threading;
 
 namespace DeepfreezeApp
 {
@@ -26,6 +32,7 @@ namespace DeepfreezeApp
 
         private bool _isReset = true;
         private bool _hasChosenFiles = false;
+        private bool _hasInvalidFiles = false;
 
         private string _errorSelectingFiles;
         private string _busyMessageText;
@@ -39,7 +46,19 @@ namespace DeepfreezeApp
 
         private List<ArchiveFileInfo> _archiveInfo = new List<ArchiveFileInfo>();
 
+        private Dictionary<string, Enumerations.FileCategory> _excludedFiles = new Dictionary<string, Enumerations.FileCategory>();
+
         private string _baseDirectory;
+
+        private string _totalFilesToArchiveText;
+        private string _totalFilesToExcludeText;
+
+        private ArchiveView _archiveView;
+        private BaseMetroDialog _excludedFilesDialog;
+
+        private string _excludedFilesText;
+
+        private bool _isUserCancel = false;
 
         #endregion
 
@@ -143,6 +162,29 @@ namespace DeepfreezeApp
             get { return this._deepfreezeClient.IsInternetConnected; }
         }
 
+        public bool HasInvalidFiles
+        {
+            get { return this._hasInvalidFiles; }
+            set { this._hasInvalidFiles = value; NotifyOfPropertyChange(() => this.HasInvalidFiles); }
+        }
+
+        public string TotalFilesToArchiveText
+        {
+            get { return this._totalFilesToArchiveText; }
+            set { this._totalFilesToArchiveText = value; NotifyOfPropertyChange(() => this.TotalFilesToArchiveText); }
+        }
+
+        public string TotalFilesToExcludeText
+        {
+            get { return this._totalFilesToExcludeText; }
+            set { this._totalFilesToExcludeText = value; NotifyOfPropertyChange(() => this.TotalFilesToExcludeText); }
+        }
+
+        public string ExcludedFilesText
+        {
+            get { return this._excludedFilesText; }
+            set { this._excludedFilesText = value; NotifyOfPropertyChange(() => this.ExcludedFilesText); }
+        }
         #endregion
 
         #region action methods
@@ -173,7 +215,19 @@ namespace DeepfreezeApp
                 try
                 {
                     var dir = dialog.SelectedPath;
-                    this._baseDirectory = Path.GetDirectoryName(dir) + "\\";
+
+                    // get the base directory of the selection.
+                    // if the path starts with 2 backslashes then it's a network location.
+                    if (dir.StartsWith(@"\\"))
+                    {
+                        int lastIndexOfBackSlash = dir.LastIndexOf('\\');
+                        string selectedDirName = dir.Substring(lastIndexOfBackSlash);
+                        this._baseDirectory = dir.Replace(selectedDirName, "") + "\\";
+                    }
+                    else
+                    {
+                        this._baseDirectory = Path.GetDirectoryName(dir) + "\\";
+                    }
 
                     _log.Info("Selected directory \"" + dir + "\".");
 
@@ -182,20 +236,29 @@ namespace DeepfreezeApp
 
                     this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
 
-                    ArchiveSizeText = Properties.Resources.TotalArchiveSizeText +
-                    LongToSizeString.ConvertToString((double)this._archiveSize);
+                    this.SetTotalsTexts();
 
                     HasChosenFiles = true;
                 }
                 catch (Exception e)
                 {
                     _log.Error("Error preparing archive, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
-                    IsReset = true;
 
-                    this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
+                    if (!this._isUserCancel)
+                        this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
 
                     if (e is UnauthorizedAccessException)
                         this.ErrorSelectingFiles += " " + e.Message;
+
+                    // if the selection includes no files and a restricted folder WASN'T in the selection
+                    // then show the no files to upload error message.
+                    if (this._archiveInfo.Count == 0 && !this._isUserCancel)
+                        this.ErrorSelectingFiles = e.Message;
+
+                    this.IsReset = true;
+
+                    if (this._isUserCancel)
+                        this.Reset();
                 }
                 finally { IsBusy = false; }
             }
@@ -240,29 +303,58 @@ namespace DeepfreezeApp
                     IsBusy = true;
                     BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
 
-                    // get the base directory of the selection.
-                    this._baseDirectory = Path.GetDirectoryName(paths.FirstOrDefault()) + "\\";
+                    string parentDirOfSelection = paths.FirstOrDefault();
 
+                    // get the base directory of the selection.
+                    // if the path starts with 2 backslashes then it's a network location.
+                    if (parentDirOfSelection.StartsWith(@"\\"))
+                    {
+                        int lastIndexOfBackSlash = parentDirOfSelection.LastIndexOf('\\');
+                        string selectedDirName = parentDirOfSelection.Substring(lastIndexOfBackSlash);
+                        this._baseDirectory = parentDirOfSelection.Replace(selectedDirName, "") + "\\";
+                    }
+                    else
+                    {
+                        var parentDirName = Path.GetDirectoryName(parentDirOfSelection);
+                        if (String.IsNullOrEmpty(parentDirName))
+                        {
+                            this._baseDirectory = Path.GetPathRoot(parentDirOfSelection);
+                        }
+                        else
+                        {
+                            this._baseDirectory = Path.GetDirectoryName(paths.FirstOrDefault()) + "\\";
+                        }
+                    }
+                    
                     _log.Info("Drag and dropped files from directory \"" + this._baseDirectory + "\".");
 
                     try
                     {
                         this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
 
-                        ArchiveSizeText = Properties.Resources.TotalArchiveSizeText +
-                            LongToSizeString.ConvertToString((double)this._archiveSize);
+                        this.SetTotalsTexts();
 
                         HasChosenFiles = true;
                     }
                     catch (Exception ex)
                     {
                         _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
-                        IsReset = true;
 
-                        this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
+                        if (!this._isUserCancel)
+                            this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
 
                         if (ex is UnauthorizedAccessException)
                             this.ErrorSelectingFiles += " " + ex.Message;
+
+                        // if the selection includes no files and a restricted folder WASN'T in the selection
+                        // then show the no files to upload error message.
+                        if (this._archiveInfo.Count == 0 && !this._isUserCancel)
+                            this.ErrorSelectingFiles = ex.Message;
+
+                        this.IsReset = true;
+
+                        if (this._isUserCancel)
+                            this.Reset();
                     }
                     finally { IsBusy = false; }
                 }
@@ -278,7 +370,7 @@ namespace DeepfreezeApp
             {
                 return !String.IsNullOrEmpty(ArchiveTitle) &&
                        !String.IsNullOrWhiteSpace(ArchiveTitle) &&
-                       this._archiveSize > 0 &&
+                       this._archiveInfo.Count > 0 &&
                        this.IsInternetConnected;
             }
         }
@@ -353,7 +445,42 @@ namespace DeepfreezeApp
             ErrorSelectingFiles = null;
             ErrorCreatingArchive = null;
             this._archiveInfo.Clear();
+            this._excludedFiles.Clear();
+            this.HasInvalidFiles = false;
+            this.TotalFilesToExcludeText = null;
+            this._isUserCancel = false;
             IsReset = true;
+        }
+
+        public async void ExportInvalidFilesList()
+        {
+            StringBuilder topMessage = new StringBuilder();
+            StringBuilder bottomMessage = new StringBuilder();
+            StringBuilder allFilePaths = new StringBuilder();
+
+            foreach (var excludedFile in this._excludedFiles)
+            {
+                allFilePaths.AppendLine(excludedFile.Key + " (" + excludedFile.Value.GetStringValue() + ")");
+            }
+
+            topMessage.Append(Properties.Resources.FollowingFilesNotArchivedText);
+
+            bottomMessage.Append(Properties.Resources.ClickSaveToExportFileListText); 
+
+            var excludedFilesVM = IoC.Get<IExcludedFilesViewModel>() as ExcludedFilesViewModel;
+            excludedFilesVM.ArchiveTitle = this.ArchiveTitle;
+            excludedFilesVM.Title = Properties.Resources.ExcludedFilesTitle + "\"" + excludedFilesVM.ArchiveTitle + "\"";
+            excludedFilesVM.TopMessageText = topMessage.ToString();
+            excludedFilesVM.BottomMessageText = bottomMessage.ToString();
+            excludedFilesVM.ExcludedFilesText = await Task.Run(() => allFilePaths.ToString());
+
+            var windowManager = IoC.Get<IWindowManager>();
+            await windowManager.ShowViewDialogAsync(excludedFilesVM);
+        }
+
+        public void OpenNameRulesFAQURL()
+        {
+            Process.Start(Properties.Settings.Default.BigStashNameRulesFAQURL);
         }
 
         #endregion
@@ -377,21 +504,52 @@ namespace DeepfreezeApp
                 // split paths to files and folders.
                 var files = new List<string>();
                 var directories = new List<string>();
+                bool isDirectoryRestricted;
 
                 foreach (var p in paths)
                 {
                     FileAttributes attr = File.GetAttributes(p);
 
-                    if (attr.HasFlag(FileAttributes.Directory))
-                        directories.Add(p);
+                    // if the selected folder is indeed a directory and not a junction point
+                    // add it for archiving.
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory &&
+                        (attr & FileAttributes.ReparsePoint) != FileAttributes.ReparsePoint)
+                    {
+                        isDirectoryRestricted = CheckIfDirectoryIsRestricted(p);
+
+                        if (!isDirectoryRestricted)
+                        {
+                            directories.Add(p);
+                        }
+                        else
+                        {
+                            this._excludedFiles.Add(p, Enumerations.FileCategory.RestrictedDirectory);
+                        }
+                    }
+                        
                     else
                         files.Add(p);
                 }
 
-                // for each selected directory, add all files in _archiveFileInfo.
+                var subDirectories = new List<string>();
+
+                // Get all subdirectories under the 1st selected directory, again ignoring any junction points.
                 foreach (var dir in directories)
                 {
-                    var dirFiles = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+                    var subsWithoutJunctions = await IgnoreJunctionsUnderPath(dir);
+                    subDirectories.AddRange(subsWithoutJunctions.OrderBy(x => x));
+                }
+
+                // add all found subdirectories in the directories list
+                // which will be scanned for files at the top level for each directory.
+                if (subDirectories.Count > 0)
+                    directories.AddRange(subDirectories);
+
+                // for all directories selected for archiving, add all files in _archiveFileInfo.
+                foreach (var dir in directories)
+                {
+                    // Fetch all files in directory, only those on the top level.
+                    var dirFiles = Directory.GetFiles(dir, "*", SearchOption.TopDirectoryOnly);
 
                     if (dirFiles.Count() > 0)
                     {
@@ -399,6 +557,15 @@ namespace DeepfreezeApp
                         {
                             foreach (var f in dirFiles)
                             {
+                                var fileCategory = Utilities.CheckFileApiRestrictions(f);
+
+                                if (fileCategory != Enumerations.FileCategory.Normal)
+                                {
+                                    this.HasInvalidFiles = true;
+                                    this._excludedFiles.Add(f, fileCategory);
+                                    continue;
+                                }
+
                                 var info = new FileInfo(f);
 
                                 // Check that the archive size does not exceed the maximum allowed file size.
@@ -427,9 +594,26 @@ namespace DeepfreezeApp
                     }
                 }
 
+                // Remove the subdirectories from the directories list, so only the initially selected
+                // directory(ies) is left. We need to keep clean the directories list, so the code below
+                // suggesting an upload name gets the corrent amount of initially selected directories.
+                foreach(string subDir in subDirectories)
+                {
+                    directories.Remove(subDir);
+                }
+
                 // do the same for each individually selected files.
                 foreach (var f in files)
                 {
+                    var fileCategory = Utilities.CheckFileApiRestrictions(f);
+
+                    if (fileCategory != Enumerations.FileCategory.Normal)
+                    {
+                        this.HasInvalidFiles = true;
+                        this._excludedFiles.Add(f, fileCategory);
+                        continue;
+                    }
+
                     var info = new FileInfo(f);
 
                     // Check that the archive size does not exceed the maximum allowed file size.
@@ -454,9 +638,22 @@ namespace DeepfreezeApp
                     size += archiveFileInfo.Size;
                 }
 
-                if (this._archiveInfo.Count == 0)
-                    throw new Exception("Your selection doesn't contain any files. Nothing to upload.");
+                var result = await ShowRestrictedWarningMessage();
 
+                // if the user clicked cancel in the warning message box because of a restricted folder
+                // then cancel the new archive archive creation and reset the ViewModel.
+                if (result == MessageBoxResult.Cancel)
+                {
+                    this._isUserCancel = true;
+                    throw new Exception("User cancelled because of a restricted folder");
+                }
+
+                if (this._archiveInfo.Count == 0)
+                {
+                    this._excludedFiles.Clear();
+                    throw new Exception("Your selection doesn't contain any files. Nothing to upload.");
+                }
+                    
                 // check that the archive size fits in user's DF storage.
                 if (size > (this._deepfreezeClient.Settings.ActiveUser.Quota.Size - this._deepfreezeClient.Settings.ActiveUser.Quota.Used))
                 {
@@ -470,9 +667,8 @@ namespace DeepfreezeApp
                         throw new Exception(Properties.Resources.ErrorNotEnoughSpaceGenericText);
                 }
 
-
                 // suggest an archive title
-                if (directories.Count == 1)
+                if (directories.Count == 1 && files.Count == 0)
                     this.ArchiveTitle = new DirectoryInfo(directories.First()).Name;
                 else if (this._archiveInfo.Count == 1)
                     this.ArchiveTitle = this._archiveInfo.First().FileName;
@@ -484,6 +680,198 @@ namespace DeepfreezeApp
             catch (Exception e)
             {
                 throw e;
+            }
+        }
+
+        private async Task<IList<string>> IgnoreJunctionsUnderPath(string root)
+        {
+            IList<string> allSubDirs = new List<string>();
+            Stack<string> dirs = new Stack<string>();
+
+            try
+            {
+                if (!System.IO.Directory.Exists(root))
+                {
+                    throw new ArgumentException();
+                }
+                dirs.Push(root);
+
+                await Task.Run(async () =>
+                    {
+                        while (dirs.Count > 0)
+                        {
+                            string currentDir = dirs.Pop();
+                            string[] subDirs;
+                            
+                            try
+                            {
+                                subDirs = System.IO.Directory.GetDirectories(currentDir);
+                            }
+                            // An UnauthorizedAccessException exception will be thrown if we do not have 
+                            // discovery permission on a folder or file. It may or may not be acceptable  
+                            // to ignore the exception and continue enumerating the remaining files and  
+                            // folders. It is also possible (but unlikely) that a DirectoryNotFound exception  
+                            // will be raised. This will happen if currentDir has been deleted by 
+                            // another application or thread after our call to Directory.Exists. The  
+                            // choice of which exceptions to catch depends entirely on the specific task  
+                            // you are intending to perform and also on how much you know with certainty  
+                            // about the systems on which this code will run. 
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                                throw e;
+                            }
+
+                            // Push the subdirectories onto the stack for traversal. 
+                            // This could also be done before handing the files. 
+                            foreach (string str in subDirs)
+                            {
+                                bool isDirectoryRestricted = CheckIfDirectoryIsRestricted(str);
+                                if (isDirectoryRestricted)
+                                {
+                                    this._excludedFiles.Add(str, Enumerations.FileCategory.RestrictedDirectory);
+                                    continue;
+                                }
+
+                                var attributes = File.GetAttributes(str);
+
+                                if (!Utilities.IsJunction(str))
+                                {
+                                    dirs.Push(str);
+                                }
+                            }
+
+                            if (currentDir != root)
+                                allSubDirs.Add(currentDir);
+                        }
+                    });
+
+                return allSubDirs;
+            }
+            catch(Exception e)
+            { throw e; }
+        }
+
+        private void SetTotalsTexts()
+        {
+            ArchiveSizeText = Properties.Resources.TotalArchiveSizeText +
+                            LongToSizeString.ConvertToString((double)this._archiveSize) + ", ";
+
+            this.TotalFilesToArchiveText = this._archiveInfo.Count + 
+                (this._archiveInfo.Count == 1 ? " file. " : " files. ");
+
+            if (_excludedFiles.Count > 0)
+            {
+                this.TotalFilesToArchiveText = this.TotalFilesToArchiveText.Replace('.', ',');
+                this.TotalFilesToExcludeText = this._excludedFiles.Count +
+                    (this._excludedFiles.Count == 1 ? " file" : " files") + 
+                    " will not be uploaded.";
+            }
+        }
+
+        private bool CheckIfDirectoryIsRestricted(string path)
+        {
+            // if the directory is the %USERPROFILE%\AppData or the %windir% directory
+            // then exclude it from the file and subdir search.
+            // show a warning dialog that it's going to be excluded and that if the user
+            // wants to back it up, she should use a backup utility and then choose
+            // to upload that backup file.
+            string localAppData = Path.GetDirectoryName(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            string windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            IList<string> restrictedDirs = new List<string>()
+                                            {
+                                                localAppData,
+                                                windowsDir
+                                            };
+
+            if (restrictedDirs.Contains(path))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if the selection includes restricted folders and show a warning message.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<MessageBoxResult> ShowRestrictedWarningMessage()
+        {
+            string localAppData = Path.GetDirectoryName(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            string windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            IList<string> restrictedDirs = new List<string>()
+                                            {
+                                                localAppData,
+                                                windowsDir
+                                            };
+
+            var restrictedDirsIntersection = this._excludedFiles.Keys.Intersect(restrictedDirs);
+
+            if (restrictedDirsIntersection.Count() > 0)
+            {
+                string title = Properties.Resources.WarningTitleText;
+
+                StringBuilder messageSb = new StringBuilder();
+                messageSb.Append(Properties.Resources.RestrictedSelectionWarningFirstPartText);
+                if (restrictedDirsIntersection.Count() > 1)
+                    messageSb.Append("s");
+
+                messageSb.AppendLine(" " + Properties.Resources.RestrictedSelectionWarningSecondPartText);
+                messageSb.AppendLine();
+
+                foreach (string dir in restrictedDirsIntersection)
+                {
+                    messageSb.Append(" \"");
+                    messageSb.Append(dir);
+                    messageSb.Append("\" ");
+                    messageSb.Append(" (contains ");
+
+                    if (dir == localAppData)
+                        messageSb.Append(Properties.Resources.AppDataDirExplanationText);
+                    else if (dir == windowsDir)
+                        messageSb.Append(Properties.Resources.WindowsDirExplanationText);
+
+                    messageSb.AppendLine(")");
+                }
+
+                messageSb.AppendLine();
+                messageSb.Append(Properties.Resources.RestrictedSelectionWarningThirdPartText);
+
+                if (restrictedDirsIntersection.Count() == 1)
+                {
+                    messageSb.Append(" " + Properties.Resources.ThisFolderText);
+                }
+                else if (restrictedDirsIntersection.Count() > 1)
+                {
+                    messageSb.Append(" " + Properties.Resources.ThoseFoldersText);
+                }
+
+                messageSb.AppendLine(" " + Properties.Resources.ClickCancelToCancelText + ".");
+                messageSb.AppendLine();
+                messageSb.Append(Properties.Resources.RestrictedSelectionWarningFourthPartText);
+
+                //if (restrictedDirsIntersection.Count() == 1)
+                //{
+                //    messageSb.Append(" " + Properties.Resources.ThisFolderText + " ");
+                //}
+                //else if (restrictedDirsIntersection.Count() > 1)
+                //{
+                //    messageSb.Append(" " + Properties.Resources.ThoseFoldersText + " ");
+                //}
+
+                //messageSb.Append(Properties.Resources.RestrictedSelectionWarningFifthPartText);
+
+                MessageBoxButton button = MessageBoxButton.OKCancel;
+
+                var windowManager = IoC.Get<IWindowManager>();
+                var result = await windowManager.ShowMessageViewModelAsync(messageSb.ToString(), title, button);
+
+                return result;
+            }
+            else
+            {
+                return MessageBoxResult.None;
             }
         }
 
