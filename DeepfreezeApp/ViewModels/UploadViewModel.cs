@@ -539,7 +539,7 @@ namespace DeepfreezeApp
             if (!String.IsNullOrEmpty(this.Archive.Url))
             {
                 var authority = new Uri(this.Archive.Url).Authority;
-                Process.Start(authority + "/a/" + this.Archive.Key);
+                Process.Start("https://" + authority + "/a/" + this.Archive.Key);
             }
         }
 
