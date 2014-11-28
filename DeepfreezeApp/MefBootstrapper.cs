@@ -71,7 +71,7 @@ namespace DeepfreezeApp
             container.SatisfyImportsOnce(instance);
         }
 
-        protected override void OnStartup(object sender, StartupEventArgs e)
+        protected override async void OnStartup(object sender, StartupEventArgs e)
         {
             // check if this is the first instance running
             // or a newer with the first instance already running.
@@ -117,9 +117,11 @@ namespace DeepfreezeApp
 
                 // If this version is network deployed, is the first instance run after installing/updating
                 // and is equal to the 1st release of Bigstash for Windows (version 1.2.0) then migrate old deepfreeze application data.
-                if (ApplicationDeployment.IsNetworkDeployed &&
-                    ApplicationDeployment.CurrentDeployment.IsFirstRun &&
-                    ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0")
+                bool isFirstBigStashRun = (ApplicationDeployment.IsNetworkDeployed &&
+                                           ApplicationDeployment.CurrentDeployment.IsFirstRun &&
+                                           ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0");
+
+                if (isFirstBigStashRun)
                 {
                     // Open the blog post page relative to the BigStash update.
                     if (!(String.IsNullOrEmpty(Properties.Settings.Default.BigStashBlogURL) ||
@@ -136,6 +138,21 @@ namespace DeepfreezeApp
                 
                 DisplayRootViewFor<IShell>();
 
+                // after showing the main window, if this instance run is the first bigstash run
+                // then show a relevant message dialog.
+                if (isFirstBigStashRun)
+                {
+                    StringBuilder updateMessage = new StringBuilder();
+                    updateMessage.Append("Deepfreeze.io is now BigStash! Read our ");
+                    updateMessage.Append(@"[a href='" + Properties.Settings.Default.BigStashBlogURL + @"']");
+                    updateMessage.Append("announcement");
+                    updateMessage.Append(@"[/a]");
+                    updateMessage.Append(".");
+
+                    var windowManager = IoC.Get<IWindowManager>();
+                    await windowManager.ShowMessageViewModelAsync(updateMessage.ToString(), "Update Information", MessageBoxButton.OK);
+                }
+                
                 // Catch with args and forward a message with them
                 if (e.Args.Length > 0)
                 {
