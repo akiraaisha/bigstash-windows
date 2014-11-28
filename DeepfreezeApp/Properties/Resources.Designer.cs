@@ -718,7 +718,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your selection includes the following folder.
+        ///   Looks up a localized string similar to Your selection includes the following folders.
         /// </summary>
         internal static string RestrictedSelectionWarningFirstPartText {
             get {
@@ -736,7 +736,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to which is a system folder  and cannot be archived safely using this program:.
+        ///   Looks up a localized string similar to which are system folders and cannot be archived safely using this program:.
         /// </summary>
         internal static string RestrictedSelectionWarningSecondPartText {
             get {
@@ -862,7 +862,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to those folders.
+        ///   Looks up a localized string similar to these folders.
         /// </summary>
         internal static string ThoseFoldersText {
             get {

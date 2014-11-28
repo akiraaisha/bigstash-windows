@@ -462,13 +462,13 @@
     <value />
   </data>
   <data name="RestrictedSelectionWarningFirstPartText" xml:space="preserve">
-    <value>Your selection includes the following folder</value>
+    <value>Your selection includes the following folders</value>
   </data>
   <data name="RestrictedSelectionWarningFourthPartText" xml:space="preserve">
     <value>Tip: You can just create a compressed file and archive it with us.</value>
   </data>
   <data name="RestrictedSelectionWarningSecondPartText" xml:space="preserve">
-    <value>which is a system folder  and cannot be archived safely using this program:</value>
+    <value>which are system folders and cannot be archived safely using this program:</value>
   </data>
   <data name="RestrictedSelectionWarningThirdPartText" xml:space="preserve">
     <value>We will go ahead and try to create the archive without</value>
@@ -477,7 +477,7 @@
     <value>this folder</value>
   </data>
   <data name="ThoseFoldersText" xml:space="preserve">
-    <value>those folders</value>
+    <value>these folders</value>
   </data>
   <data name="WarningTitleText" xml:space="preserve">
     <value>Warning</value>
