@@ -650,7 +650,6 @@ namespace DeepfreezeApp
 
                 if (this._archiveInfo.Count == 0)
                 {
-                    this._excludedFiles.Clear();
                     throw new Exception("Your selection doesn't contain any files. Nothing to upload.");
                 }
                     
@@ -679,6 +678,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
+                this._excludedFiles.Clear();
                 throw e;
             }
         }
