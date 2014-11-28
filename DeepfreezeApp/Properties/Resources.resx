@@ -437,4 +437,55 @@
   <data name="ConnectButtonDisabledTooltipText" xml:space="preserve">
     <value>You can't connect your account without an active Internet connection.</value>
   </data>
+  <data name="NameRulesFAQURLHelpText" xml:space="preserve">
+    <value>Click to open the BigStash FAQ website page.</value>
+  </data>
+  <data name="ExcludedFilesTitle" xml:space="preserve">
+    <value>Excluded files from new archive </value>
+  </data>
+  <data name="AppDataDirExplanationText" xml:space="preserve">
+    <value>application-specific data</value>
+  </data>
+  <data name="ClickCancelToCancelText" xml:space="preserve">
+    <value>or click cancel to cancel the archive creation</value>
+  </data>
+  <data name="ClickSaveToExportFileListText" xml:space="preserve">
+    <value>Click save to receive the full list as a text file.</value>
+  </data>
+  <data name="ExcludedFilesTextFileParagraph" xml:space="preserve">
+    <value>The following files were not archived. You can read our FAQ about why some files are not archived here</value>
+  </data>
+  <data name="FollowingFilesNotArchivedText" xml:space="preserve">
+    <value>The following files were not archived:</value>
+  </data>
+  <data name="RestrictedSelectionWarningFifthPartText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RestrictedSelectionWarningFirstPartText" xml:space="preserve">
+    <value>Your selection includes the following folder</value>
+  </data>
+  <data name="RestrictedSelectionWarningFourthPartText" xml:space="preserve">
+    <value>Tip: You can just create a compressed file and archive it with us.</value>
+  </data>
+  <data name="RestrictedSelectionWarningSecondPartText" xml:space="preserve">
+    <value>which cannot be archived:</value>
+  </data>
+  <data name="RestrictedSelectionWarningThirdPartText" xml:space="preserve">
+    <value>We will go ahead and try to create the archive without</value>
+  </data>
+  <data name="ThisFolderText" xml:space="preserve">
+    <value>this folder</value>
+  </data>
+  <data name="ThoseFoldersText" xml:space="preserve">
+    <value>those folders</value>
+  </data>
+  <data name="WarningTitleText" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="WhyFilesWereExcludedShortText" xml:space="preserve">
+    <value>(Why?)</value>
+  </data>
+  <data name="WindowsDirExplanationText" xml:space="preserve">
+    <value>Windows system files</value>
+  </data>
 </root>
