@@ -919,6 +919,9 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
+                _log.Error("Error preparing an upload from file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = (e as Exceptions.DfApiException).HttpResponse;
