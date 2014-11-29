@@ -133,9 +133,9 @@ namespace DeepfreezeApp
                     // Migrate deepfreeze data to bigstash app data directory.
                     // This step is needed for all clients updating from any Deepfreeze.io app version
                     // to any BigStash version.
-                    MigrateDeepfreezeData();
+                    await MigrateDeepfreezeData();
                 }
-                
+
                 DisplayRootViewFor<IShell>();
 
                 // after showing the main window, if this instance run is the first bigstash run
@@ -359,7 +359,7 @@ namespace DeepfreezeApp
             return client.ApplicationVersion;
         }
 
-        private void MigrateDeepfreezeData()
+        private async Task MigrateDeepfreezeData()
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var deepfreezeFolderPath = Path.Combine(localAppData, Properties.Settings.Default.DeepfreezeApplicationFolderName);
@@ -373,7 +373,48 @@ namespace DeepfreezeApp
 
                 try
                 {
+                    // copy Deepfreeze.io contents to BigStash folder.
                     Utilities.DirectoryCopy(deepfreezeFolderPath, Properties.Settings.Default.ApplicationDataFolder, true);
+
+                    // the old deepfreeze endpoint needs to be replaced with the new bigstash endpoint.
+
+                    // get the path to the BigStash/uploads/ folder.
+                    string uploadsFolder = Path.Combine(Properties.Settings.Default.ApplicationDataFolder, "uploads");
+
+                    // get the contents of the upload folder.
+                    var uploadFiles = Directory.GetFiles(uploadsFolder).ToList();
+
+                    IList<Task> replaceTasks = new List<Task>();
+
+                    // for all files, replace the endpoint substring found in line index 1.
+                    foreach(string uploadFile in uploadFiles)
+                    {
+                        var t = Task.Run(() =>
+                        {
+                            try
+                            {
+                                // read all file lines to a string array.
+                                var lines = File.ReadAllLines(uploadFile);
+
+                                if (lines.Count() > 0)
+                                {
+                                    // line at index 1 is the line that needs to change.
+                                    // lines[0] is the 1st line containing the '{' character.
+                                    lines[1] = lines[1].Replace("deepfreeze.io", "bigstash.co");
+                                }
+
+                                // write all lines back to the original file.
+                                File.WriteAllLines(uploadFile, lines);
+                            }
+                            catch (Exception e) { throw e; }
+                        });
+
+                        // add the awaitable task to the replaceTasks list.
+                        replaceTasks.Add(t);
+                    }
+
+                    // execute all replace tasks in parallel.
+                    await Task.WhenAll(replaceTasks);
 
                     // Delete old DFLog files copied to the BigStash directory since they're now useless.
                     var oldLogs = Directory.GetFiles(Properties.Settings.Default.ApplicationDataFolder, "DFLog*").ToList();
