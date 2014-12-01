@@ -123,13 +123,6 @@ namespace DeepfreezeApp
 
                 if (isFirstBigStashRun)
                 {
-                    // Open the blog post page relative to the BigStash update.
-                    if (!(String.IsNullOrEmpty(Properties.Settings.Default.BigStashBlogURL) ||
-                        String.IsNullOrWhiteSpace(Properties.Settings.Default.BigStashBlogURL)))
-                    {
-                        Process.Start(Properties.Settings.Default.BigStashBlogURL);
-                    }
-
                     // Migrate deepfreeze data to bigstash app data directory.
                     // This step is needed for all clients updating from any Deepfreeze.io app version
                     // to any BigStash version.
