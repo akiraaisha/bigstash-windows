@@ -146,6 +146,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\HyperLinkConverter.cs" />
     <Compile Include="Interfaces\IAboutViewModel.cs" />
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
     <Compile Include="Interfaces\IMessageBoxViewModel.cs" />

@@ -264,6 +264,14 @@ namespace DeepfreezeApp
                 this.LocalUpload.UserPaused = false;
                 await this.SaveLocalUpload();
 
+                // refresh the s3 token if it's currently expired.
+                // this takes care of cases when an upload was automatically paused 
+                // because of an expired token exception.
+                if (this.Upload.S3.TokenExpiration < DateTime.UtcNow)
+                {
+                    await this.FetchUploadAsync(this.Upload.Url);
+                }
+
                 // set timer interval to 5 seconds to catch progress updates
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
 
@@ -539,7 +547,7 @@ namespace DeepfreezeApp
             if (!String.IsNullOrEmpty(this.Archive.Url))
             {
                 var authority = new Uri(this.Archive.Url).Authority;
-                Process.Start(authority + "/a/" + this.Archive.Key);
+                Process.Start("https://" + authority + "/a/" + this.Archive.Key);
             }
         }
 
@@ -919,6 +927,9 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
+                _log.Error("Error preparing an upload from file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = (e as Exceptions.DfApiException).HttpResponse;

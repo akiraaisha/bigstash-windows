@@ -46,7 +46,7 @@ namespace DeepfreezeApp
 
         private List<ArchiveFileInfo> _archiveInfo = new List<ArchiveFileInfo>();
 
-        private Dictionary<string, Enumerations.FileCategory> _excludedFiles = new Dictionary<string, Enumerations.FileCategory>();
+        private Dictionary<string, Enumerations.FileCategory> _excludedFiles = new Dictionary<string, Enumerations.FileCategory>(StringComparer.OrdinalIgnoreCase);
 
         private string _baseDirectory;
 
@@ -250,6 +250,9 @@ namespace DeepfreezeApp
                     if (e is UnauthorizedAccessException)
                         this.ErrorSelectingFiles += " " + e.Message;
 
+                    if (e.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
+                        this.ErrorSelectingFiles = e.Message;
+
                     // if the selection includes no files and a restricted folder WASN'T in the selection
                     // then show the no files to upload error message.
                     if (this._archiveInfo.Count == 0 && !this._isUserCancel)
@@ -345,6 +348,9 @@ namespace DeepfreezeApp
 
                         if (ex is UnauthorizedAccessException)
                             this.ErrorSelectingFiles += " " + ex.Message;
+
+                        if (ex.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
+                            this.ErrorSelectingFiles = ex.Message;
 
                         // if the selection includes no files and a restricted folder WASN'T in the selection
                         // then show the no files to upload error message.
@@ -650,7 +656,6 @@ namespace DeepfreezeApp
 
                 if (this._archiveInfo.Count == 0)
                 {
-                    this._excludedFiles.Clear();
                     throw new Exception("Your selection doesn't contain any files. Nothing to upload.");
                 }
                     
@@ -679,6 +684,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
+                this._excludedFiles.Clear();
                 throw e;
             }
         }
@@ -780,11 +786,11 @@ namespace DeepfreezeApp
             string windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
             IList<string> restrictedDirs = new List<string>()
                                             {
-                                                localAppData,
-                                                windowsDir
+                                                localAppData.ToLower(),
+                                                windowsDir.ToLower()
                                             };
 
-            if (restrictedDirs.Contains(path))
+            if (restrictedDirs.Contains(path.ToLower()))
             {
                 return true;
             }
@@ -806,7 +812,7 @@ namespace DeepfreezeApp
                                                 windowsDir
                                             };
 
-            var restrictedDirsIntersection = this._excludedFiles.Keys.Intersect(restrictedDirs);
+            var restrictedDirsIntersection = this._excludedFiles.Keys.Intersect(restrictedDirs, StringComparer.InvariantCultureIgnoreCase);
 
             if (restrictedDirsIntersection.Count() > 0)
             {
@@ -827,9 +833,9 @@ namespace DeepfreezeApp
                     messageSb.Append("\" ");
                     messageSb.Append(" (contains ");
 
-                    if (dir == localAppData)
+                    if (dir.ToLower() == localAppData.ToLower())
                         messageSb.Append(Properties.Resources.AppDataDirExplanationText);
-                    else if (dir == windowsDir)
+                    else if (dir.ToLower() == windowsDir.ToLower())
                         messageSb.Append(Properties.Resources.WindowsDirExplanationText);
 
                     messageSb.AppendLine(")");

@@ -375,7 +375,7 @@
     <comment>Similar to ErrorInvalidDeploymentExceptionGenericText.</comment>
   </data>
   <data name="ErrorRefreshingUserStatsGenericText" xml:space="preserve">
-    <value>There was an error while refreshing your account's information.</value>
+    <value>There was an error while refreshing your account information.</value>
     <comment>Used for displaying a user friendly message if there's an error while getting the user account's information (after sending the relevant DF API request).</comment>
   </data>
   <data name="ErrorConnectingGenericText" xml:space="preserve">
@@ -447,28 +447,28 @@
     <value>application-specific data</value>
   </data>
   <data name="ClickCancelToCancelText" xml:space="preserve">
-    <value>or click cancel to cancel the archive creation</value>
+    <value>or, if you don't want us to do this, click cancel to abandon the archive creation.</value>
   </data>
   <data name="ClickSaveToExportFileListText" xml:space="preserve">
     <value>Click save to receive the full list as a text file.</value>
   </data>
   <data name="ExcludedFilesTextFileParagraph" xml:space="preserve">
-    <value>The following files were not archived. You can read our FAQ about why some files are not archived here</value>
+    <value>The following files will not be archived. You can read our FAQ about why some files are not archived here</value>
   </data>
   <data name="FollowingFilesNotArchivedText" xml:space="preserve">
-    <value>The following files were not archived:</value>
+    <value>The following files will not be archived:</value>
   </data>
   <data name="RestrictedSelectionWarningFifthPartText" xml:space="preserve">
     <value />
   </data>
   <data name="RestrictedSelectionWarningFirstPartText" xml:space="preserve">
-    <value>Your selection includes the following folder</value>
+    <value>Your selection includes the following folders</value>
   </data>
   <data name="RestrictedSelectionWarningFourthPartText" xml:space="preserve">
     <value>Tip: You can just create a compressed file and archive it with us.</value>
   </data>
   <data name="RestrictedSelectionWarningSecondPartText" xml:space="preserve">
-    <value>which cannot be archived:</value>
+    <value>which are system folders and cannot be archived safely using this program:</value>
   </data>
   <data name="RestrictedSelectionWarningThirdPartText" xml:space="preserve">
     <value>We will go ahead and try to create the archive without</value>
@@ -477,7 +477,7 @@
     <value>this folder</value>
   </data>
   <data name="ThoseFoldersText" xml:space="preserve">
-    <value>those folders</value>
+    <value>these folders</value>
   </data>
   <data name="WarningTitleText" xml:space="preserve">
     <value>Warning</value>

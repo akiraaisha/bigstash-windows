@@ -178,7 +178,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to or click cancel to cancel the archive creation.
+        ///   Looks up a localized string similar to or, if you don&apos;t want us to do this, click cancel to abandon the archive creation..
         /// </summary>
         internal static string ClickCancelToCancelText {
             get {
@@ -493,7 +493,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There was an error while refreshing your account&apos;s information..
+        ///   Looks up a localized string similar to There was an error while refreshing your account information..
         /// </summary>
         internal static string ErrorRefreshingUserStatsGenericText {
             get {
@@ -520,7 +520,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following files were not archived. You can read our FAQ about why some files are not archived here.
+        ///   Looks up a localized string similar to The following files will not be archived. You can read our FAQ about why some files are not archived here.
         /// </summary>
         internal static string ExcludedFilesTextFileParagraph {
             get {
@@ -547,7 +547,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following files were not archived:.
+        ///   Looks up a localized string similar to The following files will not be archived:.
         /// </summary>
         internal static string FollowingFilesNotArchivedText {
             get {
@@ -718,7 +718,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your selection includes the following folder.
+        ///   Looks up a localized string similar to Your selection includes the following folders.
         /// </summary>
         internal static string RestrictedSelectionWarningFirstPartText {
             get {
@@ -736,7 +736,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to which cannot be archived:.
+        ///   Looks up a localized string similar to which are system folders and cannot be archived safely using this program:.
         /// </summary>
         internal static string RestrictedSelectionWarningSecondPartText {
             get {
@@ -862,7 +862,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to those folders.
+        ///   Looks up a localized string similar to these folders.
         /// </summary>
         internal static string ThoseFoldersText {
             get {

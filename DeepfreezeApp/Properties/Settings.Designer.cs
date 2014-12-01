@@ -88,7 +88,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://www.deepfreeze.io/api/v1/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/api/v1/")]
         public string ServerBaseAddress {
             get {
                 return ((string)(this["ServerBaseAddress"]));
