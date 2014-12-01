@@ -264,6 +264,14 @@ namespace DeepfreezeApp
                 this.LocalUpload.UserPaused = false;
                 await this.SaveLocalUpload();
 
+                // refresh the s3 token if it's currently expired.
+                // this takes care of cases when an upload was automatically paused 
+                // because of an expired token exception.
+                if (this.Upload.S3.TokenExpiration < DateTime.UtcNow)
+                {
+                    await this.FetchUploadAsync(this.Upload.Url);
+                }
+
                 // set timer interval to 5 seconds to catch progress updates
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
 
