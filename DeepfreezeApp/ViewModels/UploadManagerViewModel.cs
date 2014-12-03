@@ -128,6 +128,14 @@ namespace DeepfreezeApp
                     {
                         var localUpload = JsonConvert.DeserializeObject<LocalUpload>(content);
 
+                        // if a local upload file has an empty url value then exclude the upload
+                        // and create a log warning about excluding it.
+                        if (!String.IsNullOrEmpty(localUpload.Url))
+                        {
+                            _log.Warn("Local Upload has url='" + localUpload.Url + "' and it will be excluded from the uploads list.");
+                            continue;
+                        }
+
                         // load only those local uploads that use the currently used api endpoint.
                         // we can filter this because each local upload has the URL property,
                         // which contains the api endpoint.
