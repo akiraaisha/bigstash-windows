@@ -53,9 +53,6 @@ namespace DeepfreezeApp
         private string _totalFilesToArchiveText;
         private string _totalFilesToExcludeText;
 
-        private ArchiveView _archiveView;
-        private BaseMetroDialog _excludedFilesDialog;
-
         private string _excludedFilesText;
 
         private bool _isUserCancel = false;
@@ -702,7 +699,7 @@ namespace DeepfreezeApp
                 }
                 dirs.Push(root);
 
-                await Task.Run(async () =>
+                await Task.Run(() =>
                     {
                         while (dirs.Count > 0)
                         {
