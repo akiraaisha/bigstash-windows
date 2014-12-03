@@ -1157,10 +1157,24 @@ namespace DeepfreezeApp
             // Immediately send cancel to cancel any upload tasks
             // if the operation status is equal to uploading.
             // This check takes place inside PauseUpload method's body.
-            this.PauseUpload(true).RunSynchronously();
+            var pauseTask = this.PauseUpload(true);
+
+            bool canRunTask = !(pauseTask.Status == TaskStatus.Canceled ||
+                                pauseTask.Status == TaskStatus.Faulted ||
+                                pauseTask.Status == TaskStatus.RanToCompletion);
+
+            if (canRunTask)
+                pauseTask.RunSynchronously();
+
+            var saveTask = this.SaveLocalUpload(false);
+
+            canRunTask = !(saveTask.Status == TaskStatus.Canceled ||
+                           saveTask.Status == TaskStatus.Faulted ||
+                           saveTask.Status == TaskStatus.RanToCompletion);
 
             // do a final save
-            bool saveCompleted = this.SaveLocalUpload(false).Result;
+            if (canRunTask)
+                saveTask.RunSynchronously();
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();
