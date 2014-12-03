@@ -296,6 +296,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
+                _log.Error("UploadManagerViewModel.OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 this.ErrorMessage = Properties.Resources.ErrorInitializingClientUploadsListGenericText;
             }
             finally

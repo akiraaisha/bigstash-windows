@@ -12,6 +12,8 @@ namespace DeepfreezeApp
 {
     public static class WindowManagerExtensions
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(WindowManagerExtensions));
+
         public static async Task<MessageBoxResult> ShowMessageViewModelAsync(this IWindowManager @this, string message, string title,
                                                            MessageBoxButton buttons)
         {
@@ -29,7 +31,10 @@ namespace DeepfreezeApp
                 await shellViewModel.ShellWindow.HideOverlayAsync();
                 retval = model.Result;
             }
-            catch (Exception e) { }
+            catch (Exception e) 
+            {
+                _log.Error("WindowManagerExtensions.ShowMessageViewModelAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
             finally
             {
             }
@@ -49,7 +54,10 @@ namespace DeepfreezeApp
                 @this.ShowDialog(viewModel, null, settings);
                 await shellViewModel.ShellWindow.HideOverlayAsync();
             }
-            catch (Exception e) { }
+            catch (Exception e) 
+            {
+                _log.Error("WindowManagerExtensions.ShowViewDialogAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
     }
 }

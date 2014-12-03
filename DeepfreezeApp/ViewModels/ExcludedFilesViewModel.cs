@@ -9,6 +9,7 @@ using Caliburn.Micro;
 using System.IO;
 using System.Diagnostics;
 using MahApps.Metro.Controls.Dialogs;
+using log4net;
 
 namespace DeepfreezeApp
 {
@@ -17,6 +18,8 @@ namespace DeepfreezeApp
     public class ExcludedFilesViewModel : Screen, IExcludedFilesViewModel
     {
         #region fields
+
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ExcludedFilesViewModel));
 
         private string _title;
         private string _excludedFilesText;
@@ -106,6 +109,8 @@ namespace DeepfreezeApp
                 }
                 catch (Exception e)
                 {
+                    _log.Error("ExcludedFilesViewModel.Save threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                     var shellWindow = IoC.Get<IShell>().ShellWindow;
                     shellWindow.ShowMessageAsync("Error", "There was an error while saving the file: '" + savePath + "'.");
                 }

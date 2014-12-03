@@ -30,7 +30,7 @@
 
             <StackPanel>
 
-                <Label x:Name="Title"
+                <Label Content="{Binding Title}"
                        Style="{StaticResource HeaderLabelStyle}"
                        HorizontalAlignment="Stretch"
                        Margin="0 10 0 5"
@@ -82,11 +82,11 @@
                             Margin="0 0 5 0"
                             />
 
-                    <Button x:Name="Close" 
-                            Content="Close" 
+                    <Button Content="Close" 
                             Width="70"
                             Style="{DynamicResource SquareButtonStyleCI}"
                             Margin="5 0 0 0"
+                            cal:Message.Attach="[Event Click] = [Action Close()]"
                             />
 
                 </WrapPanel>

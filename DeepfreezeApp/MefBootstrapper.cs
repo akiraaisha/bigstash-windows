@@ -22,7 +22,7 @@ namespace DeepfreezeApp
 {
     public class MefBootstrapper : BootstrapperBase
     {
-        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger((System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger((System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
 
         private CompositionContainer container;
 
@@ -99,14 +99,14 @@ namespace DeepfreezeApp
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-                Log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
-                Log.Info("*****************************************************");
-                Log.Info("*****************************************************");
-                Log.Info("*********                                  **********");
-                Log.Info("*********       BigStash for Windows       **********");
-                Log.Info("*********                                  **********");
-                Log.Info("*****************************************************");
-                Log.Info("*****************************************************");
+                _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
+                _log.Info("*****************************************************");
+                _log.Info("*****************************************************");
+                _log.Info("*********                                  **********");
+                _log.Info("*********       BigStash for Windows       **********");
+                _log.Info("*********                                  **********");
+                _log.Info("*****************************************************");
+                _log.Info("*****************************************************");
 
                 // Set Application local app data folder and file paths
                 // in Application.Properties for use in this application instance.
@@ -161,7 +161,7 @@ namespace DeepfreezeApp
             var app = Application as InstanceAwareApplication;
             if ((app != null && app.IsFirstInstance))
             {
-                Log.Info("Exiting application.");
+                _log.Info("Exiting application.");
 
                 // make sure to save one final time the application wide settings.
                 Properties.Settings.Default.Save();
@@ -170,7 +170,7 @@ namespace DeepfreezeApp
 
                 if (client.IsLogged())
                 {
-                    Log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+                    _log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
 
                     // Reset the api endpoint to the default 'ServerBaseAddress' before saving the preferences file
                     // for the last time.
@@ -181,7 +181,7 @@ namespace DeepfreezeApp
                 }
                 else
                 {
-                    Log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
+                    _log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
                     File.Delete(Properties.Settings.Default.SettingsFilePath);
                 }
             }
@@ -198,7 +198,7 @@ namespace DeepfreezeApp
                 System.Windows.MessageBox.Show(e.Exception.Message, "Application Exception", System.Windows.MessageBoxButton.OK);
             });
 
-            Log.Error("Unhandled exception occured, thrown " + e.Exception.GetType().Name + " with message \"" + e.Exception.Message + "\".");
+            _log.Error("Unhandled exception occured, thrown " + e.Exception.GetType().Name + " with message \"" + e.Exception.Message + "\".");
 
             Application.Shutdown();
         }
@@ -235,12 +235,15 @@ namespace DeepfreezeApp
             {
                 if (!Directory.Exists(Properties.Settings.Default.ApplicationDataFolder))
                 {
-                    Log.Info("Creating LocalAppData BigStash directory.");
+                    _log.Info("Creating LocalAppData BigStash directory.");
 
                     Directory.CreateDirectory(Properties.Settings.Default.ApplicationDataFolder);
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception e)
+            {
+                _log.Error("MefBootstrapper.CreateLocalApplicationDataDirectory threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
 
         private void SetApplicationPathsProperties()
@@ -254,7 +257,7 @@ namespace DeepfreezeApp
                     Properties.Settings.Default.ApplicationName
                 );
 
-            Log.Info("Setting LocalAppData BigStash directory path as \"" + Properties.Settings.Default.ApplicationDataFolder + "\".");
+            _log.Info("Setting LocalAppData BigStash directory path as \"" + Properties.Settings.Default.ApplicationDataFolder + "\".");
 
             // %APPDATA\BigStash\preferences.json
             Properties.Settings.Default.SettingsFilePath =
@@ -263,7 +266,7 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.SettingsFileName
                     );
 
-            Log.Info("Setting BigStash preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
+            _log.Info("Setting BigStash preferences file path as \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
             // %APPDATA\BigStash\uploads\
             Properties.Settings.Default.UploadsFolderPath =
@@ -272,7 +275,7 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.UploadsFolderName
                     );
 
-            Log.Info("Setting BigStash local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
+            _log.Info("Setting BigStash local upload files' path as \"" + Properties.Settings.Default.UploadsFolderPath + "\".");
 
             // %APPDATA\BigStash\endpoint.json
             Properties.Settings.Default.EndpointFilePath =
@@ -281,7 +284,7 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.EndpointFileName
                     );
 
-            Log.Info("Setting BigStash endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
+            _log.Info("Setting BigStash endpoint file path as \"" + Properties.Settings.Default.EndpointFilePath + "\".");
 
             // %APPDATA\BigStash\DFLog.txt
             Properties.Settings.Default.LogFilePath =
@@ -290,7 +293,7 @@ namespace DeepfreezeApp
                         Properties.Settings.Default.LogFileName
                     );
 
-            Log.Info("Setting BigStash log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
+            _log.Info("Setting BigStash log file path as \"" + Properties.Settings.Default.LogFilePath + "\".");
         }
 
         /// <summary>
@@ -331,7 +334,10 @@ namespace DeepfreezeApp
                     }
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception e) 
+            {
+                _log.Error("MefBootstrapper.SetAddRemoveProgramsIcon threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
 
         [Conditional("DEBUG")]
@@ -362,7 +368,7 @@ namespace DeepfreezeApp
             // except for the old log file.
             if (Directory.Exists(deepfreezeFolderPath))
             {
-                Log.Info("Migrating Deepfreeze data to BigStash application data directory.");
+                _log.Info("Migrating Deepfreeze data to BigStash application data directory.");
 
                 try
                 {
@@ -420,7 +426,9 @@ namespace DeepfreezeApp
                     Directory.Delete(deepfreezeFolderPath, true);
                 }
                 catch(Exception e)
-                { }
+                {
+                    _log.Error("MefBootstrapper.MigrateDeepfreezeData threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                }
             }
         }
 

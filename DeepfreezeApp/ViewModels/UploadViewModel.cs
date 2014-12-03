@@ -493,6 +493,7 @@ namespace DeepfreezeApp
                     catch(AmazonS3Exception ae)
                     {
                         // If there's an aws exception when calling abort, just go on with the delete call to the df api.
+                        _log.Error("Error while aborting S3 upload, thrown " + ae.GetType().ToString() + " with message \"" + ae.Message + "\".");
                     }
 
                     var deleteSuccess = await this._deepfreezeClient.DeleteUploadAsync(this.Upload).ConfigureAwait(false);
@@ -509,8 +510,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                //if (!this._deepfreezeClient.IsInternetConnected)
-                //    this.ErrorMessage = Properties.Resources.NoInternetConnectionMessage + "\n";
+                _log.Error("DeleteUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage += Properties.Resources.ErrorDeletingUploadGenericText;
             }
@@ -535,6 +535,8 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             {
+                _log.Error("RemoveUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 this.ErrorMessage = Properties.Resources.ErrorRemovingUploadGenericText;
             }
         }
@@ -606,8 +608,10 @@ namespace DeepfreezeApp
                     this._eventAggregator.PublishOnBackgroundThread(uploadActionMessage);
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
+                _log.Error("CreateNewUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
                 if (this.Upload == null)
@@ -1127,6 +1131,8 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
+                _log.Error("UploadViewModel.Tick threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\".");
+
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
         }
@@ -1146,15 +1152,15 @@ namespace DeepfreezeApp
 
         }
 
-        protected override async void OnDeactivate(bool close)
+        protected override void OnDeactivate(bool close)
         {
             // Immediately send cancel to cancel any upload tasks
             // if the operation status is equal to uploading.
             // This check takes place inside PauseUpload method's body.
-            this.PauseUpload(true);
+            this.PauseUpload(true).RunSynchronously();
 
             // do a final save
-            this.SaveLocalUpload(false);
+            bool saveCompleted = this.SaveLocalUpload(false).Result;
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();
