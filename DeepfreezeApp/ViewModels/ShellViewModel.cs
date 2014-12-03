@@ -417,6 +417,8 @@ namespace DeepfreezeApp
             }
             catch(JsonException e)
             {
+                _log.Error("ShellViewModel.OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 // The preferences file format seems to be invalid.
                 var settings = new Settings();
                 this._deepfreezeClient.Settings = settings;
