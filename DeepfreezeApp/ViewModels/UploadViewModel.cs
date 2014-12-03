@@ -573,13 +573,13 @@ namespace DeepfreezeApp
 
             try
             {
-                // store the upload url
-                this.LocalUpload.Url = this.Archive.UploadUrl;
-
                 this.Upload = await this._deepfreezeClient.InitiateUploadAsync(this.Archive);
 
                 if (this.Upload != null)
                 {
+                    // store the upload url
+                    this.LocalUpload.Url = this.Upload.Url;
+
                     // setup the s3 client.
                     this.SetS3Info(this.Upload.S3);
                     this.SetupS3Client(this.Upload.S3);
