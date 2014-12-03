@@ -572,7 +572,7 @@ namespace DeepfreezeApp
             try
             {
                 // store the upload url
-                this.LocalUpload.Url = this.Archive.Url;
+                this.LocalUpload.Url = this.Archive.UploadUrl;
 
                 this.Upload = await this._deepfreezeClient.InitiateUploadAsync(this.Archive);
 
