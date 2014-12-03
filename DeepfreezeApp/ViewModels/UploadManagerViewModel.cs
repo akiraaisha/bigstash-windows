@@ -130,9 +130,9 @@ namespace DeepfreezeApp
 
                         // if a local upload file has an empty url value then exclude the upload
                         // and create a log warning about excluding it.
-                        if (!String.IsNullOrEmpty(localUpload.Url))
+                        if (String.IsNullOrEmpty(localUpload.Url))
                         {
-                            _log.Warn("Local Upload has url='" + localUpload.Url + "' and it will be excluded from the uploads list.");
+                            _log.Warn("Local Upload has url=\"" + localUpload.Url + "\" and it will be excluded from the uploads list.");
                             continue;
                         }
 
