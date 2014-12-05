@@ -31,12 +31,13 @@
 
                     <!-- icon -->
                     <ContentControl x:Name="PART_Icon"
+                                    Focusable="False"
                                     Grid.Row="0"
                                     Grid.Column="0"
                                     Panel.ZIndex="1"
                                     Content="{TemplateBinding Icon}"
                                     ContentTemplate="{TemplateBinding IconTemplate}"
-                                    HorizontalContentAlignment="Left"
+                                    HorizontalContentAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     MinWidth="{Binding TitlebarHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
                                     Height="{Binding TitlebarHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
@@ -44,6 +45,7 @@
 
                     <!-- the left window commands -->
                     <ContentPresenter x:Name="PART_LeftWindowCommands"
+                                      Focusable="False"
                                       Content="{Binding LeftWindowCommands, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
                                       Panel.ZIndex="1"
                                       Grid.Row="0"
@@ -55,34 +57,41 @@
                                       Visibility="{TemplateBinding ShowTitleBar, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!-- the title bar -->
-                    <!--This (empty) element is used so everything still responds to drag-->
-                    <Label x:Name="PART_TitleBar" 
-                           Grid.Row="0"
-                           Grid.Column="2"
-                           Height="{Binding TitlebarHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                           Visibility="{TemplateBinding ShowTitleBar, Converter={StaticResource BooleanToVisibilityConverter}}"
-                           VerticalContentAlignment="Center"
-                           HorizontalContentAlignment="Left"
-                           HorizontalAlignment="Stretch">
-                        <ContentControl x:Name="TitleControl"
+                    <Grid x:Name="PART_TitleBar"
+                          Focusable="False"
+                          Grid.Row="0"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="5"
+                          Height="{Binding TitlebarHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                          Visibility="{TemplateBinding ShowTitleBar, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          Margin="30 0 0 0">
+
+                        <!--This (empty) element is used so everything still responds to drag-->
+                        <Label VerticalContentAlignment="Center"
+                               HorizontalContentAlignment="Left">
+                            <ContentControl x:Name="TitleControl"
+                                            Focusable="False"
                                             Content="{TemplateBinding Title}"
                                             ContentTemplate="{TemplateBinding TitleTemplate}"
-                                            HorizontalAlignment="Center">
-                            <ContentControl.Foreground>
-                                <MultiBinding Converter="{x:Static Converters:BackgroundToForegroundConverter.Instance}">
-                                    <Binding RelativeSource="{RelativeSource TemplatedParent}"
+                                            HorizontalAlignment="Left">
+                                <ContentControl.Foreground>
+                                    <MultiBinding Converter="{x:Static Converters:BackgroundToForegroundConverter.Instance}">
+                                        <Binding RelativeSource="{RelativeSource TemplatedParent}"
                                                  Path="Background"
                                                  Mode="OneWay" />
-                                    <Binding RelativeSource="{RelativeSource TemplatedParent}"
+                                        <Binding RelativeSource="{RelativeSource TemplatedParent}"
                                                  Path="TitleForeground"
                                                  Mode="OneWay" />
-                                </MultiBinding>
-                            </ContentControl.Foreground>
-                        </ContentControl>
-                    </Label>
-                    
+                                    </MultiBinding>
+                                </ContentControl.Foreground>
+                            </ContentControl>
+                        </Label>
+
+                    </Grid>
+
                     <!-- the right window commands -->
                     <ContentPresenter x:Name="PART_RightWindowCommands"
+                                      Focusable="False"
                                       Content="{Binding RightWindowCommands, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
                                       Panel.ZIndex="1"
                                       Grid.Row="0"
@@ -95,12 +104,12 @@
 
                     <!-- the window button commands -->
                     <Controls:WindowButtonCommands x:Name="PART_WindowButtonCommands"
+                                                   Focusable="False"
                                                    Panel.ZIndex="1"
                                                    Grid.Row="0"
                                                    Grid.Column="4"
                                                    Grid.RowSpan="2"
                                                    VerticalAlignment="Top"
-                                                   Foreground="{DynamicResource BlackColorBrush}"
                                                    Height="{Binding TitlebarHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
 
                     <!-- the main window content -->
@@ -141,6 +150,7 @@
                           Grid.ColumnSpan="5"
                           Grid.RowSpan="2"
                           Panel.ZIndex="3"
+                          Focusable="False"
                           FocusVisualStyle="{x:Null}"
                           x:Name="PART_OverlayBox"
                           Background="{DynamicResource BlackColorBrush}"
@@ -230,6 +240,7 @@
     <Style TargetType="{x:Type Controls:MetroWindow}"
            BasedOn="{StaticResource {x:Type Controls:MetroWindow}}"
            x:Key="CleanWindowStyleKey">
+
         <Setter Property="ShowTitleBar"
                 Value="True" />
         <Setter Property="MinWidth"
@@ -240,20 +251,39 @@
                 Value="{DynamicResource BlackBrush}" />
         <Setter Property="OverrideDefaultWindowCommandsBrush"
                 Value="{DynamicResource BlackBrush}" />
-        <Setter Property="TitleTemplate">
-            <Setter.Value>
-                <DataTemplate>
-                    <TextBlock Text="{TemplateBinding Content}"
-                               TextTrimming="CharacterEllipsis"
-                               VerticalAlignment="Center"
-                               Margin="8 -1 0 0"
-                               FontSize="{DynamicResource WindowTitleFontSize}"
-                               FontFamily="Segoe UI" 
-                               Foreground="{DynamicResource GrayBrush2}"
-                               />
-                </DataTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="WindowMinButtonStyle"
+                Value="{DynamicResource CleanWindowButtonStyle}" />
+        <Setter Property="WindowMaxButtonStyle"
+                Value="{DynamicResource CleanWindowButtonStyle}" />
+        <Setter Property="WindowCloseButtonStyle"
+                Value="{DynamicResource CleanCloseWindowButtonStyle}" />
+
+    </Style>
+
+    <Style x:Key="CleanWindowButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MetroWindowButtonStyle}">
+
+        <Style.Triggers>
+
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="CleanCloseWindowButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource CleanWindowButtonStyle}">
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#EB2F2F" />
+                <Setter Property="Foreground" Value="{DynamicResource WhiteBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#7C0000" />
+            </Trigger>
+
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>
