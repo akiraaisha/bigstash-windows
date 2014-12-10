@@ -431,6 +431,9 @@ namespace DeepfreezeApp
                 HasError = true;
                 this.ErrorMessage = Properties.Resources.ErrorInitializingShellViewModelGenericText;
 
+                // for every exception other than DfApiException update the error log.
+                _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = ((Exceptions.DfApiException)e).HttpResponse;
@@ -447,8 +450,7 @@ namespace DeepfreezeApp
                 }
                 else
                 {
-                    // for every exception other than DfApiException update the error log.
-                    _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    
                 }
             }
             finally 
