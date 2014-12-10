@@ -23,7 +23,7 @@ namespace DeepfreezeSDK
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
 
         protected static readonly long PART_SIZE = 5 * 1024 * 1024;
-        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount;
+        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount - 1;
 
         public IAmazonS3 s3Client;
 
@@ -44,13 +44,13 @@ namespace DeepfreezeSDK
         /// </summary>
         /// <param name="accessKeyID"></param>
         /// <param name="secretAccessKey"></param>
-        public void Setup(string accessKeyID, string secretAccessKey)
-        {
-            _s3Config = new AmazonS3Config() { RegionEndpoint = Amazon.RegionEndpoint.EUWest1 };
-            s3Client = AWSClientFactory.CreateAmazonS3Client(accessKeyID, secretAccessKey, _s3Config);
-            _accessKeyID = accessKeyID;
-            _secretAccessKey = secretAccessKey;
-        }
+        //public void Setup(string accessKeyID, string secretAccessKey)
+        //{
+        //    _s3Config = new AmazonS3Config() { RegionEndpoint = Amazon.RegionEndpoint.EUWest1 };
+        //    s3Client = AWSClientFactory.CreateAmazonS3Client(accessKeyID, secretAccessKey, _s3Config);
+        //    _accessKeyID = accessKeyID;
+        //    _secretAccessKey = secretAccessKey;
+        //}
 
         public void Setup(string accessKeyID, string secretAccessKey, string sessionToken)
         {
@@ -58,9 +58,8 @@ namespace DeepfreezeSDK
             {
                 // set the standard us region endpoint.
                 _s3Config = new AmazonS3Config();
-                _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USEast1;
+                _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USWest2;
                 _s3Config.ProgressUpdateInterval = 5 * 100 * 1024; // fire progress update event every 500 KB.
-
                 s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
             }
             catch (Exception e) { throw e; }
@@ -379,7 +378,7 @@ namespace DeepfreezeSDK
         /// <param name="token"></param>
         /// <returns></returns>
         public Queue<UploadPartRequest> PreparePartRequests(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo, 
-            List<PartDetail> uploadedParts, Dictionary<int, long> partsProgress, CancellationToken token)
+            List<PartDetail> uploadedParts, Dictionary<int, long> partsProgress)
         {
             long filePosition = 0;
             long partSize = PART_SIZE; // 5 MB
@@ -462,7 +461,7 @@ namespace DeepfreezeSDK
                 token.ThrowIfCancellationRequested();
 
                 // create all part requests.
-                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, uploadedParts, this.MultipartUploadProgress, token);
+                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, uploadedParts, this.MultipartUploadProgress);
 
                 token.ThrowIfCancellationRequested();
 
@@ -511,7 +510,9 @@ namespace DeepfreezeSDK
             finally
             {
                 if (hasException && cts != null && !cts.IsCancellationRequested)
+                {
                     cts.Cancel();
+                }
 
                 this.IsUploading = false;
             }
