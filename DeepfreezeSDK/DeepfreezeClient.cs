@@ -45,7 +45,6 @@ namespace DeepfreezeSDK
         private readonly string _uploadsUri = "uploads/";
         private readonly string _archivesUri = "archives/";
 
-        private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
         #endregion
 
         public Settings Settings { get; set; }
