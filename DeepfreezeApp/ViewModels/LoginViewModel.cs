@@ -246,6 +246,8 @@ namespace DeepfreezeApp
                 this.HasLoginError = true;
                 this.LoginError = Properties.Resources.ErrorConnectingGenericText;
 
+                _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
                 if (e is Exceptions.DfApiException)
                 {
                     var response = ((Exceptions.DfApiException)e).HttpResponse;
@@ -259,10 +261,6 @@ namespace DeepfreezeApp
                 }
                 else
                 {
-                    // if the exception is not thrown by some DF API call but from the above LocalStorage.WriteJson call
-                    // then update the error log.
-                    _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-
                     if (!this._deepfreezeClient.IsInternetConnected)
                         this.LoginError = Properties.Resources.ErrorConnectingWithoutInternetText;
                 }
