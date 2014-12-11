@@ -664,6 +664,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your previous session is no longer valid. Please connect again..
+        /// </summary>
+        internal static string PreviousSessionNoLongerValidText {
+            get {
+                return ResourceManager.GetString("PreviousSessionNoLongerValidText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Storage.
         /// </summary>
         internal static string QuotaHeader {
@@ -907,7 +916,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not authenticate. Please enter your BigStash account credentials..
+        ///   Looks up a localized string similar to Invalid email or password..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {
