@@ -242,7 +242,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("MefBootstrapper.CreateLocalApplicationDataDirectory threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
         }
 
@@ -336,7 +336,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("MefBootstrapper.SetAddRemoveProgramsIcon threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
         }
 
@@ -427,7 +427,7 @@ namespace DeepfreezeApp
                 }
                 catch(Exception e)
                 {
-                    _log.Error("MefBootstrapper.MigrateDeepfreezeData threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 }
             }
         }
