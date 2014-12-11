@@ -10,6 +10,7 @@ using System.Diagnostics;
 using Caliburn.Micro;
 
 using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.Windows.Input;
 
@@ -246,16 +247,16 @@ namespace DeepfreezeApp
                 this.HasLoginError = true;
                 this.LoginError = Properties.Resources.ErrorConnectingGenericText;
 
-                _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
-                if (e is Exceptions.DfApiException)
+                if (e is BigStashException)
                 {
-                    var response = ((Exceptions.DfApiException)e).HttpResponse;
+                    var bgex = e as BigStashException;
 
-                    switch (response.StatusCode)
+                    switch (bgex.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
-                            this.LoginError += Properties.Resources.UnauthorizedExceptionMessage;
+                            this.LoginError = Properties.Resources.UnauthorizedExceptionMessage;
                             break;
                     }
                 }
