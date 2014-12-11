@@ -148,7 +148,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("UserViewModel.RefreshUser threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingUserStatsGenericText;
             }
