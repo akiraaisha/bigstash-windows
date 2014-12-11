@@ -170,6 +170,16 @@ namespace DeepfreezeApp
             { throw e; }
         }
 
+        /// <summary>
+        /// Get the caller method's name.
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <returns></returns>
+        public static string GetCallerName([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            return memberName;
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
