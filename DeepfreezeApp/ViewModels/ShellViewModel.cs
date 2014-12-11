@@ -5,17 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.Drawing;
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
-using MahApps.Metro.Controls;
-using DeepfreezeModel;
 using System.IO;
-using Newtonsoft.Json;
-using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows;
 using System.Windows.Threading;
 using System.Diagnostics;
+using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
+using DeepfreezeModel;
+using Caliburn.Micro;
+using MahApps.Metro.Controls;
+using Newtonsoft.Json;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace DeepfreezeApp
 {
@@ -417,7 +417,7 @@ namespace DeepfreezeApp
             }
             catch(JsonException e)
             {
-                _log.Error("ShellViewModel.OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 // The preferences file format seems to be invalid.
                 var settings = new Settings();
@@ -431,26 +431,21 @@ namespace DeepfreezeApp
                 HasError = true;
                 this.ErrorMessage = Properties.Resources.ErrorInitializingShellViewModelGenericText;
 
-                // for every exception other than DfApiException update the error log.
-                _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
-                if (e is Exceptions.DfApiException)
+                if (e is BigStashException)
                 {
-                    var response = ((Exceptions.DfApiException)e).HttpResponse;
+                    var bgex = e as BigStashException;
 
-                    switch (response.StatusCode)
+                    switch (bgex.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
                         case System.Net.HttpStatusCode.Forbidden:
                             HasError = false;
                             this.ErrorMessage = null;
-                            this.Disconnect("Your previous session is no longer valid. Please connect again.");
+                            this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
                             break;
                     }
-                }
-                else
-                {
-                    
                 }
             }
             finally 
