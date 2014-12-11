@@ -73,5 +73,45 @@ namespace DeepfreezeSDK
                 return HelperMethods.ByteArrayToBase64String(hashValue);
             }
         }
+
+        // <summary>
+        /// Check if the HttpStatusCode of a HttpResponseMessage indicates a transient service fault.
+        /// </summary>
+        /// <param name="statusCode"></param>
+        /// <returns></returns>
+        public static Exceptions.ErrorType IsFailedStatusCodeServiceFault(System.Net.HttpStatusCode statusCode)
+        {
+            switch (statusCode)
+            {
+                case System.Net.HttpStatusCode.InternalServerError:
+                case System.Net.HttpStatusCode.BadGateway:
+                case System.Net.HttpStatusCode.ServiceUnavailable:
+                case System.Net.HttpStatusCode.GatewayTimeout:
+                    return Exceptions.ErrorType.Service;
+
+                case System.Net.HttpStatusCode.BadRequest:
+                case System.Net.HttpStatusCode.Forbidden:
+                case System.Net.HttpStatusCode.Gone:
+                case System.Net.HttpStatusCode.LengthRequired:
+                case System.Net.HttpStatusCode.MethodNotAllowed:
+                case System.Net.HttpStatusCode.NotAcceptable:
+                case System.Net.HttpStatusCode.NotFound:
+                case System.Net.HttpStatusCode.PaymentRequired:
+                case System.Net.HttpStatusCode.PreconditionFailed:
+                case System.Net.HttpStatusCode.ProxyAuthenticationRequired:
+                case System.Net.HttpStatusCode.RequestedRangeNotSatisfiable:
+                case System.Net.HttpStatusCode.RequestEntityTooLarge:
+                case System.Net.HttpStatusCode.RequestTimeout:
+                case System.Net.HttpStatusCode.RequestUriTooLong:
+                case System.Net.HttpStatusCode.Unauthorized:
+                case System.Net.HttpStatusCode.UnsupportedMediaType:
+                case System.Net.HttpStatusCode.Conflict:
+                case System.Net.HttpStatusCode.ExpectationFailed:
+                    return Exceptions.ErrorType.Client;
+
+                default:
+                    return Exceptions.ErrorType.NotSet;
+            }
+        }
     }
 }
