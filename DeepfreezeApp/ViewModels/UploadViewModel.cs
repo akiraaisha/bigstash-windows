@@ -381,22 +381,6 @@ namespace DeepfreezeApp
                 {
                     this.ErrorMessage = Properties.Resources.ErrorUploadingGenericText;
                     this.OperationStatus = Enumerations.Status.Paused;
-
-                    //if (e is AmazonS3Exception)
-                    //{
-                        
-                    //    this.ErrorMessage += ". Try resuming the upload again.";
-                    //}
-
-                    //if (e is AggregateException)
-                    //{
-                    //    foreach(var inner in ((AggregateException)e).InnerExceptions)
-                    //    {
-                    //        this.ErrorMessage += "\n" + inner.Message;
-                    //        if (inner.InnerException != null)
-                    //            this.ErrorMessage += "\n" + inner.InnerException.Message;
-                    //    }
-                    //}
                 }
             }
 
@@ -510,7 +494,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("DeleteUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage += Properties.Resources.ErrorDeletingUploadGenericText;
             }
@@ -535,7 +519,7 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             {
-                _log.Error("RemoveUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage = Properties.Resources.ErrorRemovingUploadGenericText;
             }
@@ -610,7 +594,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("CreateNewUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
@@ -648,7 +632,7 @@ namespace DeepfreezeApp
                     this.SetupS3Client(this.Upload.S3);
                 }
             }
-            catch (Exception e) { throw e; }
+            catch (Exception) { throw; }
         }
 
         /// <summary>
@@ -663,7 +647,7 @@ namespace DeepfreezeApp
             {
                 this.Archive = await this._deepfreezeClient.GetArchiveAsync(archiveUrl).ConfigureAwait(false);
             }
-            catch(Exception e) { throw e; }
+            catch(Exception) { throw; }
         }
 
         /// <summary>
@@ -723,8 +707,7 @@ namespace DeepfreezeApp
                 
                 return true;
             }
-            catch (AggregateException ae) { throw ae; }
-            catch (Exception e) { throw e; }
+            catch (Exception) { throw; }
         }
 
         /// <summary>
@@ -759,9 +742,9 @@ namespace DeepfreezeApp
 
                 return total;
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -826,7 +809,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("Error saving file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while saving file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 throw e; 
             }
         }
@@ -854,7 +837,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("Error deleting file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while deleting file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 throw e; 
             }
         }
@@ -931,26 +914,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("Error preparing an upload from file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while preparing an upload from file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
-
-                if (e is Exceptions.DfApiException)
-                {
-                    var response = (e as Exceptions.DfApiException).HttpResponse;
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                        this.OperationStatus = Enumerations.Status.NotFound;
-                    else
-                        this.OperationStatus = Enumerations.Status.Error;
-
-                    if (this.OperationStatus == Enumerations.Status.NotFound)
-                    {
-                        this.BusyMessage = "This upload has been deleted from the dashboard. Removing...";
-                        this.RemoveUpload();
-                    }
-                    //this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
-                    //this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
-                }
 
                 // this may get thrown when calculating the actual uploaded size to S3.
                 if (e is AmazonS3Exception)
@@ -1131,7 +1096,7 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
-                _log.Error("UploadViewModel.Tick threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\".");
 
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
