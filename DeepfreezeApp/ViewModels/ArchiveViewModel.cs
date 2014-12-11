@@ -12,6 +12,7 @@ using System.Diagnostics;
 using Caliburn.Micro;
 using DeepfreezeSDK;
 using DeepfreezeModel;
+using DeepfreezeSDK.Exceptions;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;
@@ -239,7 +240,7 @@ namespace DeepfreezeApp
                 }
                 catch (Exception e)
                 {
-                    _log.Error("Error preparing archive, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
 
                     if (!this._isUserCancel)
                         this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
@@ -338,7 +339,7 @@ namespace DeepfreezeApp
                     }
                     catch (Exception ex)
                     {
-                        _log.Error("Error preparing archive, thrown " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
+                        _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
 
                         if (!this._isUserCancel)
                             this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
@@ -419,13 +420,7 @@ namespace DeepfreezeApp
             {
                 HasChosenFiles = true;
 
-                _log.Error("Error creating archive (user clicked upload button), thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
-
-                if (e is Exceptions.DfApiException)
-                {
-                    var response = (e as Exceptions.DfApiException).HttpResponse;
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                }
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
 
                 this.ErrorCreatingArchive = Properties.Resources.ErrorCreatingArchiveGenericText;
             }
