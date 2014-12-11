@@ -109,7 +109,7 @@ namespace DeepfreezeApp
                 }
                 catch (Exception e)
                 {
-                    _log.Error("ExcludedFilesViewModel.Save threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                     var shellWindow = IoC.Get<IShell>().ShellWindow;
                     shellWindow.ShowMessageAsync("Error", "There was an error while saving the file: '" + savePath + "'.");
