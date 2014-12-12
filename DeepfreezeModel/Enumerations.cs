@@ -11,12 +11,25 @@ namespace DeepfreezeModel
     {
         public enum Status
         {
+            [StringValue("pending")]
             Pending,
+
+            [StringValue("uploaded")]
             Uploaded,
+
+            [StringValue("error")]
             Error,
+
+            [StringValue("completed")]
             Completed,
+
+            [StringValue("paused")]
             Paused,
+
+            [StringValue("uploading")]
             Uploading,
+
+            [StringValue("not_found")]
             NotFound // use this for cases when the upload is deleted from the server, but the client still has the local upload file.
         }
 
