@@ -601,6 +601,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your completed uploads list is empty..
+        /// </summary>
+        internal static string NoCompletedUploadsHeaderText {
+            get {
+                return ResourceManager.GetString("NoCompletedUploadsHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No internet connection found. Please ensure you are connected to a network with Internet access..
         /// </summary>
         internal static string NoInternetConnectionMessage {
@@ -610,11 +619,11 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There aren&apos;t any pending uploads from this app..
+        ///   Looks up a localized string similar to Your pending uploads list is empty..
         /// </summary>
-        internal static string NoUploadsHeaderText {
+        internal static string NoPendingUploadsHeaderText {
             get {
-                return ResourceManager.GetString("NoUploadsHeaderText", resourceCulture);
+                return ResourceManager.GetString("NoPendingUploadsHeaderText", resourceCulture);
             }
         }
         
