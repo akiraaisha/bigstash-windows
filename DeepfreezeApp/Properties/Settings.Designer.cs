@@ -253,5 +253,17 @@ namespace DeepfreezeApp.Properties {
                 return ((string)(this["BigStashNameRulesFAQURL"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool VerboseDebugLogging {
+            get {
+                return ((bool)(this["VerboseDebugLogging"]));
+            }
+            set {
+                this["VerboseDebugLogging"] = value;
+            }
+        }
     }
 }
