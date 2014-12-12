@@ -521,7 +521,7 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.PendingUploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
 
                     if (autoPausedUploadsCount > 0)
                         this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
@@ -530,7 +530,7 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionLostMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => x.IsUploading).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.PendingUploads.Where(x => x.IsUploading).Count();
 
                     if (autoPausedUploadsCount > 0)
                         this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);
