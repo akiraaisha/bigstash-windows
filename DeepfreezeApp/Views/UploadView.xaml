@@ -36,13 +36,6 @@
     
     <StackPanel HorizontalAlignment="Stretch" >
 
-        <Border Grid.Row="0"
-                Grid.ColumnSpan="2"
-                BorderThickness="1"
-                BorderBrush="WhiteSmoke"
-                    HorizontalAlignment="Stretch"
-                />
-        
         <WrapPanel HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -211,6 +204,11 @@
 
 
         </Grid>
+
+        <Border BorderThickness="1"
+                BorderBrush="WhiteSmoke"
+                HorizontalAlignment="Stretch"
+                />
 
     </StackPanel>
     
