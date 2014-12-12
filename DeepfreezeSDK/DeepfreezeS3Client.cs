@@ -73,7 +73,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<InitiateMultipartUploadResponse> InitiateMultipartUploadAsync(string existingBucketName, string keyName, CancellationToken token)
         {
-            _log.Info("Called InitiateMultipartUploadAsync with parameter keyName = \"" + keyName + "\".");
+            _log.Debug("Called InitiateMultipartUploadAsync with parameter keyName = \"" + keyName + "\".");
 
             try
             {
@@ -105,7 +105,7 @@ namespace DeepfreezeSDK
         /// <returns>Task<List<PartDetail>></returns>
         public async Task<List<PartDetail>> ListPartsAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
         {
-            _log.Info("Called ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
+            _log.Debug("Called ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
 
             List<PartDetail> parts = new List<PartDetail>();
 
@@ -151,7 +151,7 @@ namespace DeepfreezeSDK
         public async Task<CompleteMultipartUploadRequest> CompleteMultipartUploadAsync(string existingBucketName, string keyName, string uploadId, 
             CancellationToken token)
         {
-            _log.Info("Called CompleteMultipartUploadAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
+            _log.Debug("Called CompleteMultipartUploadAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
 
             try
             {
@@ -227,7 +227,7 @@ namespace DeepfreezeSDK
         /// <returns>Task<UploadPartResponse></returns>
         public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, Dictionary<int, long> partsProgress, CancellationToken token)
         {
-            _log.Info("Called UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key + 
+            _log.Debug("Called UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key + 
                 "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
                 ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
 
@@ -248,7 +248,7 @@ namespace DeepfreezeSDK
                     // Upload part and return response.
                     var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
 
-                    _log.Info("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
+                    _log.Debug("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
                     "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
                     ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
 
@@ -283,7 +283,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<bool> UploadSingleFileAsync(string existingBucketName, ArchiveFileInfo info, CancellationToken token)
         {
-            _log.Info("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
+            _log.Debug("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
                 "\", FilePath = \"" + info.FilePath + "\".");
 
             this.SingleUploadProgress = 0;
@@ -405,7 +405,7 @@ namespace DeepfreezeSDK
         public async Task<bool> UploadMultipartFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo,
             CancellationTokenSource cts, CancellationToken token)
         {
-            _log.Info("Called UploadMultipartFileAsync with ArchiveFileInfo properties: KeyName = \"" + fileInfo.KeyName +
+            _log.Debug("Called UploadMultipartFileAsync with ArchiveFileInfo properties: KeyName = \"" + fileInfo.KeyName +
                 "\", FilePath = \"" + fileInfo.FilePath + "\".");
 
             bool hasException = false;
@@ -499,7 +499,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadId, CancellationToken cts)
         {
-            _log.Info("Called AbortMultiPartUploadAsync with parameters keyName = \"" + keyName +
+            _log.Debug("Called AbortMultiPartUploadAsync with parameters keyName = \"" + keyName +
                 "\", UploadId = \"" + uploadId + "\".");
 
             AbortMultipartUploadRequest request = new AbortMultipartUploadRequest()
@@ -541,59 +541,19 @@ namespace DeepfreezeSDK
             StringBuilder errorMsg = new StringBuilder();
             errorMsg.Append(memberName);
             errorMsg.Append(message);
-            errorMsg.Append(" threw ");
-
-            this.GetLogMessageForException(errorMsg, ex);
-            errorMsg.AppendLine();
+            errorMsg.AppendLine(" threw exception:");
 
             if (ex is AmazonS3Exception)
             {
                 var ae = ex as AmazonS3Exception;
 
-                errorMsg.Append("   ErrorType = ");
+                errorMsg.Append("ErrorType = ");
                 errorMsg.AppendLine(ae.ErrorType.ToString());
-                errorMsg.Append("   ErrorCode = ");
-                errorMsg.AppendLine(ae.ErrorCode);
+                errorMsg.Append("ErrorCode = ");
+                errorMsg.Append(ae.ErrorCode);
             }
 
-            this.GetLogMessageForException(errorMsg, ex, true);
-
-            if (ex.InnerException != null)
-            {
-                errorMsg.AppendLine();
-                errorMsg.AppendLine("***** Begin InnerException trace *****");
-                this.GetLogMessageForException(errorMsg, ex.InnerException);
-                errorMsg.AppendLine();
-                this.GetLogMessageForException(errorMsg, ex.InnerException, true);
-                errorMsg.AppendLine();
-                errorMsg.Append("***** End InnerException trace *****");
-            }
-
-            _log.Error(errorMsg.ToString());
-        }
-
-        /// <summary>
-        /// Construct StringBuilder message for logging the given exception.
-        /// </summary>
-        /// <param name="sb"></param>
-        /// <param name="ex"></param>
-        /// <param name="onlyTrace"></param>
-        private void GetLogMessageForException(StringBuilder sb, Exception ex, bool onlyTrace = false)
-        {
-            if (!onlyTrace)
-            {
-                sb.Append(ex.GetType().ToString());
-                sb.Append(" with message \"");
-                sb.Append(ex.Message);
-                sb.Append("\".");
-            }
-            else
-            {
-                sb.Append("   Source: ");
-                sb.AppendLine(ex.Source);
-                sb.AppendLine("   Stack trace: ");
-                sb.Append(ex.StackTrace);
-            }
+            _log.Error(errorMsg.ToString(), ex);
         }
 
         #endregion
