@@ -18,6 +18,9 @@ namespace DeepfreezeModel
         [JsonProperty("url")]
         public string Url { get; set; }
 
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
         [JsonProperty("progress")]
         public long Progress
         {
