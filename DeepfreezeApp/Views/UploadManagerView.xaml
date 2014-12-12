@@ -37,7 +37,7 @@
                />
 
         <Border BorderThickness="1"
-                BorderBrush="WhiteSmoke"
+                BorderBrush="Gray"
                 HorizontalAlignment="Stretch"
                 />
 
@@ -80,7 +80,7 @@
                />
 
         <Border BorderThickness="1"
-                BorderBrush="WhiteSmoke"
+                BorderBrush="Gray"
                 HorizontalAlignment="Stretch"
                 />
 
