@@ -358,6 +358,8 @@ namespace DeepfreezeApp
                 _log.Info("Finished archive upload with title \"" + this.Archive.Title + "\".");
 
                 this.OperationStatus = this.Upload.Status;
+                this.LocalUpload.Status = this.Upload.Status.GetStringValue();
+                this.TryMoveSelfToCompleted();
 
                 // set timer interval to 1 minute to catch upload completed status change.
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
@@ -563,6 +565,8 @@ namespace DeepfreezeApp
                 {
                     // store the upload url
                     this.LocalUpload.Url = this.Upload.Url;
+                    // store the upload status
+                    this.LocalUpload.Status = this.Upload.Status.GetStringValue();
 
                     // setup the s3 client.
                     this.SetS3Info(this.Upload.S3);
@@ -628,6 +632,8 @@ namespace DeepfreezeApp
 
                 if (this.Upload != null)
                 {
+                    this.LocalUpload.Status = this.Upload.Status.GetStringValue();
+                    this.TryMoveSelfToCompleted();
                     this.SetS3Info(this.Upload.S3);
                     this.SetupS3Client(this.Upload.S3);
                 }
@@ -969,6 +975,31 @@ namespace DeepfreezeApp
             this._refreshProgressTimer = null;
         }
 
+        private void TryMoveSelfToCompleted()
+        {
+            // get the upload manager
+            var manager = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
+
+            if (manager != null)
+            {
+                bool isInPending = manager.PendingUploads.Contains(this);
+                bool isInCompleted = manager.CompletedUploads.Contains(this);
+
+                if (this.Upload.Status == Enumerations.Status.Completed ||
+                    this.Upload.Status == Enumerations.Status.Uploaded)
+                {
+                    if (isInPending)
+                        manager.PendingUploads.Remove(this);
+
+                    if (!isInCompleted)
+                        manager.CompletedUploads.Add(this);
+
+                    manager.NotifyOfPropertyChange(() => manager.TotalPendingUploadsText);
+                    manager.NotifyOfPropertyChange(() => manager.TotalCompletedUploadsText);
+                }
+            }
+        }
+
         #endregion
 
         #region message_handlers
@@ -1074,6 +1105,7 @@ namespace DeepfreezeApp
                         this.Upload.Status == Enumerations.Status.Error)
                     {
                         this.OperationStatus = this.Upload.Status;
+                        this.LocalUpload.Status = this.Upload.Status.GetStringValue();
                         this._refreshProgressTimer.Stop();
                         this.ErrorMessage = null;
 
