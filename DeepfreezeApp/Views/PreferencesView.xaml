@@ -31,10 +31,20 @@
                       />
             
             <CheckBox x:Name="MinimizeOnClose" 
-                      Content="When the Close button is pressed, minimize to tray." 
+                      Content="When the Close button is pressed, minimize to tray" 
                       Margin="5 5 0 0"
                       FontSize="14"
                       />
+
+            <CheckBox x:Name="VerboseDebugLogging" 
+                      Content="Enable verbose logging in the app logs" 
+                      Margin="5 5 0 0"
+                      FontSize="14"
+                      />
+            <Label Margin="22 0 0 0" 
+                   Content=" Warning: enabling this will result in larger log files" 
+                   VerticalAlignment="Top" 
+                   FontSize="12" />
 
         </StackPanel>
 
