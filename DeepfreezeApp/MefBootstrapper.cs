@@ -104,6 +104,7 @@ namespace DeepfreezeApp
 #if DEBUG
                 ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
                 ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+                Properties.Settings.Default.VerboseDebugLogging = true;
 #endif
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
