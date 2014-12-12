@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿#define DEBUG 
+
+using Caliburn.Micro;
 using DeepfreezeSDK;
 using System;
 using System.Collections.Generic;
@@ -99,6 +101,11 @@ namespace DeepfreezeApp
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
+#if DEBUG
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+#endif
+
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
@@ -107,6 +114,10 @@ namespace DeepfreezeApp
                 _log.Info("*********                                  **********");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
+
+#if DEBUG
+                _log.Debug("DEBUG MODE ON");
+#endif
 
                 // Set Application local app data folder and file paths
                 // in Application.Properties for use in this application instance.
