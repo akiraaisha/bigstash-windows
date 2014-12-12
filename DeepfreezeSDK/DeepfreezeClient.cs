@@ -638,17 +638,9 @@ namespace DeepfreezeSDK
         {
             StringBuilder errorMsg = new StringBuilder();
             errorMsg.Append(memberName);
-            errorMsg.Append(" threw ");
-            errorMsg.Append(innerException.GetType().ToString());
-            errorMsg.Append(" with message \"");
-            errorMsg.Append(innerException.Message);
-            errorMsg.AppendLine("\".");
-            errorMsg.Append("    Source: ");
-            errorMsg.Append(innerException.Source);
-            errorMsg.Append("    Stack trace: ");
-            errorMsg.Append(innerException.StackTrace);
+            errorMsg.Append(" threw exception:");
 
-            _log.Error(errorMsg.ToString());
+            _log.Error(errorMsg.ToString(), innerException);
 
             var errorType = DeepfreezeSDK.Exceptions.ErrorType.NotSet;
 
