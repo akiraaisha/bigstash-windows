@@ -25,7 +25,8 @@ namespace DeepfreezeApp
 
         private bool _isBusy = true;
         private IList<LocalUpload> _localUploads = new List<LocalUpload>();
-        private BindableCollection<UploadViewModel> _uploads = new BindableCollection<UploadViewModel>();
+        private BindableCollection<UploadViewModel> _pendingUploads = new BindableCollection<UploadViewModel>();
+        private BindableCollection<UploadViewModel> _completedUploads = new BindableCollection<UploadViewModel>();
         private string _errorMessage;
 
         private static object _removeLock = new Object();
@@ -67,21 +68,49 @@ namespace DeepfreezeApp
             set { this._isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
         }
 
-        public BindableCollection<UploadViewModel> Uploads
+        public BindableCollection<UploadViewModel> PendingUploads
         {
-            get { return this._uploads; }
-            set { this._uploads = value; NotifyOfPropertyChange(() => Uploads); }
+            get { return this._pendingUploads; }
+            set 
+            { 
+                this._pendingUploads = value; 
+                NotifyOfPropertyChange(() => PendingUploads);
+            }
         }
 
-        public string TotalUploadsText
+        public BindableCollection<UploadViewModel> CompletedUploads
+        {
+            get { return this._completedUploads; }
+            set 
+            { 
+                this._completedUploads = value; 
+                NotifyOfPropertyChange(() => CompletedUploads);
+            }
+        }
+
+        public string TotalPendingUploadsText
         {
             get
             {
                 if (IsBusy)
-                    return "Preparing Uploads...";
+                    return null;
 
-                if (this.Uploads.Count == 0)
-                    return Properties.Resources.NoUploadsHeaderText;
+                if (this.PendingUploads.Count == 0)
+                    return Properties.Resources.NoPendingUploadsHeaderText;
+                else
+                    return null;
+            }
+        }
+
+        public string TotalCompletedUploadsText
+        {
+            get
+            {
+                if (IsBusy)
+                    return null;
+
+                if (this.CompletedUploads.Count == 0)
+                    return Properties.Resources.NoCompletedUploadsHeaderText;
                 else
                     return null;
             }
@@ -179,12 +208,28 @@ namespace DeepfreezeApp
                 UploadViewModel u = CreateNewUploadVM() as UploadViewModel;
                 u.LocalUpload = localUpload;
 
+                if (String.IsNullOrEmpty(localUpload.Status))
+                {
+                    localUpload.Status = Enumerations.Status.Pending.GetStringValue();
+                }
+
                 this.ActivateItem(u);
 
-                this.Uploads.Add(u);
+                Enumerations.Status status = Enumerations.GetStatusFromString(localUpload.Status);
+
+                if (status == Enumerations.Status.Completed ||
+                    status == Enumerations.Status.Uploaded)
+                {
+                    this.CompletedUploads.Add(u);
+                }
+                else
+                {
+                    this.PendingUploads.Add(u);
+                }
+                
             }
 
-            _log.Info("Created " + this.Uploads.Count + " UploadViewModels for the upload manager.");
+            _log.Info("Created " + this.PendingUploads.Count + " UploadViewModels for the upload manager.");
         }
 
         /// <summary>
@@ -214,9 +259,9 @@ namespace DeepfreezeApp
             this._localUploads.Add(newUploadVM.LocalUpload);
 
             // add the new UploadViewModel at the beginning of the Uploads list.
-            Uploads.Insert(0, newUploadVM);
+            PendingUploads.Insert(0, newUploadVM);
 
-            NotifyOfPropertyChange(() => TotalUploadsText);
+            NotifyOfPropertyChange(() => TotalPendingUploadsText);
 
             // activate the new uploadviewmodel before sending the create message.
             this.ActivateItem(newUploadVM);
@@ -234,8 +279,8 @@ namespace DeepfreezeApp
         private void Reset()
         {
             this._localUploads.Clear();
-            this._uploads.Clear();
-            this.Uploads.Clear();
+            this._pendingUploads.Clear();
+            this.PendingUploads.Clear();
         }
 
         #endregion
@@ -262,16 +307,27 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(IRemoveUploadViewModelMessage message)
         {
-            if (this.Uploads.Contains(message.UploadVMToRemove))
+            if (this.PendingUploads.Contains(message.UploadVMToRemove))
             {
                 lock (_removeLock)
                 {
-                    this.Uploads.Remove(message.UploadVMToRemove);
+                    this.PendingUploads.Remove(message.UploadVMToRemove);
                     this.CloseItem(message.UploadVMToRemove);
                     message.UploadVMToRemove = null;
-                    NotifyOfPropertyChange(() => TotalUploadsText);
                 }
             }
+            else if (this.CompletedUploads.Contains(message.UploadVMToRemove))
+            {
+                lock (_removeLock)
+                {
+                    this.CompletedUploads.Remove(message.UploadVMToRemove);
+                    this.CloseItem(message.UploadVMToRemove);
+                    message.UploadVMToRemove = null;
+                }
+            }
+
+            NotifyOfPropertyChange(() => TotalPendingUploadsText);
+            NotifyOfPropertyChange(() => TotalCompletedUploadsText);
         }
 
         #endregion
@@ -304,7 +360,8 @@ namespace DeepfreezeApp
             {
                 IsBusy = false;
 
-                NotifyOfPropertyChange(() => TotalUploadsText);
+                NotifyOfPropertyChange(() => TotalPendingUploadsText);
+                NotifyOfPropertyChange(() => TotalCompletedUploadsText);
             }
         }
 

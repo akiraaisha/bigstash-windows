@@ -23,34 +23,93 @@
 
     <StackPanel Margin="5">
 
-        <WrapPanel HorizontalAlignment="Center">
-
-            <TextBlock x:Name="TotalUploadsText"
-                   FontSize="14"
-                   TextWrapping="Wrap"
-                   Visibility="{Binding TotalUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
-                   />
-
-            <controls:ProgressRing Height="20"
-                                   Width="20" 
-                                   IsActive="{Binding IsBusy}"
-                                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
-                                   />
-
-        </WrapPanel>
-        
         <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
                    HorizontalAlignment="Center"
                    TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                    />
+        
+        <Label Content="Pending uploads" 
+               VerticalAlignment="Top"
+               Style="{StaticResource DescriptionHeaderStyle}"
+               HorizontalAlignment="Stretch"
+               />
 
-        <ItemsControl x:Name="Uploads" 
-                      Margin="5 0 5 0"
-                     >
+        <Border BorderThickness="1"
+                BorderBrush="WhiteSmoke"
+                HorizontalAlignment="Stretch"
+                />
 
+        <StackPanel>
+
+            <TextBlock x:Name="TotalPendingUploadsText"
+                       FontSize="14"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       TextWrapping="Wrap"
+                       HorizontalAlignment="Left"
+                       Visibility="{Binding TotalPendingUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                       />
+
+            <controls:ProgressRing Height="20"
+                                   Width="20" 
+                                   IsActive="{Binding IsBusy}"
+                                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   VerticalAlignment="Top"
+                                   HorizontalAlignment="Center"
+                                   />
+
+        </StackPanel>
+
+        <ItemsControl x:Name="PendingUploads" 
+                      Margin="5 0 5 30"
+                      VerticalAlignment="Top"
+                      >
             <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl cal:View.Model="{Binding}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Label Content="Completed uploads" 
+               VerticalAlignment="Top"
+               Style="{StaticResource DescriptionHeaderStyle}"
+               HorizontalAlignment="Stretch"
+               />
+
+        <Border BorderThickness="1"
+                BorderBrush="WhiteSmoke"
+                HorizontalAlignment="Stretch"
+                />
+
+        <StackPanel>
+
+            <TextBlock x:Name="TotalCompletedUploadsText"
+                       FontSize="14"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       TextWrapping="Wrap"
+                       HorizontalAlignment="Left"
+                       Visibility="{Binding TotalCompletedUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                       />
+
+            <controls:ProgressRing Height="20"
+                                   Width="20" 
+                                   IsActive="{Binding IsBusy}"
+                                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   VerticalAlignment="Top"
+                                   HorizontalAlignment="Center"
+                                   />
+
+        </StackPanel>
+        
+        <ItemsControl x:Name="CompletedUploads" 
+                      Margin="5 0 5 0"
+                      VerticalAlignment="Top"
+                      >
+           <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <ContentControl cal:View.Model="{Binding}" />
                 </DataTemplate>
