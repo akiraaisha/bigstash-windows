@@ -178,7 +178,7 @@ namespace DeepfreezeSDK
 
                 if (content != null)
                 {
-                    token = JsonConvert.DeserializeObject<Token>(content);
+                    var token = JsonConvert.DeserializeObject<Token>(content);
                     return token;
                 }
                 else
