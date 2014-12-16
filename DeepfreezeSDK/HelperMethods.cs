@@ -74,7 +74,7 @@ namespace DeepfreezeSDK
             }
         }
 
-        // <summary>
+        /// <summary>
         /// Check if the HttpStatusCode of a HttpResponseMessage indicates a transient service fault.
         /// </summary>
         /// <param name="statusCode"></param>
