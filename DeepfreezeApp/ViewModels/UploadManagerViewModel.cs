@@ -122,6 +122,14 @@ namespace DeepfreezeApp
             set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
         }
 
+        public bool HasUploads
+        {
+            get
+            {
+                return (this.PendingUploads.Count > 0 || this.CompletedUploads.Count > 0);
+            }
+        }
+
         #endregion
 
         #region private methods
@@ -226,7 +234,6 @@ namespace DeepfreezeApp
                 {
                     this.PendingUploads.Add(u);
                 }
-                
             }
 
             _log.Info("Created " + this.PendingUploads.Count + " UploadViewModels for the upload manager.");
@@ -262,6 +269,7 @@ namespace DeepfreezeApp
             PendingUploads.Insert(0, newUploadVM);
 
             NotifyOfPropertyChange(() => TotalPendingUploadsText);
+            NotifyOfPropertyChange(() => this.HasUploads);
 
             // activate the new uploadviewmodel before sending the create message.
             this.ActivateItem(newUploadVM);
@@ -281,6 +289,10 @@ namespace DeepfreezeApp
             this._localUploads.Clear();
             this._pendingUploads.Clear();
             this.PendingUploads.Clear();
+            this._completedUploads.Clear();
+            this.CompletedUploads.Clear();
+
+            NotifyOfPropertyChange(() => this.HasUploads);
         }
 
         #endregion
@@ -328,6 +340,7 @@ namespace DeepfreezeApp
 
             NotifyOfPropertyChange(() => TotalPendingUploadsText);
             NotifyOfPropertyChange(() => TotalCompletedUploadsText);
+            NotifyOfPropertyChange(() => this.HasUploads);
         }
 
         #endregion
@@ -362,6 +375,7 @@ namespace DeepfreezeApp
 
                 NotifyOfPropertyChange(() => TotalPendingUploadsText);
                 NotifyOfPropertyChange(() => TotalCompletedUploadsText);
+                NotifyOfPropertyChange(() => this.HasUploads);
             }
         }
 

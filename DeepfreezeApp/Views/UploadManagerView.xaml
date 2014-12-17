@@ -21,7 +21,9 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Margin="5">
+    <StackPanel Margin="5"
+                Visibility="{Binding HasUploads, Converter={StaticResource BoolToVisibilityConverter}}"
+                >
 
         <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
