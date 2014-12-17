@@ -281,18 +281,18 @@ namespace DeepfreezeSDK
         /// <param name="info"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> UploadSingleFileAsync(string existingBucketName, ArchiveFileInfo info, CancellationToken token)
+        public async Task<bool> UploadSingleFileAsync(string existingBucketName, string keyName, string path, CancellationToken token)
         {
-            _log.Debug("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
-                "\", FilePath = \"" + info.FilePath + "\".");
+            _log.Debug("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + keyName +
+                "\", FilePath = \"" + path + "\".");
 
             this.SingleUploadProgress = 0;
 
             var putRequest = new PutObjectRequest()
             {
                 BucketName = existingBucketName,
-                Key = info.KeyName,
-                FilePath = info.FilePath
+                Key = keyName,
+                FilePath = path
             };
 
             putRequest.StreamTransferProgress += (sender, eventArgs) =>
@@ -319,8 +319,8 @@ namespace DeepfreezeSDK
                 {
                     if (!(e is TaskCanceledException || e is OperationCanceledException))
                     {
-                        var messagePart = " with ArchiveFileInfo properties: KeyName = \"" + info.KeyName +
-                            "\", FilePath = \"" + info.FilePath + "\"";
+                        var messagePart = " with ArchiveFileInfo properties: KeyName = \"" + keyName +
+                            "\", FilePath = \"" + path + "\"";
 
                         this.LogAmazonException(messagePart, e);
 
