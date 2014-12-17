@@ -153,7 +153,7 @@ namespace DeepfreezeSDK
             // Only for this request, the client uses basic auth with user credentials.
             // For every other authorized actions, a signed request should be sent.
 
-            _log.Info("Called CreateTokenAsync.");
+            _log.Debug("Called CreateTokenAsync.");
 
             HttpResponseMessage response;
 
@@ -204,7 +204,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<User> GetUserAsync()
         {
-            _log.Info("Called GetUserAsync.");
+            _log.Debug("Called GetUserAsync.");
 
             var request = CreateHttpRequestWithSignature(GET, _userUri);
             HttpResponseMessage response;
@@ -293,7 +293,7 @@ namespace DeepfreezeSDK
         /// <returns>List of Archive</returns>
         public async Task<Archive> GetArchiveAsync(string url)
         {
-            _log.Info("Called GetArchiveAsync with parameter url = \"" + url + "\".");
+            _log.Debug("Called GetArchiveAsync with parameter url = \"" + url + "\".");
 
             var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response;
@@ -340,7 +340,7 @@ namespace DeepfreezeSDK
         /// <returns>Archive</returns>
         public async Task<Archive> CreateArchiveAsync(long size, string title)
         {
-            _log.Info("Called CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + "\".");
+            _log.Debug("Called CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + "\".");
 
             ArchivePostData data = new ArchivePostData()
             {
@@ -431,7 +431,7 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> GetUploadAsync(string url)
         {
-            _log.Info("Called GetUploadAsync with parameter url = \"" + url + "\".");
+            _log.Debug("Called GetUploadAsync with parameter url = \"" + url + "\".");
 
             var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response;
@@ -476,7 +476,7 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> InitiateUploadAsync(Archive archive)
         {
-            _log.Info("Called InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\".");
+            _log.Debug("Called InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\".");
 
             var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
             HttpResponseMessage response;
@@ -521,7 +521,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
-            _log.Info("Called PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + patchContent + "\".");
+            _log.Debug("Called PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + patchContent + "\".");
 
             var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
             request.Content = new StringContent(patchContent, Encoding.UTF8, "application/json");
@@ -567,7 +567,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<Upload> FinishUploadAsync(Upload upload)
         {
-            _log.Info("Called FinishUploadAsync with parameter url = \"" + upload.Url + "\".");
+            _log.Debug("Called FinishUploadAsync with parameter url = \"" + upload.Url + "\".");
 
             try
             {
@@ -586,7 +586,7 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         public async Task<bool> DeleteUploadAsync(Upload upload)
         {
-            _log.Info("Called DeleteUploadAsync with parameter url = \"" + upload.Url + "\".");
+            _log.Debug("Called DeleteUploadAsync with parameter url = \"" + upload.Url + "\".");
 
             var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
             HttpResponseMessage response;
