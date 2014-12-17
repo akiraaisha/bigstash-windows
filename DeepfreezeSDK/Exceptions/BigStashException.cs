@@ -10,6 +10,7 @@ namespace DeepfreezeSDK.Exceptions
     {
         #region properties
 
+        public System.Net.Http.HttpRequestMessage Request { get; set; }
         public ErrorType ErrorType { get; set; }
         public ErrorCode ErrorCode { get; set; }
         public System.Net.HttpStatusCode StatusCode { get; set; }
