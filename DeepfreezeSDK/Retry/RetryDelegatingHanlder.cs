@@ -54,6 +54,7 @@ namespace DeepfreezeSDK.Retry
 
                         throw new Exceptions.BigStashException(string.Format("Response status code {0} - {1} indicates " + errorTypeSubString + " error.", (int)responseMessage.StatusCode, responseMessage.StatusCode.ToString()))
                         {
+                            Request = request,
                             StatusCode = responseMessage.StatusCode,
                             CurrentRetryCount = currentRetryCount,
                             ErrorType = errorType
