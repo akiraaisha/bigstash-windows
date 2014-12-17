@@ -40,6 +40,12 @@ namespace DeepfreezeModel
         public DateTime LastModified { get; set; }
 
         /// <summary>
+        /// File Hash.
+        /// </summary>
+        [JsonProperty("md5")]
+        public string MD5 { get; set; }
+
+        /// <summary>
         /// True if file has finished uploading after
         /// a successful Complete Upload Request
         /// </summary>
@@ -52,7 +58,6 @@ namespace DeepfreezeModel
         /// </summary>
         [JsonProperty("uploadid")]
         public string UploadId { get; set; }
-
 
         /// <summary>
         /// Serialize ArchiveFileInfo to JSON string
