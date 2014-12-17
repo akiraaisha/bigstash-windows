@@ -910,6 +910,7 @@ namespace DeepfreezeApp
                         // start polling the upload resource to catch the completed status change.
                         this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
                         this._refreshProgressTimer.Start();
+                        this.OperationStatus = this.Upload.Status;
                     }
                     else
                     {
