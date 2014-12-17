@@ -580,6 +580,7 @@ namespace DeepfreezeApp
                                     FilePath = f,
                                     Size = info.Length,
                                     LastModified = info.LastWriteTimeUtc,
+                                    MD5 = Utilities.GetMD5Hash(f),
                                     IsUploaded = false
                                 };
 
@@ -628,6 +629,7 @@ namespace DeepfreezeApp
                         FilePath = f,
                         Size = info.Length,
                         LastModified = info.LastWriteTimeUtc,
+                        MD5 = Utilities.GetMD5Hash(f),
                         IsUploaded = false
                     };
 
