@@ -149,9 +149,9 @@ namespace DeepfreezeApp.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(".djf")]
-        public string DeepfreezeJsonFormat {
+        public string BigStashJsonFormat {
             get {
-                return ((string)(this["DeepfreezeJsonFormat"]));
+                return ((string)(this["BigStashJsonFormat"]));
             }
         }
         
