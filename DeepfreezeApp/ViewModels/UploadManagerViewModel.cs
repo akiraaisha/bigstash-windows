@@ -152,7 +152,7 @@ namespace DeepfreezeApp
                     Directory.CreateDirectory(Properties.Settings.Default.UploadsFolderPath);
 
                 var uploadFilesPaths = 
-                    await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly))
+                    await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*" + Properties.Settings.Default.BigStashJsonFormat, SearchOption.TopDirectoryOnly))
                     .ConfigureAwait(false);
 
                 _log.Info("Found " + uploadFilesPaths.Count() + " local upload files.");
@@ -257,7 +257,8 @@ namespace DeepfreezeApp
             // create a new local upload
             var newLocalUpload = new LocalUpload()
             {
-                ArchiveFilesInfo = archiveFilesInfo.ToList()
+                ArchiveFilesInfo = archiveFilesInfo.ToList(),
+                IsArchiveManifestUploaded = false
             };
 
             newUploadVM.Archive = newArchive;
