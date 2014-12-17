@@ -31,6 +31,9 @@ namespace DeepfreezeModel
         [JsonProperty("user_paused")]
         public bool UserPaused { get; set; }
 
+        [JsonProperty("archive_manifest_uploaded")]
+        public bool IsArchiveManifestUploaded { get; set; }
+
         [JsonProperty("archive_files_info")]
         public IList<ArchiveFileInfo> ArchiveFilesInfo { get; set; }
     }
