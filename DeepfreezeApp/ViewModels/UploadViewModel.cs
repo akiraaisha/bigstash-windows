@@ -1006,7 +1006,6 @@ namespace DeepfreezeApp
         private async Task<bool> UploadArchiveManifestAsync(CancellationToken token)
         {
             string tempSavePath = String.Empty;
-            string zipPath = String.Empty;
 
             try
             {
@@ -1016,8 +1015,6 @@ namespace DeepfreezeApp
                     _log.Debug("Archive manifest has already been uploaded in a previous session.");
                     return true;
                 }
-
-                
 
                 // Create and put to S3 the archive manifest before starting the upload.
                 // The manifest has a keyname equal to the Upload.S3.Prefix + ".manifest".
@@ -1056,24 +1053,17 @@ namespace DeepfreezeApp
                 await Task.Run(() =>
                 {
                     _log.Debug("Creating the archive manifest file on disk.");
-                    LocalStorage.WriteJson(tempSavePath, archiveManifest, Encoding.UTF8);
+                    Utilities.CompressManifestToGZip(tempSavePath, archiveManifest);
                     _log.Debug("Created the archive manifest file on disk.");
                 });
 
-                // Create the zip file containing the manifest.
-                zipPath = await Task.Run(() =>
-                {
-                    _log.Debug("Creating the zip containing the archive manifest file on disk.");
-                    // Create the zip file containing the manifest.
-                    var zip =  Utilities.CreateZipFile(tempSavePath);
-                    _log.Debug("Created the zip containing the archive manifest file on disk.");
-                    return zip;
-                });
-
-                if (!File.Exists(zipPath))
+                if (!File.Exists(tempSavePath))
                 {
                     throw new BigStashException("Error creating the zip file containing the archive manifest.");
                 }
+
+                // Upload the zip containing the manifest file to S3.
+                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), tempSavePath, token).ConfigureAwait(false);
 
                 // Delete the manifest file.
                 if (File.Exists(tempSavePath))
@@ -1082,24 +1072,6 @@ namespace DeepfreezeApp
                     File.Delete(tempSavePath);
                     _log.Debug("Deleted the archive manifest file.");
                 }
-
-                // Upload the zip containing the manifest file to S3.
-                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), zipPath, token).ConfigureAwait(false);
-
-                manifestKeyNameSb.Clear();
-                manifestKeyNameSb = null;
-                prefix = null;
-                tempSavePath = null;
-
-                // Delete the zip containing the manifest file.
-                if (File.Exists(zipPath))
-                {
-                    _log.Debug("Deleting the zip file containing the archive manifest file.");
-                    File.Delete(zipPath);
-                    _log.Debug("Deleted the zip file containing the archive manifest file.");
-                }
-
-                zipPath = null;
 
                 // On successful upload, update the LocalUpload instance and local upload file about the manifest upload.
                 if (manifestUploaded)
@@ -1123,14 +1095,6 @@ namespace DeepfreezeApp
                     _log.Debug("Deleting the archive manifest file.");
                     File.Delete(tempSavePath);
                     _log.Debug("Deleted the archive manifest file.");
-                }
-
-                // Delete the zip containing the manifest file.
-                if (File.Exists(zipPath))
-                {
-                    _log.Debug("Deleting the zip file containing the archive manifest file.");
-                    File.Delete(zipPath);
-                    _log.Debug("Deleted the zip file containing the archive manifest file.");
                 }
 
                 // Log the exception only if it's a BigStashException with no inner exception thrown above.
