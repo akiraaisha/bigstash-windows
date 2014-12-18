@@ -80,7 +80,7 @@ namespace DeepfreezeSDK.Retry
 
                 throw;
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 if (responseMessage != null)
                 {
