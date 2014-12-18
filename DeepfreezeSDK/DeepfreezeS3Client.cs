@@ -246,9 +246,8 @@ namespace DeepfreezeSDK
                     // Upload part and return response.
                     var uploadPartResponse = await s3Client.UploadPartAsync(uploadPartRequest, token).ConfigureAwait(false);
 
-                    _log.Debug("Finished UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key +
-                    "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
-                    ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
+                    _log.Debug("Successfully uploaded KeyName = \"" + uploadPartRequest.Key +
+                                "\", PartNumber = " + uploadPartRequest.PartNumber + "\".");
 
                     return uploadPartResponse;
                 }
@@ -321,6 +320,8 @@ namespace DeepfreezeSDK
                     token.ThrowIfCancellationRequested();
 
                     var putResponse = await this.s3Client.PutObjectAsync(putRequest, token).ConfigureAwait(false);
+
+                    _log.Debug("Successfully uploaded KeyName = \"" + keyName + "\".");
 
                     return putResponse.HttpStatusCode == System.Net.HttpStatusCode.OK;
                 }
