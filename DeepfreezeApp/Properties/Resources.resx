@@ -494,4 +494,10 @@
   <data name="NoCompletedUploadsHeaderText" xml:space="preserve">
     <value>Your completed uploads list is empty.</value>
   </data>
+  <data name="ClearAllButtonContent" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="ClearAllCompletedButtonHelpText" xml:space="preserve">
+    <value>Click to remove all your completed uploads.</value>
+  </data>
 </root>

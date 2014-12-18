@@ -178,6 +178,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear all.
+        /// </summary>
+        internal static string ClearAllButtonContent {
+            get {
+                return ResourceManager.GetString("ClearAllButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click to remove all your completed uploads..
+        /// </summary>
+        internal static string ClearAllCompletedButtonHelpText {
+            get {
+                return ResourceManager.GetString("ClearAllCompletedButtonHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to or, if you don&apos;t want us to do this, click cancel to abandon the archive creation..
         /// </summary>
         internal static string ClickCancelToCancelText {
