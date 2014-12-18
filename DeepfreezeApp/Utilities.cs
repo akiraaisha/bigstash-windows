@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 
 using DeepfreezeModel;
+using Newtonsoft.Json;
 
 namespace DeepfreezeApp
 {
@@ -240,7 +241,22 @@ namespace DeepfreezeApp
             catch(Exception)
             { throw; }
         }
-        
+
+        public static void CompressManifestToGZip(string path, ArchiveManifest manifest)
+        {
+            using (FileStream fs = File.Open(path, FileMode.Create))
+            using (GZipStream gz = new GZipStream(fs, CompressionLevel.Optimal))
+            using (StreamWriter sw = new StreamWriter(gz, Encoding.UTF8))
+            using (JsonWriter jw = new JsonTextWriter(sw))
+            
+            {
+                jw.Formatting = Formatting.Indented;
+
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(jw, manifest);
+            }
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
