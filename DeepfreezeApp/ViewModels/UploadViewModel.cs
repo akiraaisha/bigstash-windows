@@ -959,6 +959,8 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private ArchiveManifest CreateArchiveManifest()
         {
+            _log.Debug("Creating the archive manifest.");
+
             ArchiveManifest archiveManifest = new ArchiveManifest();
             archiveManifest.ArchiveID = this.Archive.Key;
             archiveManifest.UserID = this._deepfreezeClient.Settings.ActiveUser.ID;
@@ -988,6 +990,8 @@ namespace DeepfreezeApp
                 archiveManifest.Files.Add(fileManifest);
             }
 
+            _log.Debug("Created the archive manifest.");
+
             return archiveManifest;
         }
 
@@ -1001,17 +1005,25 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> UploadArchiveManifestAsync(CancellationToken token)
         {
+            string tempSavePath = String.Empty;
+            string zipPath = String.Empty;
+
             try
             {
                 // if the manifest has already been uploaded then skip this.
                 if (this.LocalUpload.IsArchiveManifestUploaded)
+                {
+                    _log.Debug("Archive manifest has already been uploaded in a previous session.");
                     return true;
+                }
+
+                
 
                 // Create and put to S3 the archive manifest before starting the upload.
                 // The manifest has a keyname equal to the Upload.S3.Prefix + ".manifest".
                 var archiveManifest = this.CreateArchiveManifest();
 
-                StringBuilder manifestNameSb = new StringBuilder();
+                StringBuilder manifestKeyNameSb = new StringBuilder();
 
                 string prefix;
 
@@ -1027,57 +1039,109 @@ namespace DeepfreezeApp
                 if (prefix.EndsWith("/"))
                 {
                     // if prefix ends with / then remove it.
-                    manifestNameSb.Append(prefix.Remove(prefix.Length - 1, 1));
+                    manifestKeyNameSb.Append(prefix.Remove(prefix.Length - 1, 1));
                 }
                 else
                 {
-                    manifestNameSb.Append(prefix);
+                    manifestKeyNameSb.Append(prefix);
                 }
 
-                manifestNameSb.Append(".manifest");
+                manifestKeyNameSb.Append(".manifest");
 
                 // manifest temporary name is equal to the archive with .manifest suffix.
-                string tempSavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath,
+                tempSavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath,
                                                     this.Archive.Key + ".manifest");
 
-                
                 // Save the manifest file.
                 await Task.Run(() =>
                 {
+                    _log.Debug("Creating the archive manifest file on disk.");
                     LocalStorage.WriteJson(tempSavePath, archiveManifest, Encoding.UTF8);
+                    _log.Debug("Created the archive manifest file on disk.");
                 });
 
-                // Upload the manifest file to S3.
-                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestNameSb.ToString(), tempSavePath, token).ConfigureAwait(false);
+                // Create the zip file containing the manifest.
+                zipPath = await Task.Run(() =>
+                {
+                    _log.Debug("Creating the zip containing the archive manifest file on disk.");
+                    // Create the zip file containing the manifest.
+                    var zip =  Utilities.CreateZipFile(tempSavePath);
+                    _log.Debug("Created the zip containing the archive manifest file on disk.");
+                    return zip;
+                });
 
-                // On successful upload, update the LocalUpload instance and local upload file about the manifest upload.
-                if (manifestUploaded)
+                if (!File.Exists(zipPath))
                 {
-                    this.LocalUpload.IsArchiveManifestUploaded = manifestUploaded;
-                    await this.SaveLocalUpload();
-                    
-                }
-                // If the manifest upload is unsuccessful throw an exception.
-                else
-                {
-                    throw new BigStashException("Unsuccessful manifest upload.", ErrorType.Client);
+                    throw new BigStashException("Error creating the zip file containing the archive manifest.");
                 }
 
                 // Delete the manifest file.
                 if (File.Exists(tempSavePath))
                 {
+                    _log.Debug("Deleting the archive manifest file.");
                     File.Delete(tempSavePath);
+                    _log.Debug("Deleted the archive manifest file.");
                 }
-                
-                manifestNameSb.Clear();
-                manifestNameSb = null;
+
+                // Upload the zip containing the manifest file to S3.
+                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), zipPath, token).ConfigureAwait(false);
+
+                manifestKeyNameSb.Clear();
+                manifestKeyNameSb = null;
                 prefix = null;
                 tempSavePath = null;
 
-                return manifestUploaded;
+                // Delete the zip containing the manifest file.
+                if (File.Exists(zipPath))
+                {
+                    _log.Debug("Deleting the zip file containing the archive manifest file.");
+                    File.Delete(zipPath);
+                    _log.Debug("Deleted the zip file containing the archive manifest file.");
+                }
+
+                zipPath = null;
+
+                // On successful upload, update the LocalUpload instance and local upload file about the manifest upload.
+                if (manifestUploaded)
+                {
+                    _log.Debug("Archive manifest was successfully uploaded.");
+                    this.LocalUpload.IsArchiveManifestUploaded = manifestUploaded;
+                    await this.SaveLocalUpload();
+
+                    return manifestUploaded;
+                }
+
+                // throw an exception if the manifest isn't uploaded
+                // and the amazon s3 client didn't throw an exception.
+                throw new BigStashException("Unsuccessful manifest upload.", DeepfreezeSDK.Exceptions.ErrorType.Client);
             }
-            catch(Exception)
+            catch(Exception e)
             {
+                // Delete the manifest file.
+                if (File.Exists(tempSavePath))
+                {
+                    _log.Debug("Deleting the archive manifest file.");
+                    File.Delete(tempSavePath);
+                    _log.Debug("Deleted the archive manifest file.");
+                }
+
+                // Delete the zip containing the manifest file.
+                if (File.Exists(zipPath))
+                {
+                    _log.Debug("Deleting the zip file containing the archive manifest file.");
+                    File.Delete(zipPath);
+                    _log.Debug("Deleted the zip file containing the archive manifest file.");
+                }
+
+                // Log the exception only if it's a BigStashException with no inner exception thrown above.
+                // If the exception was thrown from the s3 client while trying to upload the manifest file,
+                // then it's already logged.
+                if (e is BigStashException && e.InnerException == null)
+                {
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
+                               this.TryGetBigStashExceptionInformation(e), e);
+                }
+
                 throw;
             }
         }
