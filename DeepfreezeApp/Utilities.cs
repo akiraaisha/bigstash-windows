@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -211,6 +212,35 @@ namespace DeepfreezeApp
             return hash;
         }
 
+        /// <summary>
+        /// Creates a zip file containing only the file from the path parameter and returns it's path.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string CreateZipFile(string path)
+        {
+            try
+            {
+                // The path to save the zip file should point in the same directory as the original file to include in the zip.
+                var zipPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".zip");
+
+                // If a zip file with the same path exists, delete it.
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+
+                using (ZipArchive newZipFile = ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create))
+                {
+                    newZipFile.CreateEntryFromFile(path, Path.GetFileName(path), CompressionLevel.Optimal);
+                }
+
+                return zipPath;
+            }
+            catch(Exception)
+            { throw; }
+        }
+        
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
