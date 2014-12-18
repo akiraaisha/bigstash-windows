@@ -28,8 +28,6 @@ namespace DeepfreezeSDK
         public IAmazonS3 s3Client;
 
         private static AmazonS3Config _s3Config;
-        private static string _accessKeyID;
-        private static string _secretAccessKey;
 
         public Dictionary<int, long> MultipartUploadProgress = new Dictionary<int, long>();
         public long SingleUploadProgress = 0;
@@ -62,7 +60,7 @@ namespace DeepfreezeSDK
                 _s3Config.ProgressUpdateInterval = 5 * 100 * 1024; // fire progress update event every 500 KB.
                 s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
             }
-            catch (Exception e) { throw; }
+            catch (Exception) { throw; }
         }
 
         /// <summary>
@@ -264,6 +262,17 @@ namespace DeepfreezeSDK
 
                         this.LogAmazonException(messagePart, e);
 
+                        // if the exception is AmazonS3Exception with error type Sender,
+                        // which means that the client is responsible for the error,
+                        // then throw do not retry.
+                        if (e is AmazonS3Exception)
+                        {
+                            var ae = e as AmazonS3Exception;
+
+                            if (ae.ErrorType == ErrorType.Sender)
+                                throw;
+                        }
+
                         if (--retries == 0)
                             throw;
                     }
@@ -323,6 +332,17 @@ namespace DeepfreezeSDK
                             "\", FilePath = \"" + path + "\"";
 
                         this.LogAmazonException(messagePart, e);
+
+                        // if the exception is AmazonS3Exception with error type Sender,
+                        // which means that the client is responsible for the error,
+                        // then throw do not retry.
+                        if (e is AmazonS3Exception)
+                        {
+                            var ae = e as AmazonS3Exception;
+
+                            if (ae.ErrorType == ErrorType.Sender)
+                                throw;
+                        }
 
                         if (--retries == 0)
                             throw;
@@ -468,7 +488,7 @@ namespace DeepfreezeSDK
                 // if all goes well, return true
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 hasException = true;
 
