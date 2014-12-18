@@ -130,6 +130,32 @@ namespace DeepfreezeApp
             }
         }
 
+        public bool HasCompletedUploads
+        {
+            get
+            {
+                return this.CompletedUploads.Count > 0;
+            }
+        }
+
+        public string ClearAllButtonContent
+        { get { return Properties.Resources.ClearAllButtonContent; } }
+
+        public string ClearAllCompletedButtonHelpText
+        { get { return Properties.Resources.ClearAllCompletedButtonHelpText; } }
+
+        #endregion
+
+        #region action_methods
+
+        public void ClearAllCompletedUploads()
+        {
+            foreach(var completedUpload in this.CompletedUploads)
+            {
+                completedUpload.RemoveUpload();
+            }
+        }
+
         #endregion
 
         #region private methods
@@ -342,6 +368,7 @@ namespace DeepfreezeApp
             NotifyOfPropertyChange(() => TotalPendingUploadsText);
             NotifyOfPropertyChange(() => TotalCompletedUploadsText);
             NotifyOfPropertyChange(() => this.HasUploads);
+            NotifyOfPropertyChange(() => this.HasCompletedUploads);
         }
 
         #endregion

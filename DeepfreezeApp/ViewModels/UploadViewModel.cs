@@ -1205,6 +1205,7 @@ namespace DeepfreezeApp
 
                     manager.NotifyOfPropertyChange(() => manager.TotalPendingUploadsText);
                     manager.NotifyOfPropertyChange(() => manager.TotalCompletedUploadsText);
+                    manager.NotifyOfPropertyChange(() => manager.HasCompletedUploads);
                 }
             }
         }

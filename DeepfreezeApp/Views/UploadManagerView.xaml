@@ -75,11 +75,37 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Label Content="Completed uploads" 
-               VerticalAlignment="Top"
-               Style="{StaticResource DescriptionHeaderStyle}"
-               HorizontalAlignment="Stretch"
-               />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Content="Completed uploads" 
+                   Style="{StaticResource DescriptionHeaderStyle}"
+                   />
+
+            <TextBlock Grid.Column="1" 
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="{Binding ClearAllButtonContent}"
+                       Cursor="Hand"
+                       Foreground="Blue"
+                       cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ClearAllCompletedUploads()]"
+                       ToolTipService.ShowDuration="30000"
+                       FontSize="14"
+                       Visibility="{Binding HasCompletedUploads, Converter={StaticResource BoolToVisibilityConverter}}"
+                       >
+                <TextBlock.ToolTip>
+                    <TextBlock Text="{Binding ClearAllCompletedButtonHelpText}"
+                               TextWrapping="Wrap"
+                               />
+                </TextBlock.ToolTip>
+
+                    </TextBlock>
+
+        </Grid>
 
         <Border BorderThickness="1"
                 BorderBrush="Gray"
