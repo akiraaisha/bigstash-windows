@@ -39,6 +39,7 @@
                 <local:InvertBool />
                 <local:BoolToVisibility />
             </local:ValueConverterGroup>
+            <local:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
         </ResourceDictionary>
     </Window.Resources>
     
@@ -129,11 +130,11 @@
 
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="{Binding PreferencesHeader}" 
+                    <MenuItem Header="{Binding Data.PreferencesHeader, Source={StaticResource BindingProxy}}"
                               cal:Message.Attach="[Event Click] = [Action ShowPreferences()]"
-                              Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                              Visibility="{Binding Data.IsLoggedIn, Source={StaticResource BindingProxy}, Converter={StaticResource BoolToVisibilityConverter}}"
                               />
-                    <MenuItem Header="{Binding ExitHeader}" 
+                    <MenuItem Header="{Binding Data.ExitHeader, Source={StaticResource BindingProxy}}" 
                               cal:Message.Attach="[Event Click] = [Action ExitApplication()]"
                               />
                 </ContextMenu>
