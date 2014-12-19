@@ -32,10 +32,10 @@
     <TargetCulture>en</TargetCulture>
     <ProductName>BigStash for Windows</ProductName>
     <PublisherName>The Longaccess Company</PublisherName>
-    <MinimumRequiredVersion>1.1.1.1</MinimumRequiredVersion>
+    <MinimumRequiredVersion>1.2.0.0</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>4</ApplicationRevision>
-    <ApplicationVersion>1.1.1.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
