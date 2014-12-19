@@ -16,7 +16,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>https://www.deepfreeze.io/apps/windows/</PublishUrl>
+    <PublishUrl>https://www.bigstash.co/apps/windows/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -26,8 +26,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://www.deepfreeze.io/apps/windows/</InstallUrl>
-    <UpdateUrl>https://www.deepfreeze.io/apps/windows/</UpdateUrl>
+    <InstallUrl>https://www.bigstash.co/apps/windows/</InstallUrl>
+    <UpdateUrl>https://www.bigstash.co/apps/windows/</UpdateUrl>
     <SupportUrl>https://www.bigstash.co/support/</SupportUrl>
     <TargetCulture>en</TargetCulture>
     <ProductName>BigStash for Windows</ProductName>
