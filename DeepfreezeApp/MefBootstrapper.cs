@@ -121,19 +121,21 @@ namespace DeepfreezeApp
                                            ApplicationDeployment.CurrentDeployment.IsFirstRun &&
                                            ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString() == "1.2.0.0");
 
+                bool didBigStashUpgradeMigration = false;
+
                 if (isFirstBigStashRun)
                 {
                     // Migrate deepfreeze data to bigstash app data directory.
                     // This step is needed for all clients updating from any Deepfreeze.io app version
                     // to any BigStash version.
-                    await MigrateDeepfreezeData();
+                    didBigStashUpgradeMigration = await MigrateDeepfreezeData();
                 }
 
                 DisplayRootViewFor<IShell>();
 
                 // after showing the main window, if this instance run is the first bigstash run
                 // then show a relevant message dialog.
-                if (isFirstBigStashRun)
+                if (isFirstBigStashRun && didBigStashUpgradeMigration)
                 {
                     StringBuilder updateMessage = new StringBuilder();
                     updateMessage.Append("Deepfreeze.io is now BigStash! Read our ");
@@ -358,11 +360,10 @@ namespace DeepfreezeApp
             return client.ApplicationVersion;
         }
 
-        private async Task MigrateDeepfreezeData()
+        private async Task<bool> MigrateDeepfreezeData()
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var deepfreezeFolderPath = Path.Combine(localAppData, Properties.Settings.Default.DeepfreezeApplicationFolderName);
-
 
             // If Deepfreeze.io local app data folder exists, then copy all it's content's to BigStash folder,
             // except for the old log file.
@@ -424,12 +425,16 @@ namespace DeepfreezeApp
 
                     // Delete the Deepfreeze.io directory.
                     Directory.Delete(deepfreezeFolderPath, true);
+
+                    return true;
                 }
                 catch(Exception e)
                 {
                     _log.Error("MefBootstrapper.MigrateDeepfreezeData threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 }
             }
+
+            return false;
         }
 
         #endregion
