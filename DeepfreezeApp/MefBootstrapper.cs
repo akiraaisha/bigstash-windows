@@ -354,11 +354,13 @@ namespace DeepfreezeApp
         private async Task ShowBigStashUpdateMessage()
         {
             StringBuilder updateMessage = new StringBuilder();
-            updateMessage.Append("Deepfreeze.io is now BigStash! Read our ");
-            updateMessage.Append(@"[a href='" + Properties.Settings.Default.BigStashBlogURL + @"']");
-            updateMessage.Append("announcement");
+            updateMessage.AppendLine("Deepfreeze.io is now BigStash!");
+            updateMessage.Append(@"[a href='" + Properties.Settings.Default.BigStashURL + @"']");
+            updateMessage.Append("www.bigstash.co");
             updateMessage.Append(@"[/a]");
-            updateMessage.Append(".");
+            updateMessage.AppendLine();
+            updateMessage.AppendLine();
+            updateMessage.Append("You can still connect by using your Deepfreeze.io account credentials.");
 
             var windowManager = IoC.Get<IWindowManager>();
             await windowManager.ShowMessageViewModelAsync(updateMessage.ToString(), "Update Information", MessageBoxButton.OK);
