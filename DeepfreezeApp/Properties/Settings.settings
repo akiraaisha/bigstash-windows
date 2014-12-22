@@ -69,6 +69,9 @@
       <Value Profile="(Default)">https://www.bigstash.co/faq/#Why-are-some-of-my-files-not-being-uploaded</Value>
     </Setting>
     <Setting Name="VerboseDebugLogging" Type="System.Boolean" Scope="User">
+	  <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="BigStashUpdateMessageShown" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

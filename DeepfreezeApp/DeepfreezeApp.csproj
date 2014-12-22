@@ -16,7 +16,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>https://www.deepfreeze.io/apps/windows/</PublishUrl>
+    <PublishUrl>https://www.bigstash.co/apps/windows/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -26,16 +26,16 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://www.deepfreeze.io/apps/windows/</InstallUrl>
-    <UpdateUrl>https://www.deepfreeze.io/apps/windows/</UpdateUrl>
+    <InstallUrl>https://www.bigstash.co/apps/windows/</InstallUrl>
+    <UpdateUrl>https://www.bigstash.co/apps/windows/</UpdateUrl>
     <SupportUrl>https://www.bigstash.co/support/</SupportUrl>
     <TargetCulture>en</TargetCulture>
     <ProductName>BigStash for Windows</ProductName>
     <PublisherName>The Longaccess Company</PublisherName>
-    <MinimumRequiredVersion>1.1.1.1</MinimumRequiredVersion>
+    <MinimumRequiredVersion>1.2.0.0</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>4</ApplicationRevision>
-    <ApplicationVersion>1.1.1.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -147,6 +147,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BindingProxy.cs" />
     <Compile Include="Converters\HyperLinkConverter.cs" />
     <Compile Include="Interfaces\IAboutViewModel.cs" />
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
