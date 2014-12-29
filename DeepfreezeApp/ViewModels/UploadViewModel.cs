@@ -426,25 +426,31 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task PauseUpload(bool isAutomatic)
         {
-            if (this.OperationStatus == Enumerations.Status.Uploading)
+            if (!this.IsUploading)
             {
-                this.IsBusy = !isAutomatic; // show busy only if user paused.
-                this.BusyMessage = "Pausing upload...";
-                this.OperationStatus = Enumerations.Status.Paused;
+                return;
+            }
 
-                this._refreshProgressTimer.Stop();
+            this.IsBusy = !isAutomatic; // show busy only if user paused.
+            this.BusyMessage = "Pausing upload...";
+            this.OperationStatus = Enumerations.Status.Paused;
 
-                var originalAction = isAutomatic ? "(automatic pause)" : "(user clicked the Pause button)";
-                _log.Info("Pausing " + originalAction + " archive upload with title \"" + this.Archive.Title + "\".");
+            this._refreshProgressTimer.Stop();
 
-                this.LocalUpload.UserPaused = !isAutomatic;
+            var originalAction = isAutomatic ? "(automatic pause)" : "(user clicked the Pause button)";
+            _log.Info("Pausing " + originalAction + " archive upload with title \"" + this.Archive.Title + "\".");
 
-                if (this._cts != null)
-                    await Task.Run(() => 
-                        {
-                            if (this._cts != null)
-                                this._cts.Cancel();
-                        }).ConfigureAwait(false);
+            this.LocalUpload.UserPaused = !isAutomatic;
+
+            if (this._cts != null)
+            {
+                await Task.Run(() =>
+                {
+                    if (this._cts != null)
+                    {
+                        this._cts.Cancel();
+                    }
+                }).ConfigureAwait(false);
             }
         }
 
@@ -470,7 +476,8 @@ namespace DeepfreezeApp
                 this.IsBusy = true;
                 this.BusyMessage = "Deleting upload...";
 
-                await this.PauseUpload(true);
+                // No need to pause since delete is shown only in paused pending uploads.
+                // await this.PauseUpload(true);
 
                 if (this.Upload != null && 
                     this.Upload.Status != Enumerations.Status.Completed &&
@@ -1355,29 +1362,35 @@ namespace DeepfreezeApp
 
         }
 
-        protected override void OnDeactivate(bool close)
+        protected override async void OnDeactivate(bool close)
         {
             // Immediately send cancel to cancel any upload tasks
             // if the operation status is equal to uploading.
             // This check takes place inside PauseUpload method's body.
-            var pauseTask = this.PauseUpload(true);
 
-            bool canRunTask = !(pauseTask.Status == TaskStatus.Canceled ||
-                                pauseTask.Status == TaskStatus.Faulted ||
-                                pauseTask.Status == TaskStatus.RanToCompletion);
+            if (this.IsUploading)
+            {
+                var pauseTask = this.PauseUpload(true);
+                await pauseTask;
+            }
 
-            if (canRunTask)
-                pauseTask.RunSynchronously();
+            //bool canRunTask = !(pauseTask.Status == TaskStatus.Canceled ||
+            //                    pauseTask.Status == TaskStatus.Faulted ||
+            //                    pauseTask.Status == TaskStatus.RanToCompletion);
+
+            //if (canRunTask)
+            //    pauseTask.RunSynchronously();
 
             var saveTask = this.SaveLocalUpload(false);
+            await saveTask;
 
-            canRunTask = !(saveTask.Status == TaskStatus.Canceled ||
-                           saveTask.Status == TaskStatus.Faulted ||
-                           saveTask.Status == TaskStatus.RanToCompletion);
+            //canRunTask = !(saveTask.Status == TaskStatus.Canceled ||
+            //               saveTask.Status == TaskStatus.Faulted ||
+            //               saveTask.Status == TaskStatus.RanToCompletion);
 
-            // do a final save
-            if (canRunTask)
-                saveTask.RunSynchronously();
+            //// do a final save
+            //if (canRunTask)
+            //    saveTask.RunSynchronously();
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();
