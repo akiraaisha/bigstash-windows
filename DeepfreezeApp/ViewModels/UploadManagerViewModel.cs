@@ -351,8 +351,6 @@ namespace DeepfreezeApp
                 lock (_removeLock)
                 {
                     this.PendingUploads.Remove(message.UploadVMToRemove);
-                    this.CloseItem(message.UploadVMToRemove);
-                    message.UploadVMToRemove = null;
                 }
             }
             else if (this.CompletedUploads.Contains(message.UploadVMToRemove))
@@ -360,10 +358,11 @@ namespace DeepfreezeApp
                 lock (_removeLock)
                 {
                     this.CompletedUploads.Remove(message.UploadVMToRemove);
-                    this.CloseItem(message.UploadVMToRemove);
-                    message.UploadVMToRemove = null;
                 }
             }
+
+            this.DeactivateItem(message.UploadVMToRemove, true);
+            message.UploadVMToRemove = null;
 
             NotifyOfPropertyChange(() => TotalPendingUploadsText);
             NotifyOfPropertyChange(() => TotalCompletedUploadsText);
