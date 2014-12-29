@@ -98,15 +98,20 @@ namespace DeepfreezeApp
         public bool MinimizeOnClose
         {
             get { return Properties.Settings.Default.MinimizeOnClose; }
-            set { Properties.Settings.Default.MinimizeOnClose = value; Properties.Settings.Default.Save(); NotifyOfPropertyChange(() => this.MinimizeOnClose); }
+            set 
+            { 
+                Properties.Settings.Default.MinimizeOnClose = value; 
+                Properties.Settings.Default.Save(); 
+                NotifyOfPropertyChange(() => this.MinimizeOnClose); 
+            }
         }
 
         public bool VerboseDebugLogging
         {
             get { return Properties.Settings.Default.VerboseDebugLogging; }
-            set 
-            { 
-                Properties.Settings.Default.VerboseDebugLogging = value; 
+            set
+            {
+                Properties.Settings.Default.VerboseDebugLogging = value;
                 NotifyOfPropertyChange(() => this.VerboseDebugLogging);
                 FlipVerboseDebugLogging();
             }
