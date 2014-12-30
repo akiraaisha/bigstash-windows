@@ -1,8 +1,5 @@
-﻿#define DEBUG 
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
-using System;
+﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -12,12 +9,12 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Diagnostics;
-using System.Deployment.Application;
- 
 
 using Newtonsoft.Json;
+using Caliburn.Micro;
+using DeepfreezeSDK;
 using DeepfreezeModel;
-using System.Threading.Tasks;
+
 using Custom.Windows;
 
 namespace DeepfreezeApp
@@ -87,16 +84,10 @@ namespace DeepfreezeApp
             else
             {
                 // Else go on with normal startup.
- 
-                bool firstDeployedRun = ApplicationDeployment.IsNetworkDeployed &&
-                    ApplicationDeployment.CurrentDeployment.IsFirstRun;
 
                 // Change default ClickOnce icon in Programs and Features entry,
                 // if it's not already set.
                 SetAddRemoveProgramsIcon();
-
-                // get the application version to be used in user agent header of api requests.
-                var currentVersion = SetVersionForUserAgent();
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
@@ -105,6 +96,9 @@ namespace DeepfreezeApp
                 ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
                 Properties.Settings.Default.VerboseDebugLogging = true;
 #endif
+
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+                this.SetVersionForUserAgent(currentVersion);
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 _log.Info("*****************************************************");
@@ -351,16 +345,10 @@ namespace DeepfreezeApp
             client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
         }
 
-        private string SetVersionForUserAgent()
+        private void SetVersionForUserAgent(string version)
         {
             var client = IoC.Get<IDeepfreezeClient>();
-
-            if (ApplicationDeployment.IsNetworkDeployed)
-                client.ApplicationVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
-            else
-                client.ApplicationVersion = "debug";
-
-            return client.ApplicationVersion;
+            client.ApplicationVersion = version;
         }
 
         private async Task ShowBigStashUpdateMessage()
