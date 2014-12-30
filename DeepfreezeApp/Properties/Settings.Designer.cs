@@ -277,5 +277,29 @@ namespace DeepfreezeApp.Properties {
                 this["BigStashUpdateMessageShown"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:8888/")]
+        public string BigStashUpdateURL {
+            get {
+                return ((string)(this["BigStashUpdateURL"]));
+            }
+            set {
+                this["BigStashUpdateURL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Squirrel\\")]
+        public string LocalUpdateURL {
+            get {
+                return ((string)(this["LocalUpdateURL"]));
+            }
+            set {
+                this["LocalUpdateURL"] = value;
+            }
+        }
     }
 }
