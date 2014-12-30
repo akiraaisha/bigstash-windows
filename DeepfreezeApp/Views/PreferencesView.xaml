@@ -48,51 +48,5 @@
 
         </StackPanel>
 
-        <!--<StackPanel DockPanel.Dock="Bottom"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Bottom"
-                    Margin="0 0 0 10">
-
-            <Label x:Name="ApplicationNameHeader" 
-               Style="{DynamicResource HeaderLabelStyle}" 
-               VerticalAlignment="Center"
-               HorizontalAlignment="Center"
-               Cursor="Hand"
-               cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenDeepfreezePage()]"
-               />
-
-            <TextBlock x:Name="VersionText"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       />
-
-            <Button x:Name="ExportLog"
-                    Width="70"
-                    Style="{DynamicResource SquareButtonStyleCI}"
-                    Content="{Binding DebugButtonContent}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Margin="0 10 0 5"
-                    ToolTipService.ShowDuration="30000"
-                    >
-                
-                <Button.ToolTip>
-                    <TextBlock Text="{Binding DebugHelpText}"
-                               TextWrapping="Wrap"
-                               Width="400"
-                               />
-                </Button.ToolTip>
-
-            </Button>
-            
-            <TextBlock x:Name="ErrorMessage"
-                       Foreground="Red"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       />
-            
-        </StackPanel>-->
-        
-
     </DockPanel>
 </UserControl>
