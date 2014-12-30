@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel;
-using System.Deployment.Application;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
@@ -93,13 +92,7 @@ namespace DeepfreezeApp
         {
             get
             {
-                if (ApplicationDeployment.IsNetworkDeployed)
-                {
-                    ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-                    return Properties.Resources.VersionHeaderText + " " + ad.CurrentVersion.ToString();
-                }
-                else
-                    return "Debugging mode";
+                return Properties.Resources.VersionHeaderText + " " + this._deepfreezeClient.ApplicationVersion;
             }
         }
 
@@ -217,7 +210,6 @@ namespace DeepfreezeApp
 
         public async void CheckForUpdate()
         {
-            UpdateCheckInfo info = null;
             this.ErrorMessage = null;
 
             if (!this._deepfreezeClient.IsInternetConnected)
@@ -226,101 +218,60 @@ namespace DeepfreezeApp
                 return;
             }
 
-            if (ApplicationDeployment.IsNetworkDeployed)
+            try
             {
-                ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
+                IsUpToDate = false;
+                this.IsBusy = true;
 
-                DeploymentProgressChangedEventHandler progressEventHandler = (sender, eventArgs) =>
+                this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
+
+                var releaseEntry = await SquirrelHelper.SilentUpdate();
+
+                //if (String.Compare(releaseEntry.Version.ToString(), SquirrelHelper.GetCurrentlyInstalledVersion()) > 1)
+                //{
+
+                //}
+
+                // insert a delay here so the user has a chance to actually see the messages
+                // and know that the check is ongoing.
+                await Task.Delay(1000);
+            }
+            catch (Exception e)
+            {
+                IsBusy = false;
+                this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                return;
+            }
+            finally
+            {
+                if (String.IsNullOrEmpty(this.ErrorMessage))
                 {
-                    string action = "";
-                    switch(eventArgs.State)
-                    {
-                        case DeploymentProgressState.DownloadingApplicationFiles:
-                            action = Properties.Resources.DowloadingUpdateText;
-                            this.UpdateMessage = action + eventArgs.ProgressPercentage + "%";
-                            break;
-                    }
-                };
-
-                ad.UpdateProgressChanged += progressEventHandler;
-
-                AsyncCompletedEventHandler completedEventHandler = (sender, eventArgs) =>
-                {
-                    ad.UpdateProgressChanged -= progressEventHandler;
-                    this.RestartNeeded = true;
-                    this.IsBusy = false;
-                    this.UpdateMessage = Properties.Resources.UpdateCompletedText;
-
-                    Properties.Settings.Default.RestartAfterUpdate = true;
-                    Properties.Settings.Default.Save();
-                };
-
-                ad.UpdateCompleted += completedEventHandler;
-
-                try
-                {
-                    IsUpToDate = false;
-                    this.IsBusy = true;
-
-                    this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
-
-                    info = await Task.Run(() => ad.CheckForDetailedUpdate(false));
-
-                    // insert a delay here so the user has a chance to actually see the messages
-                    // and know that the check is ongoing.
-                    await Task.Delay(1000);
-                }
-                catch (DeploymentDownloadException dde)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
-                    return;
-                }
-                catch (InvalidDeploymentException ide)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorInvalidDeploymentExceptionGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + ide.GetType().ToString() + " with message \"" + ide.Message + "\".");
-                    return;
-                }
-                catch (InvalidOperationException ioe)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorInvalidOperationCheckingForUpdateGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
-                    return;
-                }
-                finally
-                {
-                    if (String.IsNullOrEmpty(this.ErrorMessage))
-                    {
-                        this.UpdateMessage = Properties.Resources.UpdateVersionInfoOutdatedText;
-                    }
-                }
-
-                if (info.UpdateAvailable)
-                {
-                    try
-                    {
-                        this.UpdateMessage = Properties.Resources.UpdatingToLatestVersionText;
-                        ad.UpdateAsync();
-                    }
-                    catch (DeploymentDownloadException dde)
-                    {
-                        IsBusy = false;
-                        this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                        _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
-                    }
-                }
-                else
-                {
-                    IsBusy = false;
-                    IsUpToDate = true;
-                    RestartNeeded = false;
-                    this.UpdateMessage = Properties.Resources.UpToDateText;
+                    this.UpdateMessage = Properties.Resources.UpdateVersionInfoOutdatedText;
                 }
             }
+
+                //if (info.UpdateAvailable)
+                //{
+                //    try
+                //    {
+                //        this.UpdateMessage = Properties.Resources.UpdatingToLatestVersionText;
+                //        ad.UpdateAsync();
+                //    }
+                //    catch (DeploymentDownloadException dde)
+                //    {
+                //        IsBusy = false;
+                //        this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
+                //        _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
+                //    }
+                //}
+                //else
+                //{
+                //    IsBusy = false;
+                //    IsUpToDate = true;
+                //    RestartNeeded = false;
+                //    this.UpdateMessage = Properties.Resources.UpToDateText;
+                //}
         }
 
         public void RestartApplication()
