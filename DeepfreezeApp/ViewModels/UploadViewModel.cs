@@ -13,6 +13,7 @@ using System.IO;
 using Caliburn.Micro;
 
 using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 
 using Amazon.S3;
@@ -264,6 +265,9 @@ namespace DeepfreezeApp
                 this.LocalUpload.UserPaused = false;
                 await this.SaveLocalUpload();
 
+                // Create and upload the archive manifest.
+                await this.UploadArchiveManifestAsync(token).ConfigureAwait(false);
+                
                 // refresh the s3 token if it's currently expired.
                 // this takes care of cases when an upload was automatically paused 
                 // because of an expired token exception.
@@ -337,7 +341,7 @@ namespace DeepfreezeApp
                     }
                     else
                     {
-                        uploadFinished = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, info, token).ConfigureAwait(false);
+                        uploadFinished = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, info.KeyName, info.FilePath, token).ConfigureAwait(false);
                         this._refreshProgressTimer.Stop();
                     }
 
@@ -358,6 +362,8 @@ namespace DeepfreezeApp
                 _log.Info("Finished archive upload with title \"" + this.Archive.Title + "\".");
 
                 this.OperationStatus = this.Upload.Status;
+                this.LocalUpload.Status = this.Upload.Status.GetStringValue();
+                this.TryMoveSelfToCompleted();
 
                 // set timer interval to 1 minute to catch upload completed status change.
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
@@ -381,22 +387,6 @@ namespace DeepfreezeApp
                 {
                     this.ErrorMessage = Properties.Resources.ErrorUploadingGenericText;
                     this.OperationStatus = Enumerations.Status.Paused;
-
-                    //if (e is AmazonS3Exception)
-                    //{
-                        
-                    //    this.ErrorMessage += ". Try resuming the upload again.";
-                    //}
-
-                    //if (e is AggregateException)
-                    //{
-                    //    foreach(var inner in ((AggregateException)e).InnerExceptions)
-                    //    {
-                    //        this.ErrorMessage += "\n" + inner.Message;
-                    //        if (inner.InnerException != null)
-                    //            this.ErrorMessage += "\n" + inner.InnerException.Message;
-                    //    }
-                    //}
                 }
             }
 
@@ -436,25 +426,31 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task PauseUpload(bool isAutomatic)
         {
-            if (this.OperationStatus == Enumerations.Status.Uploading)
+            if (!this.IsUploading)
             {
-                this.IsBusy = !isAutomatic; // show busy only if user paused.
-                this.BusyMessage = "Pausing upload...";
-                this.OperationStatus = Enumerations.Status.Paused;
+                return;
+            }
 
-                this._refreshProgressTimer.Stop();
+            this.IsBusy = !isAutomatic; // show busy only if user paused.
+            this.BusyMessage = "Pausing upload...";
+            this.OperationStatus = Enumerations.Status.Paused;
 
-                var originalAction = isAutomatic ? "(automatic pause)" : "(user clicked the Pause button)";
-                _log.Info("Pausing " + originalAction + " archive upload with title \"" + this.Archive.Title + "\".");
+            this._refreshProgressTimer.Stop();
 
-                this.LocalUpload.UserPaused = !isAutomatic;
+            var originalAction = isAutomatic ? "(automatic pause)" : "(user clicked the Pause button)";
+            _log.Info("Pausing " + originalAction + " archive upload with title \"" + this.Archive.Title + "\".");
 
-                if (this._cts != null)
-                    await Task.Run(() => 
-                        {
-                            if (this._cts != null)
-                                this._cts.Cancel();
-                        }).ConfigureAwait(false);
+            this.LocalUpload.UserPaused = !isAutomatic;
+
+            if (this._cts != null)
+            {
+                await Task.Run(() =>
+                {
+                    if (this._cts != null)
+                    {
+                        this._cts.Cancel();
+                    }
+                }).ConfigureAwait(false);
             }
         }
 
@@ -480,7 +476,8 @@ namespace DeepfreezeApp
                 this.IsBusy = true;
                 this.BusyMessage = "Deleting upload...";
 
-                await this.PauseUpload(true);
+                // No need to pause since delete is shown only in paused pending uploads.
+                // await this.PauseUpload(true);
 
                 if (this.Upload != null && 
                     this.Upload.Status != Enumerations.Status.Completed &&
@@ -493,7 +490,7 @@ namespace DeepfreezeApp
                     catch(AmazonS3Exception ae)
                     {
                         // If there's an aws exception when calling abort, just go on with the delete call to the df api.
-                        _log.Error("Error while aborting S3 upload, thrown " + ae.GetType().ToString() + " with message \"" + ae.Message + "\".");
+                        _log.Error("Error while aborting S3 upload, thrown " + ae.GetType().ToString() + " with message \"" + ae.Message + "\".", ae);
                     }
 
                     var deleteSuccess = await this._deepfreezeClient.DeleteUploadAsync(this.Upload).ConfigureAwait(false);
@@ -510,7 +507,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("DeleteUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
 
                 this.ErrorMessage += Properties.Resources.ErrorDeletingUploadGenericText;
             }
@@ -522,8 +519,8 @@ namespace DeepfreezeApp
         {
             try
             {
-                if (this.OperationStatus == Enumerations.Status.NotFound)
-                    _log.Info("Removing (user clicked the Remove button) already deleted upload on the server.");
+                if (this.Archive == null)
+                    _log.Info("Removing already deleted upload on the server.");
                 else
                     _log.Info("Removing (user clicked the Remove button) completed archive upload with title \"" + this.Archive.Title + "\".");
 
@@ -535,7 +532,7 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             {
-                _log.Error("RemoveUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
 
                 this.ErrorMessage = Properties.Resources.ErrorRemovingUploadGenericText;
             }
@@ -579,6 +576,8 @@ namespace DeepfreezeApp
                 {
                     // store the upload url
                     this.LocalUpload.Url = this.Upload.Url;
+                    // store the upload status
+                    this.LocalUpload.Status = this.Upload.Status.GetStringValue();
 
                     // setup the s3 client.
                     this.SetS3Info(this.Upload.S3);
@@ -610,7 +609,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("CreateNewUpload threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
+                           this.TryGetBigStashExceptionInformation(e), e);
 
                 this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
@@ -644,11 +644,13 @@ namespace DeepfreezeApp
 
                 if (this.Upload != null)
                 {
+                    this.LocalUpload.Status = this.Upload.Status.GetStringValue();
+                    this.TryMoveSelfToCompleted();
                     this.SetS3Info(this.Upload.S3);
                     this.SetupS3Client(this.Upload.S3);
                 }
             }
-            catch (Exception e) { throw e; }
+            catch (Exception) { throw; }
         }
 
         /// <summary>
@@ -663,7 +665,7 @@ namespace DeepfreezeApp
             {
                 this.Archive = await this._deepfreezeClient.GetArchiveAsync(archiveUrl).ConfigureAwait(false);
             }
-            catch(Exception e) { throw e; }
+            catch(Exception) { throw; }
         }
 
         /// <summary>
@@ -723,8 +725,7 @@ namespace DeepfreezeApp
                 
                 return true;
             }
-            catch (AggregateException ae) { throw ae; }
-            catch (Exception e) { throw e; }
+            catch (Exception) { throw; }
         }
 
         /// <summary>
@@ -759,9 +760,9 @@ namespace DeepfreezeApp
 
                 return total;
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -809,7 +810,7 @@ namespace DeepfreezeApp
                 // Save the newLocalUpload to the correct local upload file
                 // in %APPDATA\Deepfreeze\uploads\ArchiveKey.djf
                 this.LocalUpload.SavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath, 
-                    this.Archive.Key + Properties.Settings.Default.DeepfreezeJsonFormat);
+                    this.Archive.Key + Properties.Settings.Default.BigStashJsonFormat);
 
                 _log.Info("Saving \"" + this.LocalUpload.SavePath + "\".");
 
@@ -826,7 +827,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("Error saving file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while saving file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
                 throw e; 
             }
         }
@@ -854,7 +855,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("Error deleting file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while deleting file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
                 throw e; 
             }
         }
@@ -921,6 +922,7 @@ namespace DeepfreezeApp
                         // start polling the upload resource to catch the completed status change.
                         this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
                         this._refreshProgressTimer.Start();
+                        this.OperationStatus = this.Upload.Status;
                     }
                     else
                     {
@@ -931,25 +933,17 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("Error preparing an upload from file \"" + this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " error while preparing an upload from file \"" + 
+                           this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() +
+                           " with message \"" + e.Message + "\"." +
+                           this.TryGetBigStashExceptionInformation(e), e);
+
                 this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
 
-                if (e is Exceptions.DfApiException)
+                // if the archive doesn't exist on the server, simply remove the upload from the client.
+                if (this.LocalUpload != null && this.Upload != null && this.Archive == null)
                 {
-                    var response = (e as Exceptions.DfApiException).HttpResponse;
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                        this.OperationStatus = Enumerations.Status.NotFound;
-                    else
-                        this.OperationStatus = Enumerations.Status.Error;
-
-                    if (this.OperationStatus == Enumerations.Status.NotFound)
-                    {
-                        this.BusyMessage = "This upload has been deleted from the dashboard. Removing...";
-                        this.RemoveUpload();
-                    }
-                    //this.ErrorMessage = "This upload is already deleted on the server. You can safely remove it.\n";
-                    //this.ErrorMessage += "Error: " + response.StatusCode + "\n" + e.Message;
+                    this.RemoveUpload();
                 }
 
                 // this may get thrown when calculating the actual uploaded size to S3.
@@ -963,6 +957,163 @@ namespace DeepfreezeApp
             {
                 this.IsBusy = false;
                 this.BusyMessage = null;
+            }
+        }
+
+        /// <summary>
+        /// Create the archive's manifest.
+        /// </summary>
+        /// <returns></returns>
+        private ArchiveManifest CreateArchiveManifest()
+        {
+            _log.Debug("Creating the archive manifest.");
+
+            ArchiveManifest archiveManifest = new ArchiveManifest();
+            archiveManifest.ArchiveID = this.Archive.Key;
+            archiveManifest.UserID = this._deepfreezeClient.Settings.ActiveUser.ID;
+
+            string prefixToRemove;
+            
+            if (this.Upload.S3.Prefix.StartsWith("/"))
+            {
+                prefixToRemove = this.Upload.S3.Prefix.Remove(0, 1);
+            }
+            else
+            {
+                prefixToRemove = this.Upload.S3.Prefix;
+            }
+
+            foreach(var info in this.LocalUpload.ArchiveFilesInfo)
+            {
+                var fileManifest = new FileManifest()
+                {
+                    KeyName = info.KeyName.Replace(prefixToRemove, ""),
+                    FilePath = info.FilePath,
+                    Size = info.Size,
+                    LastModified = info.LastModified,
+                    MD5 = info.MD5
+                };
+
+                archiveManifest.Files.Add(fileManifest);
+            }
+
+            _log.Debug("Created the archive manifest.");
+
+            return archiveManifest;
+        }
+
+        /// <summary>
+        /// Upload the archive manifest to S3. This method includes creating the manifest file,
+        /// as well as deleting it immediately after a successful upload. If the upload is unsuccessful,
+        /// then an exception is thrown and so the upload gets paused. Manifest upload is a requirement in order
+        /// to start uploading the archive's files.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        private async Task<bool> UploadArchiveManifestAsync(CancellationToken token)
+        {
+            string tempSavePath = String.Empty;
+
+            try
+            {
+                // if the manifest has already been uploaded then skip this.
+                if (this.LocalUpload.IsArchiveManifestUploaded)
+                {
+                    _log.Debug("Archive manifest has already been uploaded in a previous session.");
+                    return true;
+                }
+
+                // Create and put to S3 the archive manifest before starting the upload.
+                // The manifest has a keyname equal to the Upload.S3.Prefix + ".manifest".
+                var archiveManifest = this.CreateArchiveManifest();
+
+                StringBuilder manifestKeyNameSb = new StringBuilder();
+
+                string prefix;
+
+                if (this._s3Info.Prefix.StartsWith("/"))
+                {
+                    prefix = this._s3Info.Prefix.Remove(0, 1);
+                }
+                else
+                {
+                    prefix = this._s3Info.Prefix;
+                }
+
+                if (prefix.EndsWith("/"))
+                {
+                    // if prefix ends with / then remove it.
+                    manifestKeyNameSb.Append(prefix.Remove(prefix.Length - 1, 1));
+                }
+                else
+                {
+                    manifestKeyNameSb.Append(prefix);
+                }
+
+                manifestKeyNameSb.Append(".manifest");
+
+                // manifest temporary name is equal to the archive with .manifest suffix.
+                tempSavePath = Path.Combine(Properties.Settings.Default.UploadsFolderPath,
+                                                    this.Archive.Key + ".manifest");
+
+                // Save the manifest file.
+                await Task.Run(() =>
+                {
+                    _log.Debug("Creating the archive manifest file on disk.");
+                    Utilities.CompressManifestToGZip(tempSavePath, archiveManifest);
+                    _log.Debug("Created the archive manifest file on disk.");
+                });
+
+                if (!File.Exists(tempSavePath))
+                {
+                    throw new BigStashException("Error creating the zip file containing the archive manifest.");
+                }
+
+                // Upload the zip containing the manifest file to S3.
+                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), tempSavePath, token).ConfigureAwait(false);
+
+                // Delete the manifest file.
+                if (File.Exists(tempSavePath))
+                {
+                    _log.Debug("Deleting the archive manifest file.");
+                    File.Delete(tempSavePath);
+                    _log.Debug("Deleted the archive manifest file.");
+                }
+
+                // On successful upload, update the LocalUpload instance and local upload file about the manifest upload.
+                if (manifestUploaded)
+                {
+                    _log.Debug("Archive manifest was successfully uploaded.");
+                    this.LocalUpload.IsArchiveManifestUploaded = manifestUploaded;
+                    await this.SaveLocalUpload();
+
+                    return manifestUploaded;
+                }
+
+                // throw an exception if the manifest isn't uploaded
+                // and the amazon s3 client didn't throw an exception.
+                throw new BigStashException("Unsuccessful manifest upload.", DeepfreezeSDK.Exceptions.ErrorType.Client);
+            }
+            catch(Exception e)
+            {
+                // Delete the manifest file.
+                if (File.Exists(tempSavePath))
+                {
+                    _log.Debug("Deleting the archive manifest file.");
+                    File.Delete(tempSavePath);
+                    _log.Debug("Deleted the archive manifest file.");
+                }
+
+                // Log the exception only if it's a BigStashException with no inner exception thrown above.
+                // If the exception was thrown from the s3 client while trying to upload the manifest file,
+                // then it's already logged.
+                if (e is BigStashException && e.InnerException == null)
+                {
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
+                               this.TryGetBigStashExceptionInformation(e), e);
+                }
+
+                throw;
             }
         }
 
@@ -1002,6 +1153,63 @@ namespace DeepfreezeApp
             this._refreshProgressTimer.Tick -= Tick;
             this._refreshProgressTimer.Stop();
             this._refreshProgressTimer = null;
+        }
+
+        private void TryMoveSelfToCompleted()
+        {
+            // get the upload manager
+            var manager = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
+
+            if (manager != null)
+            {
+                bool isInPending = manager.PendingUploads.Contains(this);
+                bool isInCompleted = manager.CompletedUploads.Contains(this);
+
+                if (this.Upload.Status == Enumerations.Status.Completed ||
+                    this.Upload.Status == Enumerations.Status.Uploaded)
+                {
+                    if (isInPending)
+                        manager.PendingUploads.Remove(this);
+
+                    if (!isInCompleted)
+                        manager.CompletedUploads.Add(this);
+
+                    manager.NotifyOfPropertyChange(() => manager.TotalPendingUploadsText);
+                    manager.NotifyOfPropertyChange(() => manager.TotalCompletedUploadsText);
+                    manager.NotifyOfPropertyChange(() => manager.HasCompletedUploads);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the request body of the sent request which resulted in the BigStashException throw.
+        /// </summary>
+        /// <param name="bgex"></param>
+        /// <returns></returns>
+        private string TryGetBigStashExceptionInformation(Exception ex)
+        {
+            if (ex is BigStashException)
+            {
+                var bgex = ex as BigStashException;
+                var request = bgex.Request;
+
+                if (request != null)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine();
+                    sb.AppendLine("Error Type: " + bgex.ErrorType);
+                    sb.AppendLine("Error Code: " + bgex.ErrorCode);
+                    sb.AppendLine("Status Code: " + bgex.StatusCode);
+                    sb.AppendLine("Failed Request:");
+                    sb.Append("    " + request.ToString().Replace(Environment.NewLine, Environment.NewLine + "        "));
+
+                    return sb.ToString();
+                }
+
+                return "";
+            }
+
+            return "";
         }
 
         #endregion
@@ -1109,6 +1317,7 @@ namespace DeepfreezeApp
                         this.Upload.Status == Enumerations.Status.Error)
                     {
                         this.OperationStatus = this.Upload.Status;
+                        this.LocalUpload.Status = this.Upload.Status.GetStringValue();
                         this._refreshProgressTimer.Stop();
                         this.ErrorMessage = null;
 
@@ -1131,7 +1340,8 @@ namespace DeepfreezeApp
             }
             catch (Exception ex)
             {
-                _log.Error("UploadViewModel.Tick threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"." +
+                           this.TryGetBigStashExceptionInformation(ex), ex);
 
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
@@ -1152,29 +1362,35 @@ namespace DeepfreezeApp
 
         }
 
-        protected override void OnDeactivate(bool close)
+        protected override async void OnDeactivate(bool close)
         {
             // Immediately send cancel to cancel any upload tasks
             // if the operation status is equal to uploading.
             // This check takes place inside PauseUpload method's body.
-            var pauseTask = this.PauseUpload(true);
 
-            bool canRunTask = !(pauseTask.Status == TaskStatus.Canceled ||
-                                pauseTask.Status == TaskStatus.Faulted ||
-                                pauseTask.Status == TaskStatus.RanToCompletion);
+            if (this.IsUploading)
+            {
+                var pauseTask = this.PauseUpload(true);
+                await pauseTask;
+            }
 
-            if (canRunTask)
-                pauseTask.RunSynchronously();
+            //bool canRunTask = !(pauseTask.Status == TaskStatus.Canceled ||
+            //                    pauseTask.Status == TaskStatus.Faulted ||
+            //                    pauseTask.Status == TaskStatus.RanToCompletion);
+
+            //if (canRunTask)
+            //    pauseTask.RunSynchronously();
 
             var saveTask = this.SaveLocalUpload(false);
+            await saveTask;
 
-            canRunTask = !(saveTask.Status == TaskStatus.Canceled ||
-                           saveTask.Status == TaskStatus.Faulted ||
-                           saveTask.Status == TaskStatus.RanToCompletion);
+            //canRunTask = !(saveTask.Status == TaskStatus.Canceled ||
+            //               saveTask.Status == TaskStatus.Faulted ||
+            //               saveTask.Status == TaskStatus.RanToCompletion);
 
-            // do a final save
-            if (canRunTask)
-                saveTask.RunSynchronously();
+            //// do a final save
+            //if (canRunTask)
+            //    saveTask.RunSynchronously();
 
             this._eventAggregator.Unsubscribe(this);
             this.Reset();

@@ -178,6 +178,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear all.
+        /// </summary>
+        internal static string ClearAllButtonContent {
+            get {
+                return ResourceManager.GetString("ClearAllButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click to remove all your completed uploads..
+        /// </summary>
+        internal static string ClearAllCompletedButtonHelpText {
+            get {
+                return ResourceManager.GetString("ClearAllCompletedButtonHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to or, if you don&apos;t want us to do this, click cancel to abandon the archive creation..
         /// </summary>
         internal static string ClickCancelToCancelText {
@@ -601,6 +619,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your completed uploads list is empty..
+        /// </summary>
+        internal static string NoCompletedUploadsHeaderText {
+            get {
+                return ResourceManager.GetString("NoCompletedUploadsHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No internet connection found. Please ensure you are connected to a network with Internet access..
         /// </summary>
         internal static string NoInternetConnectionMessage {
@@ -610,11 +637,11 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There aren&apos;t any pending uploads from this app..
+        ///   Looks up a localized string similar to Your pending uploads list is empty..
         /// </summary>
-        internal static string NoUploadsHeaderText {
+        internal static string NoPendingUploadsHeaderText {
             get {
-                return ResourceManager.GetString("NoUploadsHeaderText", resourceCulture);
+                return ResourceManager.GetString("NoPendingUploadsHeaderText", resourceCulture);
             }
         }
         
@@ -660,6 +687,15 @@ namespace DeepfreezeApp.Properties {
         internal static string PreferencesHeader {
             get {
                 return ResourceManager.GetString("PreferencesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your previous session is no longer valid. Please connect again..
+        /// </summary>
+        internal static string PreviousSessionNoLongerValidText {
+            get {
+                return ResourceManager.GetString("PreviousSessionNoLongerValidText", resourceCulture);
             }
         }
         
@@ -907,7 +943,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not authenticate. Please enter your BigStash account credentials..
+        ///   Looks up a localized string similar to Invalid email or password..
         /// </summary>
         internal static string UnauthorizedExceptionMessage {
             get {

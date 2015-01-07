@@ -149,9 +149,9 @@ namespace DeepfreezeApp.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(".djf")]
-        public string DeepfreezeJsonFormat {
+        public string BigStashJsonFormat {
             get {
-                return ((string)(this["DeepfreezeJsonFormat"]));
+                return ((string)(this["BigStashJsonFormat"]));
             }
         }
         
@@ -251,6 +251,18 @@ namespace DeepfreezeApp.Properties {
         public string BigStashNameRulesFAQURL {
             get {
                 return ((string)(this["BigStashNameRulesFAQURL"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool VerboseDebugLogging {
+            get {
+                return ((bool)(this["VerboseDebugLogging"]));
+            }
+            set {
+                this["VerboseDebugLogging"] = value;
             }
         }
         

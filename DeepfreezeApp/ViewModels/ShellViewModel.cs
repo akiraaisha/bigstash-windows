@@ -5,17 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.Drawing;
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
-using MahApps.Metro.Controls;
-using DeepfreezeModel;
 using System.IO;
-using Newtonsoft.Json;
-using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows;
 using System.Windows.Threading;
 using System.Diagnostics;
+using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
+using DeepfreezeModel;
+using Caliburn.Micro;
+using MahApps.Metro.Controls;
+using Newtonsoft.Json;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace DeepfreezeApp
 {
@@ -417,7 +417,7 @@ namespace DeepfreezeApp
             }
             catch(JsonException e)
             {
-                _log.Error("ShellViewModel.OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 // The preferences file format seems to be invalid.
                 var settings = new Settings();
@@ -431,24 +431,21 @@ namespace DeepfreezeApp
                 HasError = true;
                 this.ErrorMessage = Properties.Resources.ErrorInitializingShellViewModelGenericText;
 
-                if (e is Exceptions.DfApiException)
-                {
-                    var response = ((Exceptions.DfApiException)e).HttpResponse;
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
-                    switch (response.StatusCode)
+                if (e is BigStashException)
+                {
+                    var bgex = e as BigStashException;
+
+                    switch (bgex.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
                         case System.Net.HttpStatusCode.Forbidden:
                             HasError = false;
                             this.ErrorMessage = null;
-                            this.Disconnect("Your previous session is no longer valid. Please connect again.");
+                            this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
                             break;
                     }
-                }
-                else
-                {
-                    // for every exception other than DfApiException update the error log.
-                    _log.Error("ShellViewModel's OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
                 }
             }
             finally 
@@ -524,7 +521,7 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionRestoredMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.PendingUploads.Where(x => !x.LocalUpload.UserPaused && x.Upload.Status == Enumerations.Status.Pending).Count();
 
                     if (autoPausedUploadsCount > 0)
                         this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionRestoredMessage, BalloonIcon.Info);
@@ -533,7 +530,7 @@ namespace DeepfreezeApp
                 {
                     _log.Warn(Properties.Resources.ConnectionLostMessage);
 
-                    int autoPausedUploadsCount = uploadManagerVM.Uploads.Where(x => x.IsUploading).Count();
+                    int autoPausedUploadsCount = uploadManagerVM.PendingUploads.Where(x => x.IsUploading).Count();
 
                     if (autoPausedUploadsCount > 0)
                         this._tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.ConnectionLostMessage, BalloonIcon.Warning);

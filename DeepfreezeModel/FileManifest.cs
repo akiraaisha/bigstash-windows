@@ -1,20 +1,14 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DeepfreezeModel
 {
-    public class ArchiveFileInfo
+    public class FileManifest
     {
-        /// <summary>
-        /// File name for the S3 Object.
-        /// </summary>
-        [JsonProperty("file_name")]
-        public string FileName { get; set; }
-
         /// <summary>
         /// Key name for the S3 Object.
         /// </summary>
@@ -22,7 +16,7 @@ namespace DeepfreezeModel
         public string KeyName { get; set; }
 
         /// <summary>
-        /// File path to upload.
+        /// Original file path.
         /// </summary>
         [JsonProperty("file_path")]
         public string FilePath { get; set; }
@@ -46,21 +40,7 @@ namespace DeepfreezeModel
         public string MD5 { get; set; }
 
         /// <summary>
-        /// True if file has finished uploading after
-        /// a successful Complete Upload Request
-        /// </summary>
-        [JsonProperty("uploaded")]
-        public bool IsUploaded { get; set; }
-
-        /// <summary>
-        /// True if file has finished uploading after
-        /// a successful Complete Upload Request
-        /// </summary>
-        [JsonProperty("uploadid")]
-        public string UploadId { get; set; }
-
-        /// <summary>
-        /// Serialize ArchiveFileInfo to JSON string
+        /// Serialize FileManifest to JSON string
         /// </summary>
         /// <returns></returns>
         public string ToJson()

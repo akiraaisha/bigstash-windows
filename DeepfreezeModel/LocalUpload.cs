@@ -18,6 +18,9 @@ namespace DeepfreezeModel
         [JsonProperty("url")]
         public string Url { get; set; }
 
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
         [JsonProperty("progress")]
         public long Progress
         {
@@ -27,6 +30,9 @@ namespace DeepfreezeModel
 
         [JsonProperty("user_paused")]
         public bool UserPaused { get; set; }
+
+        [JsonProperty("archive_manifest_uploaded")]
+        public bool IsArchiveManifestUploaded { get; set; }
 
         [JsonProperty("archive_files_info")]
         public IList<ArchiveFileInfo> ArchiveFilesInfo { get; set; }

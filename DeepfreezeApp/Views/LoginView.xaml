@@ -41,7 +41,7 @@
         <TextBox 
                 x:Name="UsernameInput" 
                 MinWidth="100"
-                controls:TextboxHelper.Watermark="{Binding UsernameHelper}"
+                controls:TextBoxHelper.Watermark="{Binding UsernameHelper}"
                 cal:Message.Attach="[Event PreviewMouseLeftButtonDown] = [Action SelectAll($source, $eventArgs)]"
                 />
 
@@ -55,7 +55,7 @@
         <PasswordBox 
                 cal:Message.Attach="[Event PasswordChanged] = [Action RetrievePassword($source)]; [Event PreviewMouseLeftButtonDown] = [Action SelectAll($source, $eventArgs)]"
                 MinWidth="100"
-                controls:TextboxHelper.Watermark="{Binding PasswordHelper}"
+                controls:TextBoxHelper.Watermark="{Binding PasswordHelper}"
                 />
 
         <StackPanel Orientation="Horizontal"

@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿#define DEBUG 
+
+using Caliburn.Micro;
 using DeepfreezeSDK;
 using System;
 using System.Collections.Generic;
@@ -98,6 +100,12 @@ namespace DeepfreezeApp
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
+#if DEBUG
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+                Properties.Settings.Default.VerboseDebugLogging = true;
+#endif
+
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
@@ -106,6 +114,10 @@ namespace DeepfreezeApp
                 _log.Info("*********                                  **********");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
+
+#if DEBUG
+                _log.Debug("DEBUG MODE ON");
+#endif
 
                 // Set Application local app data folder and file paths
                 // in Application.Properties for use in this application instance.
@@ -231,7 +243,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("MefBootstrapper.CreateLocalApplicationDataDirectory threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
         }
 
@@ -314,7 +326,7 @@ namespace DeepfreezeApp
                         diplayNameValue.ToString() == Properties.Settings.Default.ApplicationFullName)
                     {
                         // If it's already set, then simply return.
-                        if (subKey.GetValue("DisplayIcon") == iconSourcePath)
+                        if (subKey.GetValue("DisplayIcon").ToString() == iconSourcePath)
                             return;
 
                         subKey.SetValue("DisplayIcon", iconSourcePath);
@@ -329,7 +341,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("MefBootstrapper.SetAddRemoveProgramsIcon threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
         }
 
@@ -439,7 +451,7 @@ namespace DeepfreezeApp
                             // write all lines back to the original file.
                             File.WriteAllLines(uploadFile, lines);
                         }
-                        catch (Exception) { throw ; }
+                        catch (Exception) { throw; }
                     });
 
                     // add the awaitable task to the replaceTasks list.
@@ -451,15 +463,16 @@ namespace DeepfreezeApp
 
                 // Delete the Deepfreeze.io directory.
                 Directory.Delete(deepfreezeFolderPath, true);
-
-                return true;
             }
             catch (Exception e)
             {
-                _log.Error("MefBootstrapper.MigrateDeepfreezeData threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-
-                return true;
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
+
+            // Delete the Deepfreeze.io directory.
+            Directory.Delete(deepfreezeFolderPath, true);
+
+            return true;
         }
 
         #endregion

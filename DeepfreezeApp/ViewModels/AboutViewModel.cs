@@ -274,21 +274,21 @@ namespace DeepfreezeApp
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                    _log.Error("CheckForUpdate threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
+                    _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
                     return;
                 }
                 catch (InvalidDeploymentException ide)
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorInvalidDeploymentExceptionGenericText;
-                    _log.Error("CheckForUpdate threw " + ide.GetType().ToString() + " with message \"" + ide.Message + "\".");
+                    _log.Error(Utilities.GetCallerName() + " threw " + ide.GetType().ToString() + " with message \"" + ide.Message + "\".");
                     return;
                 }
                 catch (InvalidOperationException ioe)
                 {
                     IsBusy = false;
                     this.ErrorMessage = Properties.Resources.ErrorInvalidOperationCheckingForUpdateGenericText;
-                    _log.Error("CheckForUpdate threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
+                    _log.Error(Utilities.GetCallerName() + " threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
                     return;
                 }
                 finally
@@ -310,7 +310,7 @@ namespace DeepfreezeApp
                     {
                         IsBusy = false;
                         this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                        _log.Error("CheckForUpdate threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
+                        _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
                     }
                 }
                 else

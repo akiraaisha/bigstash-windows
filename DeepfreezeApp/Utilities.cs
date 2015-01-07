@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 using DeepfreezeModel;
-using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace DeepfreezeApp
 {
@@ -168,6 +171,90 @@ namespace DeepfreezeApp
             }
             catch(Exception e)
             { throw e; }
+        }
+
+        /// <summary>
+        /// Get the caller method's name.
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <returns></returns>
+        public static string GetCallerName([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            return memberName;
+        }
+
+        /// <summary>
+        /// Gets the MD5 hash of the given path and encodes it in Base64.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string GetMD5Hash(string path)
+        {
+            string hash = String.Empty;
+
+            using (MD5 md5Hash = MD5.Create())
+            {
+                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(path));
+
+                // Create a new Stringbuilder to collect the bytes 
+                // and create a string.
+                StringBuilder sBuilder = new StringBuilder();
+
+                // Loop through each byte of the hashed data  
+                // and format each one as a hexadecimal string. 
+                for (int i = 0; i < data.Length; i++)
+                {
+                    sBuilder.Append(data[i].ToString("x2"));
+                }
+
+                hash = sBuilder.ToString();
+            }
+
+            return hash;
+        }
+
+        /// <summary>
+        /// Creates a zip file containing only the file from the path parameter and returns it's path.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string CreateZipFile(string path)
+        {
+            try
+            {
+                // The path to save the zip file should point in the same directory as the original file to include in the zip.
+                var zipPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".zip");
+
+                // If a zip file with the same path exists, delete it.
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+
+                using (ZipArchive newZipFile = ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create))
+                {
+                    newZipFile.CreateEntryFromFile(path, Path.GetFileName(path), CompressionLevel.Optimal);
+                }
+
+                return zipPath;
+            }
+            catch(Exception)
+            { throw; }
+        }
+
+        public static void CompressManifestToGZip(string path, ArchiveManifest manifest)
+        {
+            using (FileStream fs = File.Open(path, FileMode.Create))
+            using (GZipStream gz = new GZipStream(fs, CompressionLevel.Optimal))
+            using (StreamWriter sw = new StreamWriter(gz, Encoding.UTF8))
+            using (JsonWriter jw = new JsonTextWriter(sw))
+            
+            {
+                jw.Formatting = Formatting.Indented;
+
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(jw, manifest);
+            }
         }
 
         #region shell32_code

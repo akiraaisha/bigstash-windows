@@ -150,7 +150,7 @@
                         <TextBox x:Name="ArchiveTitle"
                                  Margin="5 5 5 0"
                                  MaxLength="255"
-                                 controls:TextboxHelper.Watermark="{Binding ArchiveTitleHelperText}" 
+                                 controls:TextBoxHelper.Watermark="{Binding ArchiveTitleHelperText}" 
                                  />
 
                         <WrapPanel Margin="5 0 5 0">

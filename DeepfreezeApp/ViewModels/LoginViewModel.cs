@@ -10,6 +10,7 @@ using System.Diagnostics;
 using Caliburn.Micro;
 
 using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.Windows.Input;
 
@@ -246,23 +247,21 @@ namespace DeepfreezeApp
                 this.HasLoginError = true;
                 this.LoginError = Properties.Resources.ErrorConnectingGenericText;
 
-                if (e is Exceptions.DfApiException)
-                {
-                    var response = ((Exceptions.DfApiException)e).HttpResponse;
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
-                    switch (response.StatusCode)
+                if (e is BigStashException)
+                {
+                    var bgex = e as BigStashException;
+
+                    switch (bgex.StatusCode)
                     {
                         case System.Net.HttpStatusCode.Unauthorized:
-                            this.LoginError += Properties.Resources.UnauthorizedExceptionMessage;
+                            this.LoginError = Properties.Resources.UnauthorizedExceptionMessage;
                             break;
                     }
                 }
                 else
                 {
-                    // if the exception is not thrown by some DF API call but from the above LocalStorage.WriteJson call
-                    // then update the error log.
-                    _log.Error("Connect threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-
                     if (!this._deepfreezeClient.IsInternetConnected)
                         this.LoginError = Properties.Resources.ErrorConnectingWithoutInternetText;
                 }

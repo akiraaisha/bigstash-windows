@@ -38,7 +38,7 @@
     <Setting Name="LogFilePath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="DeepfreezeJsonFormat" Type="System.String" Scope="Application">
+    <Setting Name="BigStashJsonFormat" Type="System.String" Scope="Application">
       <Value Profile="(Default)">.djf</Value>
     </Setting>
     <Setting Name="MinimizeOnClose" Type="System.Boolean" Scope="User">
@@ -67,6 +67,9 @@
     </Setting>
     <Setting Name="BigStashNameRulesFAQURL" Type="System.String" Scope="Application">
       <Value Profile="(Default)">https://www.bigstash.co/faq/#Why-are-some-of-my-files-not-being-uploaded</Value>
+    </Setting>
+    <Setting Name="VerboseDebugLogging" Type="System.Boolean" Scope="User">
+	  <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="BigStashUpdateMessageShown" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

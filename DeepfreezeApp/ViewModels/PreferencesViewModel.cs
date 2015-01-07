@@ -19,6 +19,8 @@ namespace DeepfreezeApp
     {
         #region members
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger((System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
+
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
 
@@ -96,7 +98,23 @@ namespace DeepfreezeApp
         public bool MinimizeOnClose
         {
             get { return Properties.Settings.Default.MinimizeOnClose; }
-            set { Properties.Settings.Default.MinimizeOnClose = value; Properties.Settings.Default.Save(); NotifyOfPropertyChange(() => this.MinimizeOnClose); }
+            set 
+            { 
+                Properties.Settings.Default.MinimizeOnClose = value; 
+                Properties.Settings.Default.Save(); 
+                NotifyOfPropertyChange(() => this.MinimizeOnClose); 
+            }
+        }
+
+        public bool VerboseDebugLogging
+        {
+            get { return Properties.Settings.Default.VerboseDebugLogging; }
+            set
+            {
+                Properties.Settings.Default.VerboseDebugLogging = value;
+                NotifyOfPropertyChange(() => this.VerboseDebugLogging);
+                FlipVerboseDebugLogging();
+            }
         }
         #endregion
 
@@ -115,6 +133,30 @@ namespace DeepfreezeApp
             {
                 registryKey.DeleteValue(curAssembly.GetName().Name, false);
             }
+        }
+
+        #endregion
+
+        #region private_methods
+
+        private void FlipVerboseDebugLogging()
+        {
+            string debugMode = String.Empty;
+
+            if (this.VerboseDebugLogging)
+            {
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                debugMode = log4net.Core.Level.Debug.DisplayName;
+            }
+            else
+            {
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Info;
+                debugMode = log4net.Core.Level.Info.DisplayName;
+            }
+
+            ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+
+            _log.Warn("Changed minimum logging level to " + debugMode + ".");
         }
 
         #endregion

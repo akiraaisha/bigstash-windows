@@ -12,6 +12,8 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 
 using DeepfreezeModel;
+using DeepfreezeSDK.Exceptions;
+using DeepfreezeSDK.Retry;
 
 using Amazon;
 using Amazon.S3;
@@ -36,7 +38,6 @@ namespace DeepfreezeSDK
         private readonly string PATCH = "PATCH";
         private readonly string DELETE = "DELETE";
 
-        // Currently pointing to beta stage api.
         private readonly string ACCEPT = "application/vnd.deepfreeze+json";
         private readonly string AUTHORIZATION = @"keyId=""hmac-key-1"",algorithm=""hmac-sha256"",headers=""(request-line) host accept date""";
 
@@ -45,14 +46,21 @@ namespace DeepfreezeSDK
         private readonly string _uploadsUri = "uploads/";
         private readonly string _archivesUri = "archives/";
 
-        private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
+        private readonly int FASTRETRY = 1;
+        private readonly int LONGRETRY = 4;
+
         #endregion
 
+        #region properties
+
+        /// <summary>
+        /// The Settings object holding the connected user, api token and endpoint.
+        /// </summary>
         public Settings Settings { get; set; }
 
-        [DllImport("wininet.dll")]
-        private extern static bool InternetGetConnectedState(out int Description, int ReservedValue);
-
+        /// <summary>
+        /// Indicating whether an active internet connection is available or not.
+        /// </summary>
         public bool IsInternetConnected
         {
             get
@@ -64,7 +72,18 @@ namespace DeepfreezeSDK
             }
         }
 
+        /// <summary>
+        /// The version of the consuming application.
+        /// </summary>
         public string ApplicationVersion { get; set; }
+
+        #endregion
+
+        #region constructors
+
+        public DeepfreezeClient() { }
+
+        #endregion
 
         #region methods_for_consuming_DF_API
 
@@ -90,16 +109,14 @@ namespace DeepfreezeSDK
         public async Task<List<Token>> GetTokensAsync()
         {
             var request = CreateHttpRequestWithSignature(GET, _tokenUri);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
-
-                response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 JObject json = JObject.Parse(content);
@@ -111,15 +128,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
-                else
-                    throw e;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -133,59 +153,48 @@ namespace DeepfreezeSDK
             // Only for this request, the client uses basic auth with user credentials.
             // For every other authorized actions, a signed request should be sent.
 
-            _log.Info("Called CreateTokenAsync.");
+            _log.Debug("Called CreateTokenAsync.");
 
-            HttpResponseMessage response = new HttpResponseMessage();
-            Token token = new Token();
+            HttpResponseMessage response;
 
             var requestUri = new UriBuilder(this.Settings.ApiEndpoint + _tokenUri).Uri;
             var name = @"{""name"":""BigStash for Windows on " + Environment.MachineName + @"""}";
             var requestContent = new StringContent(name, Encoding.UTF8, "application/json");
 
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
+            request.Content = requestContent;
+
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
                 {
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.deepfreeze+json"));
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authorizationString);
-
-                    response = await httpClient.PostAsync(requestUri, requestContent).ConfigureAwait(false);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
-
-                response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 if (content != null)
                 {
-                    token = JsonConvert.DeserializeObject<Token>(content);
+                    var token = JsonConvert.DeserializeObject<Token>(content);
                     return token;
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("CreateTokenAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("CreateTokenAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -195,19 +204,19 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<User> GetUserAsync()
         {
-            _log.Info("Called GetUserAsync.");
+            _log.Debug("Called GetUserAsync.");
 
             var request = CreateHttpRequestWithSignature(GET, _userUri);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
                 
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 JObject json = JObject.Parse(content);
@@ -220,29 +229,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("GetUserAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("GetUserAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -253,16 +251,16 @@ namespace DeepfreezeSDK
         public async Task<List<Archive>> GetArchivesAsync()
         {
             var request = CreateHttpRequestWithSignature(GET, _archivesUri);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 JObject json = JObject.Parse(content);
@@ -274,15 +272,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
-                else
-                    throw e;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -292,19 +293,19 @@ namespace DeepfreezeSDK
         /// <returns>List of Archive</returns>
         public async Task<Archive> GetArchiveAsync(string url)
         {
-            _log.Info("Called GetArchiveAsync with parameter url = \"" + url + "\".");
+            _log.Debug("Called GetArchiveAsync with parameter url = \"" + url + "\".");
 
             var request = CreateHttpRequestWithSignature(GET, url, false);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -315,30 +316,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("GetArchiveAsync with parameter url = \"" + url + 
-                        "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("GetArchiveAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -351,7 +340,7 @@ namespace DeepfreezeSDK
         /// <returns>Archive</returns>
         public async Task<Archive> CreateArchiveAsync(long size, string title)
         {
-            _log.Info("Called CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + "\".");
+            _log.Debug("Called CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + "\".");
 
             ArchivePostData data = new ArchivePostData()
             {
@@ -361,16 +350,16 @@ namespace DeepfreezeSDK
 
             var request = CreateHttpRequestWithSignature(POST, _archivesUri);
             request.Content = new StringContent(data.ToJson(), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -380,29 +369,17 @@ namespace DeepfreezeSDK
                     return archive;
                 }
                 else
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("CreateArchiveAsync with parameters size = '" + size + "' and title = \"" + title + 
-                        "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("CreateArchiveAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -413,15 +390,15 @@ namespace DeepfreezeSDK
         public async Task<List<Upload>> GetUploadsAsync()
         {
             var request = CreateHttpRequestWithSignature(GET, _uploadsUri);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 JObject json = JObject.Parse(content);
@@ -433,15 +410,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                    throw new Exceptions.DfApiException(e.Message, e, response);
-                else
-                    throw e;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -451,21 +431,20 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> GetUploadAsync(string url)
         {
-            _log.Info("Called GetUploadAsync with parameter url = \"" + url + "\".");
+            _log.Debug("Called GetUploadAsync with parameter url = \"" + url + "\".");
 
             var request = CreateHttpRequestWithSignature(GET, url, false);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
             string content = String.Empty;
 
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
-                    response = await httpClient.SendAsync(request);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
                 content = await response.Content.ReadAsStringAsync();
-                response.EnsureSuccessStatusCode();
 
                 if (content != null)
                 {
@@ -474,30 +453,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("GetUploadAsync with parameter url = \"" + url + "\" threw " + e.GetType().ToString() + 
-                        " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("GetUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -509,19 +476,17 @@ namespace DeepfreezeSDK
         /// <returns>Upload</returns>
         public async Task<Upload> InitiateUploadAsync(Archive archive)
         {
-            _log.Info("Called InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\".");
+            _log.Debug("Called InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\".");
 
             var request = CreateHttpRequestWithSignature(POST, archive.UploadUrl, false);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using(var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
-
-                response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -532,30 +497,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("InitiateUploadAsync with parameter url = \"" + archive.UploadUrl + "\" threw " + 
-                        e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("InitiateUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -568,20 +521,20 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<Upload> PatchUploadAsync(Upload upload, string patchContent)
         {
-            _log.Info("Called PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + patchContent + "\".");
+            _log.Debug("Called PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + patchContent + "\".");
 
             var request = CreateHttpRequestWithSignature(PATCH, upload.Url, false);
             request.Content = new StringContent(patchContent, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -592,30 +545,18 @@ namespace DeepfreezeSDK
                 }
                 else
                 {
-                    throw new Exceptions.DfApiException("Server replied with success but response was empty.", response);
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
                 }
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("PatchUploadAsync with parameters url = \"" + upload.Url + "\" and content = \"" + 
-                        patchContent + "\" threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("PatchUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
@@ -626,7 +567,7 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<Upload> FinishUploadAsync(Upload upload)
         {
-            _log.Info("Called FinishUploadAsync with parameter url = \"" + upload.Url + "\".");
+            _log.Debug("Called FinishUploadAsync with parameter url = \"" + upload.Url + "\".");
 
             try
             {
@@ -634,8 +575,8 @@ namespace DeepfreezeSDK
 
                 return patchedUpload;
             }
-            catch (Exception e)
-            { throw e; }
+            catch (Exception)
+            { throw; }
         }
 
         /// <summary>
@@ -645,49 +586,86 @@ namespace DeepfreezeSDK
         /// <returns>bool</returns>
         public async Task<bool> DeleteUploadAsync(Upload upload)
         {
-            _log.Info("Called DeleteUploadAsync with parameter url = \"" + upload.Url + "\".");
+            _log.Debug("Called DeleteUploadAsync with parameter url = \"" + upload.Url + "\".");
 
             var request = CreateHttpRequestWithSignature(DELETE, upload.Url, false);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
 
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
 
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
 
                 return true;
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException)
-                {
-                    Exceptions.DfApiException dfApiException;
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
 
-                    if (e.InnerException != null)
-                        dfApiException = new Exceptions.DfApiException(e.InnerException.Message, e.InnerException, response);
-                    else
-                        dfApiException = new Exceptions.DfApiException(e.Message, e, response);
-
-                    _log.Error("DeleteUploadAsync with parameter url = \"" + upload.Url + "\" threw " + 
-                        e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    _log.Error("HTTP Response Status Code: " + response.StatusCode + ".");
-                    throw dfApiException;
-                }
-                else
-                {
-                    _log.Error("DeleteUploadAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                    throw e;
-                }
+                throw this.BigStashExceptionHandler(e);
             }
         }
 
         #endregion
 
         #region private methods
+
+        /// <summary>
+        /// Create an instance of HttpClient implementing retry logic by using the RetryDelegatingHanlder DelegatingHandler.
+        /// </summary>
+        /// <returns></returns>
+        private HttpClient CreateHttpClientWithRetryLogic(int retry)
+        {
+            return new HttpClient(new RetryDelegatingHanlder(new HttpClientHandler(), retry), true);
+        }
+
+        /// <summary>
+        /// Handle and create exceptions occuring while trying requests to the BigStash API.
+        /// </summary>
+        /// <param name="innerException"></param>
+        /// <param name="memberName"></param>
+        /// <returns></returns>
+        private BigStashException BigStashExceptionHandler(Exception innerException,
+                                      [System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.Append(memberName);
+            errorMsg.Append(" threw exception:");
+
+            _log.Error(errorMsg.ToString(), innerException);
+
+            var errorType = DeepfreezeSDK.Exceptions.ErrorType.NotSet;
+
+            // If the InnerException is thrown by HttpClient.SendAsync() then
+            // the error type should be ErrorType.Service.
+            if (innerException is HttpRequestException)
+            {
+                errorType = Exceptions.ErrorType.Service;
+            }
+            else
+            {
+                errorType = Exceptions.ErrorType.Client;
+            }
+
+            return new BigStashException(memberName, innerException, errorType);
+        }
+
+        /// <summary>
+        /// Get the connected state of the OS running this client.
+        /// </summary>
+        /// <param name="Description"></param>
+        /// <param name="ReservedValue"></param>
+        /// <returns></returns>
+        [DllImport("wininet.dll")]
+        private extern static bool InternetGetConnectedState(out int Description, int ReservedValue);
 
         /// <summary>
         /// Create a HttpRequestMessage with Http-Signature authorization
@@ -771,12 +749,6 @@ namespace DeepfreezeSDK
 
             return signature;
         }
-
-        #endregion
-
-        #region constructors
-
-        public DeepfreezeClient() { }
 
         #endregion
     }

@@ -25,7 +25,8 @@ namespace DeepfreezeApp
 
         private bool _isBusy = true;
         private IList<LocalUpload> _localUploads = new List<LocalUpload>();
-        private BindableCollection<UploadViewModel> _uploads = new BindableCollection<UploadViewModel>();
+        private BindableCollection<UploadViewModel> _pendingUploads = new BindableCollection<UploadViewModel>();
+        private BindableCollection<UploadViewModel> _completedUploads = new BindableCollection<UploadViewModel>();
         private string _errorMessage;
 
         private static object _removeLock = new Object();
@@ -67,21 +68,49 @@ namespace DeepfreezeApp
             set { this._isBusy = value; NotifyOfPropertyChange(() => IsBusy); }
         }
 
-        public BindableCollection<UploadViewModel> Uploads
+        public BindableCollection<UploadViewModel> PendingUploads
         {
-            get { return this._uploads; }
-            set { this._uploads = value; NotifyOfPropertyChange(() => Uploads); }
+            get { return this._pendingUploads; }
+            set 
+            { 
+                this._pendingUploads = value; 
+                NotifyOfPropertyChange(() => PendingUploads);
+            }
         }
 
-        public string TotalUploadsText
+        public BindableCollection<UploadViewModel> CompletedUploads
+        {
+            get { return this._completedUploads; }
+            set 
+            { 
+                this._completedUploads = value; 
+                NotifyOfPropertyChange(() => CompletedUploads);
+            }
+        }
+
+        public string TotalPendingUploadsText
         {
             get
             {
                 if (IsBusy)
-                    return "Preparing Uploads...";
+                    return null;
 
-                if (this.Uploads.Count == 0)
-                    return Properties.Resources.NoUploadsHeaderText;
+                if (this.PendingUploads.Count == 0)
+                    return Properties.Resources.NoPendingUploadsHeaderText;
+                else
+                    return null;
+            }
+        }
+
+        public string TotalCompletedUploadsText
+        {
+            get
+            {
+                if (IsBusy)
+                    return null;
+
+                if (this.CompletedUploads.Count == 0)
+                    return Properties.Resources.NoCompletedUploadsHeaderText;
                 else
                     return null;
             }
@@ -91,6 +120,40 @@ namespace DeepfreezeApp
         {
             get { return this._errorMessage; }
             set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
+        }
+
+        public bool HasUploads
+        {
+            get
+            {
+                return (this.PendingUploads.Count > 0 || this.CompletedUploads.Count > 0);
+            }
+        }
+
+        public bool HasCompletedUploads
+        {
+            get
+            {
+                return this.CompletedUploads.Count > 0;
+            }
+        }
+
+        public string ClearAllButtonContent
+        { get { return Properties.Resources.ClearAllButtonContent; } }
+
+        public string ClearAllCompletedButtonHelpText
+        { get { return Properties.Resources.ClearAllCompletedButtonHelpText; } }
+
+        #endregion
+
+        #region action_methods
+
+        public void ClearAllCompletedUploads()
+        {
+            foreach(var completedUpload in this.CompletedUploads)
+            {
+                completedUpload.RemoveUpload();
+            }
         }
 
         #endregion
@@ -115,7 +178,7 @@ namespace DeepfreezeApp
                     Directory.CreateDirectory(Properties.Settings.Default.UploadsFolderPath);
 
                 var uploadFilesPaths = 
-                    await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*", SearchOption.TopDirectoryOnly))
+                    await Task.Run(() => Directory.GetFiles(Properties.Settings.Default.UploadsFolderPath, "*" + Properties.Settings.Default.BigStashJsonFormat, SearchOption.TopDirectoryOnly))
                     .ConfigureAwait(false);
 
                 _log.Info("Found " + uploadFilesPaths.Count() + " local upload files.");
@@ -155,8 +218,8 @@ namespace DeepfreezeApp
             }
             catch (Exception e) 
             {
-                _log.Error("ReadLocalUploads threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                throw e; 
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                throw; 
             }
         }
 
@@ -179,12 +242,27 @@ namespace DeepfreezeApp
                 UploadViewModel u = CreateNewUploadVM() as UploadViewModel;
                 u.LocalUpload = localUpload;
 
+                if (String.IsNullOrEmpty(localUpload.Status))
+                {
+                    localUpload.Status = Enumerations.Status.Pending.GetStringValue();
+                }
+
                 this.ActivateItem(u);
 
-                this.Uploads.Add(u);
+                Enumerations.Status status = Enumerations.GetStatusFromString(localUpload.Status);
+
+                if (status == Enumerations.Status.Completed ||
+                    status == Enumerations.Status.Uploaded)
+                {
+                    this.CompletedUploads.Add(u);
+                }
+                else
+                {
+                    this.PendingUploads.Add(u);
+                }
             }
 
-            _log.Info("Created " + this.Uploads.Count + " UploadViewModels for the upload manager.");
+            _log.Info("Created " + this.PendingUploads.Count + " UploadViewModels for the upload manager.");
         }
 
         /// <summary>
@@ -205,7 +283,8 @@ namespace DeepfreezeApp
             // create a new local upload
             var newLocalUpload = new LocalUpload()
             {
-                ArchiveFilesInfo = archiveFilesInfo.ToList()
+                ArchiveFilesInfo = archiveFilesInfo.ToList(),
+                IsArchiveManifestUploaded = false
             };
 
             newUploadVM.Archive = newArchive;
@@ -214,9 +293,10 @@ namespace DeepfreezeApp
             this._localUploads.Add(newUploadVM.LocalUpload);
 
             // add the new UploadViewModel at the beginning of the Uploads list.
-            Uploads.Insert(0, newUploadVM);
+            PendingUploads.Insert(0, newUploadVM);
 
-            NotifyOfPropertyChange(() => TotalUploadsText);
+            NotifyOfPropertyChange(() => TotalPendingUploadsText);
+            NotifyOfPropertyChange(() => this.HasUploads);
 
             // activate the new uploadviewmodel before sending the create message.
             this.ActivateItem(newUploadVM);
@@ -234,8 +314,12 @@ namespace DeepfreezeApp
         private void Reset()
         {
             this._localUploads.Clear();
-            this._uploads.Clear();
-            this.Uploads.Clear();
+            this._pendingUploads.Clear();
+            this.PendingUploads.Clear();
+            this._completedUploads.Clear();
+            this.CompletedUploads.Clear();
+
+            NotifyOfPropertyChange(() => this.HasUploads);
         }
 
         #endregion
@@ -262,16 +346,28 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(IRemoveUploadViewModelMessage message)
         {
-            if (this.Uploads.Contains(message.UploadVMToRemove))
+            if (this.PendingUploads.Contains(message.UploadVMToRemove))
             {
                 lock (_removeLock)
                 {
-                    this.Uploads.Remove(message.UploadVMToRemove);
-                    this.CloseItem(message.UploadVMToRemove);
-                    message.UploadVMToRemove = null;
-                    NotifyOfPropertyChange(() => TotalUploadsText);
+                    this.PendingUploads.Remove(message.UploadVMToRemove);
                 }
             }
+            else if (this.CompletedUploads.Contains(message.UploadVMToRemove))
+            {
+                lock (_removeLock)
+                {
+                    this.CompletedUploads.Remove(message.UploadVMToRemove);
+                }
+            }
+
+            this.DeactivateItem(message.UploadVMToRemove, true);
+            message.UploadVMToRemove = null;
+
+            NotifyOfPropertyChange(() => TotalPendingUploadsText);
+            NotifyOfPropertyChange(() => TotalCompletedUploadsText);
+            NotifyOfPropertyChange(() => this.HasUploads);
+            NotifyOfPropertyChange(() => this.HasCompletedUploads);
         }
 
         #endregion
@@ -296,7 +392,7 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error("UploadManagerViewModel.OnActivate threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 this.ErrorMessage = Properties.Resources.ErrorInitializingClientUploadsListGenericText;
             }
@@ -304,7 +400,9 @@ namespace DeepfreezeApp
             {
                 IsBusy = false;
 
-                NotifyOfPropertyChange(() => TotalUploadsText);
+                NotifyOfPropertyChange(() => TotalPendingUploadsText);
+                NotifyOfPropertyChange(() => TotalCompletedUploadsText);
+                NotifyOfPropertyChange(() => this.HasUploads);
             }
         }
 

@@ -212,8 +212,8 @@
   <data name="NoInternetConnectionMessage" xml:space="preserve">
     <value>No internet connection found. Please ensure you are connected to a network with Internet access.</value>
   </data>
-  <data name="NoUploadsHeaderText" xml:space="preserve">
-    <value>There aren't any pending uploads from this app.</value>
+  <data name="NoPendingUploadsHeaderText" xml:space="preserve">
+    <value>Your pending uploads list is empty.</value>
   </data>
   <data name="PasswordError" xml:space="preserve">
     <value>Please fill your password.</value>
@@ -287,7 +287,7 @@
     <value>Total Uploads: </value>
   </data>
   <data name="UnauthorizedExceptionMessage" xml:space="preserve">
-    <value>Could not authenticate. Please enter your BigStash account credentials.</value>
+    <value>Invalid email or password.</value>
     <comment>Used for informing the user about wrong username/password combination.</comment>
   </data>
   <data name="UploadButtonContent" xml:space="preserve">
@@ -487,5 +487,17 @@
   </data>
   <data name="WindowsDirExplanationText" xml:space="preserve">
     <value>Windows system files</value>
+  </data>
+  <data name="PreviousSessionNoLongerValidText" xml:space="preserve">
+    <value>Your previous session is no longer valid. Please connect again.</value>
+  </data>
+  <data name="NoCompletedUploadsHeaderText" xml:space="preserve">
+    <value>Your completed uploads list is empty.</value>
+  </data>
+  <data name="ClearAllButtonContent" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="ClearAllCompletedButtonHelpText" xml:space="preserve">
+    <value>Click to remove all your completed uploads.</value>
   </data>
 </root>
