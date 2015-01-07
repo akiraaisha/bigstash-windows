@@ -429,7 +429,7 @@ namespace DeepfreezeSDK
         /// Send a GET "uploads/id" request which returns a user's Deepfreeze upload.
         /// </summary>
         /// <returns>Upload</returns>
-        public async Task<Upload> GetUploadAsync(string url)
+        public async Task<Upload> GetUploadAsync(string url, bool tryForever = false)
         {
             _log.Debug("Called GetUploadAsync with parameter url = \"" + url + "\".");
 
@@ -439,7 +439,16 @@ namespace DeepfreezeSDK
 
             try
             {
-                using (var httpClient = this.CreateHttpClientWithRetryLogic(LONGRETRY))
+                var retries = LONGRETRY;
+
+                // if tryForever is true, then set retries to the Int16 max value, that is 32767,
+                // to ensure a large number of max retries are completed when transient errors occur.
+                if (tryForever)
+                {
+                    retries = Int16.MaxValue;
+                }
+
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(retries))
                 {
                     response = await httpClient.SendAsync(request).ConfigureAwait(false);
                 }
