@@ -42,6 +42,15 @@ namespace DeepfreezeSDK.Retry
             var maxBackoff = TimeSpan.FromSeconds(10);
             var deltaBackoff = TimeSpan.FromSeconds(5);
 
+            // if retryCount is equal to Int16.MaxValue (32767)
+            // then increase the backoff intervals.
+            if (retryCount == Int16.MaxValue)
+            {
+                minBackoff = TimeSpan.FromSeconds(1);
+                maxBackoff = TimeSpan.FromSeconds(300);
+                deltaBackoff = TimeSpan.FromSeconds(10);
+            }
+
             // 30 60 120 240
 
             var exponentialBackoff = new ExponentialBackoff(retryCount, minBackoff, maxBackoff, deltaBackoff);
