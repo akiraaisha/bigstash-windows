@@ -16,7 +16,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>https://www.bigstash.co/apps/windows/</PublishUrl>
+    <PublishUrl>C:\bigstash-deploy\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -32,10 +32,10 @@
     <TargetCulture>en</TargetCulture>
     <ProductName>BigStash for Windows</ProductName>
     <PublisherName>The Longaccess Company</PublisherName>
-    <MinimumRequiredVersion>1.2.0.0</MinimumRequiredVersion>
+    <MinimumRequiredVersion>1.3.0.0</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
