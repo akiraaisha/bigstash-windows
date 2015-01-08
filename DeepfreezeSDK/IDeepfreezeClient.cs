@@ -56,7 +56,7 @@ namespace DeepfreezeSDK
         /// Send a GET "uploads/id" request which returns a user's Deepfreeze upload.
         /// </summary>
         /// <returns>Upload</returns>
-        Task<Upload> GetUploadAsync(string url);
+        Task<Upload> GetUploadAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Send a POST "Upload.Url"-url request which returns a Deepfreeze upload.

@@ -117,23 +117,61 @@
                    Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
                    />
 
-            <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
+            <WrapPanel Grid.Row="1" Grid.ColumnSpan="2">
+                
+                <TextBlock 
                        Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Left"
                        FontSize="14"
                        >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <Trigger Property="Text" Value="Error">
-                                <Setter Property="Foreground" Value="Red" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="Error">
+                                    <Setter Property="Foreground" Value="Red" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
+                <!--<Button ToolTip="{Binding OperationStatus, Converter={StaticResource UploadedStatusToWaitingForCompletedTextConverter}}" 
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="12"
+                        Style="{DynamicResource MetroWindowButtonStyle}"
+                        Visibility="{Binding IsWaitingForCompletedStatus, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Margin="2 0 0 0"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        
+                        >
+
+                    <WrapPanel>
+                        <TextBlock Text="(" />
+
+                        <Rectangle Width="10"
+                               Height="10">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Uniform"
+                                         Visual="{StaticResource appbar_question}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <TextBlock Text=")" />
+                    </WrapPanel>
+                    
+                </Button>-->
+
+                <!--<TextBlock Text="{Binding OperationStatus, Converter={StaticResource UploadedStatusToWaitingForCompletedTextConverter}}"
+                           Visibility="{Binding IsWaitingForCompletedStatus, Converter={StaticResource BoolToVisibilityConverter}}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           Margin="5 0 0 0"
+                           />-->
+                
+            </WrapPanel>
+            
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
                            Text="{Binding ProgressText}"
                            VerticalAlignment="Center"
