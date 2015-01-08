@@ -835,7 +835,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Completed.
+        ///   Looks up a localized string similar to Archived.
         /// </summary>
         internal static string StatusCompletedText {
             get {

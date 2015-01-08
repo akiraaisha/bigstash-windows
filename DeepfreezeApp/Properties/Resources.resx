@@ -253,7 +253,7 @@
     <value>https://www.bigstash.co/account/</value>
   </data>
   <data name="StatusCompletedText" xml:space="preserve">
-    <value>Completed</value>
+    <value>Archived</value>
   </data>
   <data name="StatusErrorNotificationText" xml:space="preserve">
     <value>There was an error freezing Archive</value>
