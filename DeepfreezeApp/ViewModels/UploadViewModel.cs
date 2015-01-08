@@ -60,6 +60,9 @@ namespace DeepfreezeApp
 
         private DispatcherTimer _refreshProgressTimer;
 
+        private bool _fetchUploadTakingTooLong = false;
+        private bool _isWaitingForCompletedStatus = false;
+
         #endregion
 
         #region constructor
@@ -227,6 +230,29 @@ namespace DeepfreezeApp
             get { return this._deepfreezeClient.IsInternetConnected; }
         }
 
+        public bool FetchUploadTakingTooLong
+        {
+            get { return this._fetchUploadTakingTooLong; }
+            set
+            {
+                this._fetchUploadTakingTooLong = value;
+                NotifyOfPropertyChange(() => this.FetchUploadTakingTooLong);
+            }
+        }
+
+        public bool IsWaitingForCompletedStatus
+        {
+            get { return this._isWaitingForCompletedStatus; }
+            set
+            {
+                this._isWaitingForCompletedStatus = value;
+                NotifyOfPropertyChange(() => this.IsWaitingForCompletedStatus);
+            }
+        }
+
+        public string FetchUploadTakingTooLongText
+        { get { return Properties.Resources.FetchUploadTakingTooLongText; } }
+
         #endregion
 
         #region action_methods
@@ -370,9 +396,11 @@ namespace DeepfreezeApp
                 // and start the timer again.
                 this._refreshProgressTimer.Start();
 
-                var notification = IoC.Get<INotificationMessage>();
-                notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.UploadedNotificationText;
-                this._eventAggregator.PublishOnBackgroundThread(notification);
+                this.IsWaitingForCompletedStatus = true;
+
+                //var notification = IoC.Get<INotificationMessage>();
+                //notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.UploadedNotificationText;
+                //this._eventAggregator.PublishOnBackgroundThread(notification);
             }
             catch (Exception e)
             {
@@ -636,11 +664,22 @@ namespace DeepfreezeApp
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        private async Task FetchUploadAsync(string url)
+        private async Task FetchUploadAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                this.Upload = await this._deepfreezeClient.GetUploadAsync(url).ConfigureAwait(false);
+                // Add a timer with 2 minutes intervals to monitor slow upload fetches.
+                // If the timer's tick event fires, then the DelayTick handler will update the UI to inform about the delay.
+                // TODO: While this is already in place, there aren't any UI properties bound 
+                // to the UploadViewModel.FetchUploadTakingTooLong property, so the user won't see any difference.
+                // This is for future functionality.
+                DispatcherTimer delayTimer = new DispatcherTimer(new TimeSpan(0, 2, 0), DispatcherPriority.Normal, DelayTick, Application.Current.Dispatcher);
+                delayTimer.Start();
+
+                this.Upload = await this._deepfreezeClient.GetUploadAsync(url, tryForever, cancellationToken).ConfigureAwait(false);
+
+                delayTimer.Stop();
+                delayTimer = null;
 
                 if (this.Upload != null)
                 {
@@ -889,7 +928,7 @@ namespace DeepfreezeApp
                     // in case it is a new upload.
                     isExistingUpload = true;
 
-                    await this.FetchUploadAsync(this.LocalUpload.Url).ConfigureAwait(false);
+                    await this.FetchUploadAsync(this.LocalUpload.Url, true).ConfigureAwait(false);
                 }
 
                 if (this.Archive == null || this._isRefreshing)
@@ -923,6 +962,7 @@ namespace DeepfreezeApp
                         this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
                         this._refreshProgressTimer.Start();
                         this.OperationStatus = this.Upload.Status;
+                        this.IsWaitingForCompletedStatus = true;
                     }
                     else
                     {
@@ -1165,8 +1205,7 @@ namespace DeepfreezeApp
                 bool isInPending = manager.PendingUploads.Contains(this);
                 bool isInCompleted = manager.CompletedUploads.Contains(this);
 
-                if (this.Upload.Status == Enumerations.Status.Completed ||
-                    this.Upload.Status == Enumerations.Status.Uploaded)
+                if (this.Upload.Status == Enumerations.Status.Completed)
                 {
                     if (isInPending)
                         manager.PendingUploads.Remove(this);
@@ -1311,12 +1350,13 @@ namespace DeepfreezeApp
                 if (this.Upload.Status == Enumerations.Status.Uploaded
                     && this._deepfreezeClient.IsInternetConnected)
                 {
-                    await this.FetchUploadAsync(this.Upload.Url);
+                    await this.FetchUploadAsync(this.Upload.Url, true);
 
                     if (this.Upload.Status == Enumerations.Status.Completed ||
                         this.Upload.Status == Enumerations.Status.Error)
                     {
                         this.OperationStatus = this.Upload.Status;
+                        this.IsWaitingForCompletedStatus = false;
                         this.LocalUpload.Status = this.Upload.Status.GetStringValue();
                         this._refreshProgressTimer.Stop();
                         this.ErrorMessage = null;
@@ -1345,6 +1385,13 @@ namespace DeepfreezeApp
 
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
+        }
+
+        private void DelayTick(object sender, object e)
+        {
+            System.Action updateUIForDelay = () => this.FetchUploadTakingTooLong = true;
+            Application.Current.Dispatcher.BeginInvoke(updateUIForDelay);
+            ((DispatcherTimer)sender).Stop();
         }
 
         protected override async void OnActivate()
