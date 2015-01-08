@@ -429,7 +429,7 @@ namespace DeepfreezeSDK
         /// Send a GET "uploads/id" request which returns a user's Deepfreeze upload.
         /// </summary>
         /// <returns>Upload</returns>
-        public async Task<Upload> GetUploadAsync(string url, bool tryForever = false)
+        public async Task<Upload> GetUploadAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             _log.Debug("Called GetUploadAsync with parameter url = \"" + url + "\".");
 
@@ -450,7 +450,7 @@ namespace DeepfreezeSDK
 
                 using (var httpClient = this.CreateHttpClientWithRetryLogic(retries))
                 {
-                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                    response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 }
 
                 content = await response.Content.ReadAsStringAsync();
