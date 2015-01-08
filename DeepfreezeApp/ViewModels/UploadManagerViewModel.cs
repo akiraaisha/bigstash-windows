@@ -148,12 +148,23 @@ namespace DeepfreezeApp
 
         #region action_methods
 
+        /// <summary>
+        /// Clear the completed upload list. Subsequently use each upload's remove method, without sending a removal message
+        /// (as is the remove method's normal functionality). Finally call Clear() on the CompletedUploads list.
+        /// </summary>
         public void ClearAllCompletedUploads()
         {
             foreach(var completedUpload in this.CompletedUploads)
             {
-                completedUpload.RemoveUpload();
+                // Call each UploadViewModel's remove method without sending a remove message to the upload manager,
+                // since it's the manager that sends the removal request.
+                completedUpload.RemoveUpload(true);
             }
+
+            this.CompletedUploads.Clear();
+            NotifyOfPropertyChange(() => TotalCompletedUploadsText);
+            NotifyOfPropertyChange(() => this.HasUploads);
+            NotifyOfPropertyChange(() => this.HasCompletedUploads);
         }
 
         #endregion
