@@ -268,7 +268,7 @@
     <value>Pending</value>
   </data>
   <data name="StatusUploadedText" xml:space="preserve">
-    <value>Uploaded</value>
+    <value>Uploaded. Waiting for server verification.</value>
   </data>
   <data name="StatusUploadingText" xml:space="preserve">
     <value>Uploading</value>
@@ -499,5 +499,11 @@
   </data>
   <data name="ClearAllCompletedButtonHelpText" xml:space="preserve">
     <value>Click to remove all your completed uploads.</value>
+  </data>
+  <data name="FetchUploadTakingTooLongText" xml:space="preserve">
+    <value>Status refresh is taking too long. We're still trying...</value>
+  </data>
+  <data name="WaitingForCompletedStatusText" xml:space="preserve">
+    <value>Waiting for the service to verify your files.</value>
   </data>
 </root>

@@ -565,6 +565,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status refresh is taking too long. We&apos;re still trying....
+        /// </summary>
+        internal static string FetchUploadTakingTooLongText {
+            get {
+                return ResourceManager.GetString("FetchUploadTakingTooLongText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The following files will not be archived:.
         /// </summary>
         internal static string FollowingFilesNotArchivedText {
@@ -871,7 +880,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploaded.
+        ///   Looks up a localized string similar to Uploaded. Waiting for server verification..
         /// </summary>
         internal static string StatusUploadedText {
             get {
@@ -1056,6 +1065,15 @@ namespace DeepfreezeApp.Properties {
         internal static string VersionHeaderText {
             get {
                 return ResourceManager.GetString("VersionHeaderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting for the service to verify your files..
+        /// </summary>
+        internal static string WaitingForCompletedStatusText {
+            get {
+                return ResourceManager.GetString("WaitingForCompletedStatusText", resourceCulture);
             }
         }
         
