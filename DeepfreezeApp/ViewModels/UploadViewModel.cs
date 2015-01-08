@@ -29,6 +29,9 @@ namespace DeepfreezeApp
     {
         #region fields
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(UploadViewModel));
+        private static object lockObject = new Object();
+
+        private const int INTERVAL_FOR_FAST_COMPLETION_CHECK = 5;
 
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
@@ -389,10 +392,12 @@ namespace DeepfreezeApp
 
                 this.OperationStatus = this.Upload.Status;
                 this.LocalUpload.Status = this.Upload.Status.GetStringValue();
-                this.TryMoveSelfToCompleted();
+                
+                // no need to try and move to completed, the timer tick handles it.
+                //this.TryMoveSelfToCompleted();
 
-                // set timer interval to 1 minute to catch upload completed status change.
-                this._refreshProgressTimer.Interval = new TimeSpan(0, 1, 0);
+                // set timer interval to 10 seconds to catch fast archive completion. On it's first tick it will change to 1 minute intervals.
+                this._refreshProgressTimer.Interval = new TimeSpan(0, 0, INTERVAL_FOR_FAST_COMPLETION_CHECK);
                 // and start the timer again.
                 this._refreshProgressTimer.Start();
 
@@ -543,7 +548,7 @@ namespace DeepfreezeApp
             { this.IsBusy = false; }
         }
 
-        public void RemoveUpload()
+        public void RemoveUpload(bool skipRemoveMessage = false)
         {
             try
             {
@@ -554,9 +559,12 @@ namespace DeepfreezeApp
 
                 this.DeleteLocalUpload();
 
-                var removeUploadMessage = IoC.Get<IRemoveUploadViewModelMessage>();
-                removeUploadMessage.UploadVMToRemove = this;
-                this._eventAggregator.PublishOnBackgroundThread(removeUploadMessage);
+                if (!skipRemoveMessage)
+                {
+                    var removeUploadMessage = IoC.Get<IRemoveUploadViewModelMessage>();
+                    removeUploadMessage.UploadVMToRemove = this;
+                    this._eventAggregator.PublishOnBackgroundThread(removeUploadMessage);
+                }
             }
             catch(Exception e)
             {
@@ -1208,10 +1216,20 @@ namespace DeepfreezeApp
                 if (this.Upload.Status == Enumerations.Status.Completed)
                 {
                     if (isInPending)
-                        manager.PendingUploads.Remove(this);
+                    {
+                        lock (lockObject)
+                        {
+                            manager.PendingUploads.Remove(this);
+                        }
+                    }
 
                     if (!isInCompleted)
-                        manager.CompletedUploads.Add(this);
+                    {
+                        lock (lockObject)
+                        {
+                            manager.CompletedUploads.Add(this);
+                        }
+                    }
 
                     manager.NotifyOfPropertyChange(() => manager.TotalPendingUploadsText);
                     manager.NotifyOfPropertyChange(() => manager.TotalCompletedUploadsText);
@@ -1329,6 +1347,17 @@ namespace DeepfreezeApp
 
         private async void Tick(object sender, object e)
         {
+            // When the timer is initialized in StartUpload to check for the completed status,
+            // it's interval is set to 10 seconds to catch fast archive completions. So after it's first tick
+            // change to interval to 1 minute to check in larger intervals.
+            if (this._refreshProgressTimer.Interval.Seconds == INTERVAL_FOR_FAST_COMPLETION_CHECK &&
+                this._refreshProgressTimer.Interval.Minutes == 0)
+            {
+                this._refreshProgressTimer.Stop();
+                this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 10);
+                this._refreshProgressTimer.Start();
+            }
+            
             try
             {
                 if (this.Upload.Status == Enumerations.Status.Pending
