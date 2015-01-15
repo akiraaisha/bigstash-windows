@@ -32,6 +32,7 @@ namespace DeepfreezeApp
         private string _errorMessage;
         private string _updateMessage = Properties.Resources.UpToDateText;
         private bool _restartNeeded = false;
+        private bool _updateFound = false;
 
         #endregion
 
@@ -182,6 +183,22 @@ namespace DeepfreezeApp
             }
         }
 
+        public bool UpdateFound
+        {
+            get
+            {
+                return this._updateFound;
+            }
+            set
+            {
+                this._updateFound = value;
+                NotifyOfPropertyChange(() => this.UpdateFound);
+            }
+        }
+
+        public string UpdateFoundText
+        { get { return Properties.Resources.UpdateFoundText; } }
+
         #endregion
 
         #region methods
@@ -218,61 +235,51 @@ namespace DeepfreezeApp
                 return;
             }
 
+            IsUpToDate = false;
+            this.IsBusy = true;
+
+            // set UI message to checking for update
+            this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
+
             try
             {
-                IsUpToDate = false;
-                this.IsBusy = true;
+                // check for update
+                var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
+                var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
 
-                this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
+                if (!hasUpdates)
+                {
+                    // no updates found, update the UI and return
+                    this.IsBusy = false;
+                    this.IsUpToDate = true;
+                    this.RestartNeeded = false;
+                    this.UpdateFound = false;
+                    this.UpdateMessage = Properties.Resources.UpToDateText;
+                    return;
+                }
 
-                var releaseEntry = await SquirrelHelper.SilentUpdate();
+                // Update found, continue with download
+                this.UpdateMessage = Properties.Resources.DowloadingUpdateText;
+                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply);
 
-                //if (String.Compare(releaseEntry.Version.ToString(), SquirrelHelper.GetCurrentlyInstalledVersion()) > 1)
-                //{
+                // Update donwload finished, continue with install
+                this.UpdateMessage = Properties.Resources.InstallingUpdateText;
+                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
 
-                //}
-
-                // insert a delay here so the user has a chance to actually see the messages
-                // and know that the check is ongoing.
-                await Task.Delay(1000);
+                // update the UI to show that a restart is needed.
+                this.RestartNeeded = true;  
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                IsBusy = false;
-                this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                return;
+                this.UpdateMessage = Properties.Resources.UpToDateText;
+                this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
             }
             finally
             {
-                if (String.IsNullOrEmpty(this.ErrorMessage))
-                {
-                    this.UpdateMessage = Properties.Resources.UpdateVersionInfoOutdatedText;
-                }
+                this.IsBusy = false;
             }
-
-                //if (info.UpdateAvailable)
-                //{
-                //    try
-                //    {
-                //        this.UpdateMessage = Properties.Resources.UpdatingToLatestVersionText;
-                //        ad.UpdateAsync();
-                //    }
-                //    catch (DeploymentDownloadException dde)
-                //    {
-                //        IsBusy = false;
-                //        this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                //        _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
-                //    }
-                //}
-                //else
-                //{
-                //    IsBusy = false;
-                //    IsUpToDate = true;
-                //    RestartNeeded = false;
-                //    this.UpdateMessage = Properties.Resources.UpToDateText;
-                //}
         }
+
 
         public void RestartApplication()
         {
