@@ -28,6 +28,7 @@ namespace DeepfreezeApp
         public MefBootstrapper()
         {
             Initialize();
+            SquirrelHelper.CustomSquirrelSetup();
         }
 
         protected override void Configure()
@@ -83,7 +84,7 @@ namespace DeepfreezeApp
                 
             else
             {
-                // Else go on with normal startup.
+                // Else go on with normal startup.           
 
                 // Change default ClickOnce icon in Programs and Features entry,
                 // if it's not already set.
