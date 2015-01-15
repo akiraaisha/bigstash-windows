@@ -241,7 +241,7 @@
     <value>Remove</value>
   </data>
   <data name="RestartNeededText" xml:space="preserve">
-    <value>Click Restart for changes to take effect.</value>
+    <value>Click Restart to install update.</value>
   </data>
   <data name="ResumeButtonContent" xml:space="preserve">
     <value>Resume</value>
@@ -405,7 +405,7 @@
     <value>You can't delete your upload without an active Internet connection.</value>
   </data>
   <data name="DowloadingUpdateText" xml:space="preserve">
-    <value>Downloading... </value>
+    <value>Downloading the update... </value>
   </data>
   <data name="ResumeButtonDisabledTooltipText" xml:space="preserve">
     <value>You can't resume your upload without an active Internet connection.</value>
@@ -505,5 +505,17 @@
   </data>
   <data name="WaitingForCompletedStatusText" xml:space="preserve">
     <value>Waiting for the service to verify your files.</value>
+  </data>
+  <data name="ErrorCheckingForUpdateGenericText" xml:space="preserve">
+    <value>There was an error while checking for updates.</value>
+  </data>
+  <data name="NoUpdatesFoundText" xml:space="preserve">
+    <value>No updates found.</value>
+  </data>
+  <data name="UpdateFoundText" xml:space="preserve">
+    <value>There are updates to be installed. Click to download and install them.</value>
+  </data>
+  <data name="InstallingUpdateText" xml:space="preserve">
+    <value>Installing the update...</value>
   </data>
 </root>
