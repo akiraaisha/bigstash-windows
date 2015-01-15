@@ -57,3 +57,4 @@ using System.Windows;
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "Log4Net.config", Watch = true)]
 [assembly: NeutralResourcesLanguageAttribute("en")]
 [assembly: GuidAttribute("0686143D-9199-435A-987F-6DC09AC0DAAF")]
+[assembly: AssemblyMetadata("SquirrelAwareVersion", "1")]
