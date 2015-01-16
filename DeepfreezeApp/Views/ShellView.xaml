@@ -79,6 +79,19 @@
     
     <controls:MetroWindow.RightWindowCommands>
         <controls:WindowCommands>
+
+            <Button ToolTip="{Binding UpdateFoundButtonTooltipText}" 
+                    FontFamily="Segoe UI Symbol"
+                    FontSize="16"
+                    Style="{DynamicResource MetroWindowButtonStyle}"
+                    cal:Message.Attach="ToggleAboutFlyout"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    Visibility="{Binding ShowRestartNeeded, Converter={StaticResource BoolToVisibilityConverter}}"
+                    >
+
+                <Rectangle Style="{StaticResource UpdateFoundIconStyle}" />
+
+            </Button>
             
             <Button ToolTip="{Binding PreferencesHeader}" 
                     FontFamily="Segoe UI Symbol"
@@ -101,11 +114,11 @@
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
                     >
-
-                <Rectangle Style="{StaticResource AboutIconStyle}" />
+                
+                    <Rectangle Style="{StaticResource AboutIconStyle}" />
 
             </Button>
-
+            
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
 
