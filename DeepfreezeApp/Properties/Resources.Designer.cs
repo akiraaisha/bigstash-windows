@@ -124,7 +124,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic check and installation of updates, every time the About page is opened..
+        ///   Looks up a localized string similar to Automatically check for updates..
         /// </summary>
         internal static string CheckForUpdateAutomaticText {
             get {
@@ -772,7 +772,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click Restart to install update..
+        ///   Looks up a localized string similar to Restart to install updates..
         /// </summary>
         internal static string RestartNeededText {
             get {
@@ -993,6 +993,15 @@ namespace DeepfreezeApp.Properties {
         internal static string UpdateCompletedText {
             get {
                 return ResourceManager.GetString("UpdateCompletedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new software update is available..
+        /// </summary>
+        internal static string UpdateFoundButtonTooltipText {
+            get {
+                return ResourceManager.GetString("UpdateFoundButtonTooltipText", resourceCulture);
             }
         }
         

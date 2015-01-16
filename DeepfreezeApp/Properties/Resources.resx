@@ -141,7 +141,7 @@
     <comment>Used for cancel button content.</comment>
   </data>
   <data name="CheckForUpdateAutomaticText" xml:space="preserve">
-    <value>Automatic check and installation of updates, every time the About page is opened.</value>
+    <value>Automatically check for updates.</value>
   </data>
   <data name="CheckForUpdateText" xml:space="preserve">
     <value>Check for update</value>
@@ -241,7 +241,7 @@
     <value>Remove</value>
   </data>
   <data name="RestartNeededText" xml:space="preserve">
-    <value>Click Restart to install update.</value>
+    <value>Restart to install updates.</value>
   </data>
   <data name="ResumeButtonContent" xml:space="preserve">
     <value>Resume</value>
@@ -517,5 +517,8 @@
   </data>
   <data name="InstallingUpdateText" xml:space="preserve">
     <value>Installing the update...</value>
+  </data>
+  <data name="UpdateFoundButtonTooltipText" xml:space="preserve">
+    <value>A new software update is available.</value>
   </data>
 </root>
