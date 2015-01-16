@@ -268,6 +268,18 @@ namespace DeepfreezeApp
 
             try
             {
+                // Verify that old ClickOnce deployments get migrated to Squirrel.
+                var squirrelMigrationDone = await SquirrelHelper.TryInstallSquirrelAppFromClickOnceAncestor();
+
+                if (squirrelMigrationDone)
+                {
+                    // update the UI to show that a restart is needed.
+                    this.IsBusy = false;
+                    this.RestartNeeded = true;
+                    this.UpdateMessage = Properties.Resources.RestartNeededText;
+                    return;
+                }
+
                 // check for update
                 var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
                 var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
@@ -302,7 +314,7 @@ namespace DeepfreezeApp
             }
             catch (Exception)
             {
-                this.UpdateMessage = Properties.Resources.UpToDateText;
+                this.UpdateMessage = null;
                 this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
             }
             finally
