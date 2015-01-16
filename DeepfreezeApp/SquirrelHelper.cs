@@ -145,7 +145,7 @@ namespace DeepfreezeApp
         /// </summary>
         public static void RestartApp()
         {
-            _log.Debug("Called " + Utilities.GetCallerName() + " with UpdateLocation = \"" + updateLocation + "\" and AppName = " + appName + "\".");
+            _log.Debug("Called " + Utilities.GetCallerName() + ".");
 
             // Use Squirrel's restart method.
             UpdateManager.RestartApp();
