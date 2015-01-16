@@ -82,6 +82,7 @@ namespace DeepfreezeApp
             set
             {
                 Properties.Settings.Default.VerboseDebugLogging = value;
+                Properties.Settings.Default.Save(); 
                 NotifyOfPropertyChange(() => this.VerboseDebugLogging);
                 FlipVerboseDebugLogging();
             }
@@ -147,11 +148,11 @@ namespace DeepfreezeApp
             
             // After the first ever login, set MinimizeOnClose to true.
             // Future login actions will simply ignore this.
-            if (Properties.Settings.Default.IsFirstLogin)
-            {
-                Properties.Settings.Default.IsFirstLogin = false;
-                this.MinimizeOnClose = true;
-            }
+            //if (Properties.Settings.Default.IsFirstLogin)
+            //{
+            //    Properties.Settings.Default.IsFirstLogin = false;
+            //    this.MinimizeOnClose = true;
+            //}
 
             this.ActivateItem(this.UserVM);
 
