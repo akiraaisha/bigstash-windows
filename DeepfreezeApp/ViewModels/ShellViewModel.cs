@@ -21,7 +21,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>
+        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartAppMessage>
     {
         #region fields
 
@@ -50,6 +50,7 @@ namespace DeepfreezeApp
 
         private DispatcherTimer _connectionTimer;
         private bool _isInternetConnected = true;
+        private bool _restartNeeded = false;
 
         #endregion
 
@@ -126,7 +127,12 @@ namespace DeepfreezeApp
         public bool IsAboutFlyoutOpen
         {
             get { return this._isAboutFlyoutOpen; }
-            set { this._isAboutFlyoutOpen = value; NotifyOfPropertyChange(() => IsAboutFlyoutOpen); }
+            set 
+            { 
+                this._isAboutFlyoutOpen = value; 
+                NotifyOfPropertyChange(() => this.IsAboutFlyoutOpen);
+                NotifyOfPropertyChange(() => this.ShowRestartNeeded);
+            }
         }
 
         public string PreferencesHeader
@@ -146,6 +152,20 @@ namespace DeepfreezeApp
             get { return this._isInternetConnected; }
             set { this._isInternetConnected = value; NotifyOfPropertyChange(() => IsInternetConnected); }
         }
+
+        public bool ShowRestartNeeded
+        {
+            get 
+            {
+                if (this.IsAboutFlyoutOpen)
+                    return false;
+                else
+                    return this._restartNeeded; 
+            }
+        }
+
+        public string UpdateFoundButtonTooltipText
+        { get { return Properties.Resources.UpdateFoundButtonTooltipText; } }
 
         #endregion
 
@@ -171,14 +191,6 @@ namespace DeepfreezeApp
             if (IsAboutFlyoutOpen)
             {
                 IsPreferencesFlyoutOpen = false;
-
-                // send a message with the aggregator to check for updates
-                // only if the user has automatic updates settings enabled.\
-                if (Properties.Settings.Default.DoAutomaticUpdates)
-                {
-                    var checkForUpdateMessage = IoC.Get<ICheckForUpdateMessage>() as CheckForUpdatesMessage;
-                    this._eventAggregator.PublishOnUIThread(checkForUpdateMessage);
-                }
             }
         }
 
@@ -293,6 +305,19 @@ namespace DeepfreezeApp
                         _shellWindow.ShowInTaskbar = true;
                         break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Handle RestartAppMessage
+        /// </summary>
+        /// <param name="message"></param>
+        public void Handle(IRestartAppMessage message)
+        {
+            if (message != null)
+            {
+                this._restartNeeded = message.RestartNeeded;
+                NotifyOfPropertyChange(() => this.ShowRestartNeeded);
             }
         }
 
