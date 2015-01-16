@@ -40,11 +40,46 @@
                 <local:BoolToVisibility />
             </local:ValueConverterGroup>
             <local:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
+
+            <VisualBrush x:Key="SettingsIconVisualBrush" 
+                         Stretch="Uniform"
+                         Visual="{StaticResource appbar_settings}" 
+                         />
+            
+            <VisualBrush x:Key="AboutIconVisualBrush" 
+                         Stretch="Uniform"
+                         Visual="{StaticResource appbar_information}" 
+                         />
+
+            <VisualBrush x:Key="UpdateFoundIconVisualBrush" 
+                         Stretch="Uniform"
+                         Visual="{StaticResource appbar_arrow_up}" 
+                         />
+
+            <Style x:Key="SettingsIconStyle" TargetType="{x:Type Rectangle}">
+                <Setter Property="Fill" Value="{StaticResource SettingsIconVisualBrush}" />
+                <Setter Property="Height" Value="15" />
+                <Setter Property="Width" Value="15" />
+            </Style>
+            
+            <Style x:Key="AboutIconStyle" TargetType="{x:Type Rectangle}">
+                <Setter Property="Fill" Value="{StaticResource AboutIconVisualBrush}" />
+                <Setter Property="Height" Value="15" />
+                <Setter Property="Width" Value="15" />
+            </Style>
+
+            <Style x:Key="UpdateFoundIconStyle" TargetType="{x:Type Rectangle}">
+                <Setter Property="Fill" Value="{StaticResource UpdateFoundIconVisualBrush}" />
+                <Setter Property="Height" Value="15" />
+                <Setter Property="Width" Value="15" />
+            </Style>
+
         </ResourceDictionary>
     </Window.Resources>
     
     <controls:MetroWindow.RightWindowCommands>
         <controls:WindowCommands>
+            
             <Button ToolTip="{Binding PreferencesHeader}" 
                     FontFamily="Segoe UI Symbol"
                     FontSize="16"
@@ -54,13 +89,7 @@
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
                     >
                 
-                <Rectangle Width="15"
-                           Height="15">
-                    <Rectangle.Fill>
-                        <VisualBrush Stretch="Fill"
-                                     Visual="{StaticResource appbar_settings}" />
-                    </Rectangle.Fill>
-                </Rectangle>
+                <Rectangle Style="{StaticResource SettingsIconStyle}" />
                 
             </Button>
 
@@ -73,13 +102,7 @@
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
                     >
 
-                <Rectangle Width="15"
-                           Height="15">
-                    <Rectangle.Fill>
-                        <VisualBrush Stretch="Uniform"
-                                     Visual="{StaticResource appbar_information}" />
-                    </Rectangle.Fill>
-                </Rectangle>
+                <Rectangle Style="{StaticResource AboutIconStyle}" />
 
             </Button>
 
