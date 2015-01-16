@@ -12,7 +12,6 @@ namespace DeepfreezeApp
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SquirrelHelper));
         private const string DEBUGVERSION = "debug";
-        private static string updateURL = Properties.Settings.Default.BigStashUpdateURL;
 
         public static string GetAppName()
         {
@@ -43,7 +42,7 @@ namespace DeepfreezeApp
             //updateURL = Properties.Settings.Default.LocalUpdateURL;
 #endif
 
-            using (var mgr = new Squirrel.UpdateManager(updateURL, Properties.Settings.Default.ApplicationName, Squirrel.FrameworkVersion.Net45))
+            using (var mgr = new Squirrel.UpdateManager(updateUrl, Properties.Settings.Default.ApplicationName, Squirrel.FrameworkVersion.Net45))
             {
                 if (!isDebug)
                 {
