@@ -232,7 +232,7 @@ namespace DeepfreezeApp
         /// If the current instance is not a ClickOnce app, then nothing happens.
         /// </summary>
         /// <returns></returns>
-        public static async Task TryInstallSquirrelAppFromClickOnceAncestor()
+        public static async Task<bool> TryInstallSquirrelAppFromClickOnceAncestor()
         {
             var isClickOnce = System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed;
 
@@ -240,7 +240,7 @@ namespace DeepfreezeApp
             {
                 // This is not a ClickOnce application, so the user has already updated to the newer Squirrel.
                 // No need to use the ClickOnceAppMigrator.
-                return;
+                return false;
             }
 
             var appName = GetAppName();
@@ -260,6 +260,8 @@ namespace DeepfreezeApp
                     throw;
                 }
             }
+
+            return true;
         }
 
         /// <summary>
