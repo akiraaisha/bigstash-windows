@@ -190,8 +190,8 @@
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
     <Compile Include="Interfaces\IMessageBoxViewModel.cs" />
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
-    <Compile Include="Messages\ICheckForUpdateMessage.cs" />
-    <Compile Include="Messages\IRestartAppMessage.cs" />
+    <Compile Include="Interfaces\ICheckForUpdateMessage.cs" />
+    <Compile Include="Interfaces\IRestartAppMessage.cs" />
     <Compile Include="Messages\RestartAppMessage.cs" />
     <Compile Include="SquirrelHelper.cs" />
     <Compile Include="Utilities.cs" />
@@ -211,7 +211,7 @@
     <Compile Include="Messages\FetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IFetchUploadsMessage.cs" />
     <Compile Include="Interfaces\IInitiateUploadMessage.cs" />
-    <Compile Include="Messages\IInternetConnectivityMessage.cs" />
+    <Compile Include="Interfaces\IInternetConnectivityMessage.cs" />
     <Compile Include="Messages\InitiateUploadMessage.cs" />
     <Compile Include="Interfaces\ILoginViewModel.cs" />
     <Compile Include="Converters\InvertBool.cs" />
