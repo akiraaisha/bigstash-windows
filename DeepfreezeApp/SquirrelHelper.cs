@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Squirrel;
 using log4net;
+using ClickOnceToSquirrelMigrator;
 
 namespace DeepfreezeApp
 {
@@ -183,11 +184,14 @@ namespace DeepfreezeApp
                             mgr.RemoveShortcutForThisExe();
                             RemoveCustomRegistryEntries();
                         },
-                    onFirstRun: () =>
+                    onFirstRun: async () =>
                         {
                             Properties.Settings.Default.MinimizeOnClose = true;
+                            Properties.Settings.Default.VerboseDebugLogging = false;
                             Properties.Settings.Default.DoAutomaticUpdates = true;
                             Properties.Settings.Default.Save();
+
+                            await TryRemoveClickOnceAncestor();
                         }
                         );
             }
@@ -221,6 +225,51 @@ namespace DeepfreezeApp
 
             // TODO
             // Add code to remove shell extension registration as well.
+        }
+
+        /// <summary>
+        /// Install the very first Squirrel release from the immediate ClickOnce ancestor application.
+        /// If the current instance is not a ClickOnce app, then nothing happens.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task TryInstallSquirrelAppFromClickOnceAncestor()
+        {
+            var isClickOnce = System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed;
+
+            if (!isClickOnce)
+            {
+                // This is not a ClickOnce application, so the user has already updated to the newer Squirrel.
+                // No need to use the ClickOnceAppMigrator.
+                return;
+            }
+
+            var appName = GetAppName();
+            var updateLocation = GetUpdateLocation();
+
+            using (var updateManager = new UpdateManager(updateLocation, appName, FrameworkVersion.Net45))
+            {
+                var migrator = new InClickOnceAppMigrator(updateManager, Properties.Settings.Default.ApplicationFullName);
+
+                try
+                {
+                    await migrator.Execute();
+                }
+                catch(MigrationException me)
+                {
+                    _log.Error(Utilities.GetCallerName() + " error while migrating to Squirrel with UpdateLocation = \"" + updateLocation + "\" and AppName = " + appName + ", thrown " + me.GetType().ToString() + " with message \"" + me.Message + "\".", me);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove the immediate ClickOnce ancestor app from the very first Squirrel descendant app.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task TryRemoveClickOnceAncestor()
+        {
+            var migrator = new InSquirrelAppMigrator(Properties.Settings.Default.ApplicationFullName);
+            await migrator.Execute();
         }
     }
 }
