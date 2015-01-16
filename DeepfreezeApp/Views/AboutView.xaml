@@ -9,6 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              VerticalAlignment="Stretch"
+             MinWidth="400"
              >
 
     <UserControl.Resources>
@@ -87,7 +88,28 @@
                                                IsActive="{Binding IsBusy}"
                                                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
                                                />
+                        
+<!--Button for downloading updates after having checked and found at least one.-->
+                        <!--<Button Height="35" 
+                                Width="35"
+                                ToolTip="{Binding UpdateFoundText}" 
+                                FontFamily="Segoe UI Symbol"
+                                FontSize="16"
+                                Style="{DynamicResource MetroCircleButtonStyle}"
+                                cal:Message.Attach="RestartApplication"
+                                Visibility="{Binding UpdateFound, Converter={StaticResource BoolToVisibilityConverter}}"
+                                >
 
+                            <Rectangle Width="15"
+                                       Height="15">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Uniform"
+                                                 Visual="{StaticResource appbar_download}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                        </Button>-->
+                        
                         <Button Height="35" 
                                 Width="35"
                                 ToolTip="{Binding RestartNeededText}" 
@@ -120,6 +142,7 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                FontSize="14"
+                               Visibility="{Binding UpdateMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                                />
 
                     <TextBlock HorizontalAlignment="Center"
