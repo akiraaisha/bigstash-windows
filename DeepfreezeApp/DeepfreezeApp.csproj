@@ -191,6 +191,8 @@
     <Compile Include="Interfaces\IMessageBoxViewModel.cs" />
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
     <Compile Include="Messages\ICheckForUpdateMessage.cs" />
+    <Compile Include="Messages\IRestartAppMessage.cs" />
+    <Compile Include="Messages\RestartAppMessage.cs" />
     <Compile Include="SquirrelHelper.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Converters\BoolToVisibility.cs" />
