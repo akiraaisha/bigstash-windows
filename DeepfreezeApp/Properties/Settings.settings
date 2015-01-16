@@ -75,7 +75,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="BigStashUpdateURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://localhost:8888/</Value>
+      <Value Profile="(Default)">https://www.bigstash.co/apps/windows/</Value>
     </Setting>
     <Setting Name="LocalUpdateURL" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Squirrel\</Value>

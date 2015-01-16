@@ -280,7 +280,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:8888/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/apps/windows/")]
         public string BigStashUpdateURL {
             get {
                 return ((string)(this["BigStashUpdateURL"]));
