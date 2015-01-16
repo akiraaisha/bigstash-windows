@@ -5,20 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel;
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
+using System.Windows.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+
+using Caliburn.Micro;
+using DeepfreezeSDK;
 using Custom.Windows;
+
 
 namespace DeepfreezeApp
 {
     [Export(typeof(IAboutViewModel))]
-    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<ICheckForUpdateMessage>,
-        IHandle<IInternetConnectivityMessage>
+    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -30,9 +31,11 @@ namespace DeepfreezeApp
         private bool _isBusy = false;
         private bool _isUpToDate = true;
         private string _errorMessage;
-        private string _updateMessage = Properties.Resources.UpToDateText;
+        private string _updateMessage;
         private bool _restartNeeded = false;
         private bool _updateFound = false;
+
+        DispatcherTimer _updateTimer;
 
         #endregion
 
@@ -44,6 +47,9 @@ namespace DeepfreezeApp
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
+
+            // get a new DispatcherTimer on the UI Thread.
+            this._updateTimer = new DispatcherTimer(new TimeSpan(0, 1, 0), DispatcherPriority.Normal, UpdateTick, Application.Current.Dispatcher);
         }
 
         #endregion
@@ -151,8 +157,19 @@ namespace DeepfreezeApp
             {
                 Properties.Settings.Default.DoAutomaticUpdates = value;
                 Properties.Settings.Default.Save();
+
+                // When changing the automatic updates setting, set the update timer's operation accordingly.
+                if (value)
+                {
+                    this._updateTimer.Start();
+                }
+                else
+                {
+                    this._updateTimer.Stop();
+                }
+
                 NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
-                NotifyOfPropertyChange(() => ShowCheckForUpdate);
+                //NotifyOfPropertyChange(() => ShowCheckForUpdate);
             }
         }
 
@@ -225,9 +242,17 @@ namespace DeepfreezeApp
             Process.Start(authority);
         }
 
-        public async void CheckForUpdate()
+        public async Task CheckForUpdate()
         {
             this.ErrorMessage = null;
+
+            // No need to check for update when already checking and/or installing one.
+            // The same holds for when a restart is needed because of a previously installed update,
+            // while still running the same application instance.
+            if (this.IsBusy || this.RestartNeeded)
+            {
+                return;
+            }
 
             if (!this._deepfreezeClient.IsInternetConnected)
             {
@@ -267,7 +292,13 @@ namespace DeepfreezeApp
                 var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
 
                 // update the UI to show that a restart is needed.
-                this.RestartNeeded = true;  
+                this.RestartNeeded = true;
+                this.UpdateMessage = Properties.Resources.RestartNeededText;
+
+                // send a message using the event aggregator to inform the shellviewmodel that a restart is needed.
+                var restartMessage = IoC.Get<IRestartAppMessage>();
+                restartMessage.RestartNeeded = true;
+                this._eventAggregator.PublishOnUIThread(restartMessage);
             }
             catch (Exception)
             {
@@ -280,17 +311,27 @@ namespace DeepfreezeApp
             }
         }
 
-
+        /// <summary>
+        /// Restarts the app.
+        /// </summary>
         public void RestartApplication()
         {
-            // send a message to pause here before actually starting a new instance
-            System.Windows.Forms.Application.Restart();
-            Application.Current.Shutdown();
+            SquirrelHelper.RestartApp();
         }
 
         #endregion
 
         #region events
+
+        private async void UpdateTick(object sender, object e)
+        {
+            await this.CheckForUpdate();
+
+            // after the 1st automatic check, reset it's interval to 1 day.
+            this._updateTimer.Stop();
+            this._updateTimer.Interval = new TimeSpan(1, 0, 0, 0);
+            this._updateTimer.Start();
+        }
 
         protected override void OnActivate()
         {
@@ -307,14 +348,6 @@ namespace DeepfreezeApp
         #endregion
 
         #region message_handlers
-
-        public void Handle(ICheckForUpdateMessage message)
-        {
-            if (message != null && !RestartNeeded)
-            {
-                this.CheckForUpdate();
-            }
-        }
 
         public void Handle(IInternetConnectivityMessage message)
         {
