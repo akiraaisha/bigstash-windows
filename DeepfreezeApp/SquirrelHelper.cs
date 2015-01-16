@@ -141,6 +141,17 @@ namespace DeepfreezeApp
             return ret;
         }
 
+        /// <summary>
+        /// Restarts the app using Squirrel' UpdateManager.RestartApp().
+        /// </summary>
+        public static void RestartApp()
+        {
+            _log.Debug("Called " + Utilities.GetCallerName() + " with UpdateLocation = \"" + updateLocation + "\" and AppName = " + appName + "\".");
+
+            // Use Squirrel's restart method.
+            UpdateManager.RestartApp();
+        }
+
         public static async Task<ReleaseEntry> SilentUpdate()
         {
             var appName = GetAppName();
@@ -168,10 +179,16 @@ namespace DeepfreezeApp
                 SquirrelAwareApp.HandleEvents(
                     onInitialInstall: v => mgr.CreateShortcutForThisExe(),
                     onAppUpdate: v => mgr.CreateShortcutForThisExe(),
-                    onAppUninstall: v => 
+                    onAppUninstall: v =>
                         {
                             mgr.RemoveShortcutForThisExe();
                             RemoveCustomRegistryEntries();
+                        },
+                    onFirstRun: () =>
+                        {
+                            Properties.Settings.Default.MinimizeOnClose = true;
+                            Properties.Settings.Default.DoAutomaticUpdates = true;
+                            Properties.Settings.Default.Save();
                         }
                         );
             }
