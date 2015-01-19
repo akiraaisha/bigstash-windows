@@ -280,6 +280,9 @@ namespace DeepfreezeApp
                     return;
                 }
 
+                // Verify that old ClickOnce deployments are removed.
+                await SquirrelHelper.TryRemoveClickOnceAncestor();
+
                 // check for update
                 var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
                 var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
@@ -312,8 +315,10 @@ namespace DeepfreezeApp
                 restartMessage.RestartNeeded = true;
                 this._eventAggregator.PublishOnUIThread(restartMessage);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
                 this.UpdateMessage = null;
                 this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
             }
