@@ -184,7 +184,7 @@ namespace DeepfreezeApp
                             mgr.RemoveShortcutForThisExe();
                             RemoveCustomRegistryEntries();
                         },
-                    onFirstRun: async () =>
+                    onFirstRun: () =>
                         {
                             Properties.Settings.Default.MinimizeOnClose = true;
                             Properties.Settings.Default.VerboseDebugLogging = false;
