@@ -190,8 +190,6 @@ namespace DeepfreezeApp
                             Properties.Settings.Default.VerboseDebugLogging = false;
                             Properties.Settings.Default.DoAutomaticUpdates = true;
                             Properties.Settings.Default.Save();
-
-                            await TryRemoveClickOnceAncestor();
                         }
                         );
             }
