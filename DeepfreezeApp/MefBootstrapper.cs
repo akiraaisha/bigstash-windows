@@ -14,9 +14,7 @@ using Newtonsoft.Json;
 using Caliburn.Micro;
 using DeepfreezeSDK;
 using DeepfreezeModel;
-
 using Custom.Windows;
-using System.Management;
 
 namespace DeepfreezeApp
 {
@@ -80,34 +78,8 @@ namespace DeepfreezeApp
             var app = Application.Current as InstanceAwareApplication;
             if (!(app == null || app.IsFirstInstance))
             {
-                var parent = this.GetParentProcess();
-
-                if (parent != null)
-                {
-                    // if parent process is an older version of the app, we have to wait until it exits,
-                    // before going on.
-                    if (parent.ProcessName == Process.GetCurrentProcess().ProcessName)
-                    {
-                        // check if parent still exists
-                        while(!parent.HasExited)
-                        {
-                            // wait until the parent has exited
-                            if (parent.HasExited)
-                            { break; }
-                        }
-
-                        // restart self to make sure that the new spawn is the first instance running.
-                        SquirrelHelper.RestartApp();
-                    }
-                    // if parent process is not an older instance of this app, the shutdown the new instance
-                    // (start arguments will get forwarded to the already running instance)
-                    else
-                    {
-                        app.Shutdown();
-                    }
-                }
-            }
-                
+                app.Shutdown();
+            }    
             else
             {
                 // Else go on with normal startup.           
@@ -488,20 +460,6 @@ namespace DeepfreezeApp
             Directory.Delete(deepfreezeFolderPath, true);
 
             return true;
-        }
-
-        private Process GetParentProcess()
-        {
-            var myId = Process.GetCurrentProcess().Id;
-            var query = string.Format("SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {0}", myId);
-            var search = new ManagementObjectSearcher("root\\CIMV2", query);
-            var results = search.Get().GetEnumerator();
-            if (!results.MoveNext()) throw new Exception("Huh?");
-            var queryObj = results.Current;
-            uint parentId = (uint)queryObj["ParentProcessId"];
-            var parent = Process.GetProcessById((int)parentId);
-
-            return parent;
         }
 
         #endregion
