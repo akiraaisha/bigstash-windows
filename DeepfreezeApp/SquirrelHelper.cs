@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Squirrel;
 using log4net;
 using ClickOnceToSquirrelMigrator;
+using System.Diagnostics;
 
 namespace DeepfreezeApp
 {
@@ -177,19 +178,29 @@ namespace DeepfreezeApp
             using (var mgr = new UpdateManager(updateLocation, appName, FrameworkVersion.Net45))
             {
                 SquirrelAwareApp.HandleEvents(
-                    onInitialInstall: v => mgr.CreateShortcutForThisExe(),
+                    onInitialInstall: v => 
+                        {
+                            mgr.CreateShortcutForThisExe();
+
+                            Properties.Settings.Default.MinimizeOnClose = true;
+                            Properties.Settings.Default.VerboseDebugLogging = false;
+                            Properties.Settings.Default.DoAutomaticUpdates = true;
+                            Properties.Settings.Default.Save();
+                        },
                     onAppUpdate: v => mgr.CreateShortcutForThisExe(),
                     onAppUninstall: v =>
                         {
+                            StopBigStashOnUninstall();
                             mgr.RemoveShortcutForThisExe();
                             RemoveCustomRegistryEntries();
                         },
                     onFirstRun: () =>
                         {
-                            Properties.Settings.Default.MinimizeOnClose = true;
-                            Properties.Settings.Default.VerboseDebugLogging = false;
-                            Properties.Settings.Default.DoAutomaticUpdates = true;
-                            Properties.Settings.Default.Save();
+                            //System.Windows.Forms.MessageBox.Show("Hooray! This is the first run!!!");
+                            //Properties.Settings.Default.MinimizeOnClose = true;
+                            //Properties.Settings.Default.VerboseDebugLogging = false;
+                            //Properties.Settings.Default.DoAutomaticUpdates = true;
+                            //Properties.Settings.Default.Save();
                         }
                         );
             }
@@ -233,6 +244,35 @@ namespace DeepfreezeApp
         {
             var migrator = new InSquirrelAppMigrator(Properties.Settings.Default.ApplicationFullName);
             await migrator.Execute();
+        }
+
+        public static void StopBigStashOnUninstall()
+        {
+            // Notice:
+            // When uninstalling, a new app instance tries to uninstall.
+            // Make sure to not kill that instance but only the main bigstash instance running,
+            // so the uninstall completes successfully.
+
+            var p = Process.GetProcessesByName("DeepfreezeApp");
+            var currentProcess = Process.GetCurrentProcess();
+
+            if (p != null && p.Count() > 0)
+            {
+                for (int i = 0; i < p.Count(); i++)
+                {
+                    try
+                    {
+                        if (p[i].Id != currentProcess.Id)
+                        {
+                            p[i].Kill();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Exception: " + e.ToString() + "\n\nMessage: " + e.Message);
+                    }
+                }
+            }
         }
     }
 }
