@@ -7,6 +7,8 @@ using Squirrel;
 using log4net;
 using ClickOnceToSquirrelMigrator;
 using System.Diagnostics;
+using System.Reflection;
+using System.IO;
 
 namespace DeepfreezeApp
 {
@@ -190,9 +192,10 @@ namespace DeepfreezeApp
                     onAppUpdate: v => mgr.CreateShortcutForThisExe(),
                     onAppUninstall: v =>
                         {
-                            StopBigStashOnUninstall();
                             mgr.RemoveShortcutForThisExe();
                             RemoveCustomRegistryEntries();
+                            StopBigStashOnUninstall();
+                            CallBatchDelete(mgr.RootAppDirectory);
                         },
                     onFirstRun: () =>
                         {
@@ -246,6 +249,9 @@ namespace DeepfreezeApp
             await migrator.Execute();
         }
 
+        /// <summary>
+        /// Find the running BigStash instance when uninstalling and kill it.
+        /// </summary>
         public static void StopBigStashOnUninstall()
         {
             // Notice:
@@ -253,26 +259,54 @@ namespace DeepfreezeApp
             // Make sure to not kill that instance but only the main bigstash instance running,
             // so the uninstall completes successfully.
 
-            var p = Process.GetProcessesByName("DeepfreezeApp");
+            Assembly curAssembly = Assembly.GetExecutingAssembly();
+            var p = Process.GetProcessesByName(curAssembly.GetName().Name);
             var currentProcess = Process.GetCurrentProcess();
 
             if (p != null && p.Count() > 0)
             {
                 for (int i = 0; i < p.Count(); i++)
                 {
-                    try
+                    if (p[i].Id != currentProcess.Id)
                     {
-                        if (p[i].Id != currentProcess.Id)
-                        {
-                            p[i].Kill();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Windows.Forms.MessageBox.Show("Exception: " + e.ToString() + "\n\nMessage: " + e.Message);
+                        p[i].Kill();
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Call a batch file to delete the root app directory after the uninstall exits.
+        /// </summary>
+        /// <param name="rootAppDirectory"></param>
+        public static void CallBatchDelete(string rootAppDirectory)
+        {
+            var pid = Process.GetCurrentProcess().Id;
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(":loop");
+            sb.AppendLine("tasklist | find \"" + pid + "\" >nul");
+            sb.AppendLine("if not errorlevel 1 (");
+            sb.AppendLine("    timeout /t 2 >nul");
+            sb.AppendLine("goto :loop");
+            sb.AppendLine(")");
+            sb.AppendLine("rmdir /s /q " + rootAppDirectory);
+            sb.AppendLine("call :deleteSelf&exit /b");
+            sb.AppendLine(":deleteSelf");
+            sb.AppendLine("start /b \"\" cmd /c del \"%~f0\"&exit /b");
+
+            var tempPath = Path.GetTempPath();
+            var tempSavePath = Path.Combine(tempPath, "bigstash_squirrel_cleaner.bat");
+            
+            File.WriteAllText(tempSavePath, sb.ToString(), Encoding.ASCII);
+
+            var p = new Process();
+            p.StartInfo.WorkingDirectory = tempPath;
+            p.StartInfo.FileName = tempSavePath;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+            p.Start();
         }
     }
 }
