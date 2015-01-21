@@ -226,43 +226,6 @@ namespace DeepfreezeApp
         }
 
         /// <summary>
-        /// Install the very first Squirrel release from the immediate ClickOnce ancestor application.
-        /// If the current instance is not a ClickOnce app, then nothing happens.
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<bool> TryInstallSquirrelAppFromClickOnceAncestor()
-        {
-            var isClickOnce = System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed;
-
-            if (!isClickOnce)
-            {
-                // This is not a ClickOnce application, so the user has already updated to the newer Squirrel.
-                // No need to use the ClickOnceAppMigrator.
-                return false;
-            }
-
-            var appName = GetAppName();
-            var updateLocation = GetUpdateLocation();
-
-            using (var updateManager = new UpdateManager(updateLocation, appName, FrameworkVersion.Net45))
-            {
-                var migrator = new InClickOnceAppMigrator(updateManager, Properties.Settings.Default.ApplicationFullName);
-
-                try
-                {
-                    await migrator.Execute();
-                }
-                catch(MigrationException me)
-                {
-                    _log.Error(Utilities.GetCallerName() + " error while migrating to Squirrel with UpdateLocation = \"" + updateLocation + "\" and AppName = " + appName + ", thrown " + me.GetType().ToString() + " with message \"" + me.Message + "\".", me);
-                    throw;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Remove the immediate ClickOnce ancestor app from the very first Squirrel descendant app.
         /// </summary>
         /// <returns></returns>
