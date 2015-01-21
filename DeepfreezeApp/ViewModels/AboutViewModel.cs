@@ -36,6 +36,8 @@ namespace DeepfreezeApp
         private bool _updateFound = false;
 
         DispatcherTimer _updateTimer;
+        private const TimeSpan INITIAL_FAST_CHECK_TIMESPAN = new TimeSpan(0, 1, 0);
+        private const TimeSpan DAILY_CHECK_TIMESPAN = new TimeSpan(1, 0, 0, 0);
 
         #endregion
 
@@ -49,7 +51,7 @@ namespace DeepfreezeApp
             this._deepfreezeClient = deepfreezeClient;
 
             // get a new DispatcherTimer on the UI Thread.
-            this._updateTimer = new DispatcherTimer(new TimeSpan(0, 1, 0), DispatcherPriority.Normal, UpdateTick, Application.Current.Dispatcher);
+            this._updateTimer = new DispatcherTimer(INITIAL_FAST_CHECK_TIMESPAN, DispatcherPriority.Normal, UpdateTick, Application.Current.Dispatcher);
         }
 
         #endregion
@@ -150,28 +152,28 @@ namespace DeepfreezeApp
         public string CheckForUpdateAutomaticText
         { get { return Properties.Resources.CheckForUpdateAutomaticText; } }
 
-        public bool DoAutomaticUpdates
-        {
-            get { return Properties.Settings.Default.DoAutomaticUpdates; }
-            set
-            {
-                Properties.Settings.Default.DoAutomaticUpdates = value;
-                Properties.Settings.Default.Save();
+        //public bool DoAutomaticUpdates
+        //{
+        //    get { return Properties.Settings.Default.DoAutomaticUpdates; }
+        //    set
+        //    {
+        //        Properties.Settings.Default.DoAutomaticUpdates = value;
+        //        Properties.Settings.Default.Save();
 
-                // When changing the automatic updates setting, set the update timer's operation accordingly.
-                if (value)
-                {
-                    this._updateTimer.Start();
-                }
-                else
-                {
-                    this._updateTimer.Stop();
-                }
+        //        // When changing the automatic updates setting, set the update timer's operation accordingly.
+        //        if (value)
+        //        {
+        //            this._updateTimer.Start();
+        //        }
+        //        else
+        //        {
+        //            this._updateTimer.Stop();
+        //        }
 
-                NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
-                //NotifyOfPropertyChange(() => ShowCheckForUpdate);
-            }
-        }
+        //        NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
+        //        //NotifyOfPropertyChange(() => ShowCheckForUpdate);
+        //    }
+        //}
 
         public bool IsInternetConnected
         {
@@ -268,18 +270,6 @@ namespace DeepfreezeApp
 
             try
             {
-                // Verify that old ClickOnce deployments get migrated to Squirrel.
-                var squirrelMigrationDone = await SquirrelHelper.TryInstallSquirrelAppFromClickOnceAncestor();
-
-                if (squirrelMigrationDone)
-                {
-                    // update the UI to show that a restart is needed.
-                    this.IsBusy = false;
-                    this.RestartNeeded = true;
-                    this.UpdateMessage = Properties.Resources.RestartNeededText;
-                    return;
-                }
-
                 // Verify that old ClickOnce deployments are removed.
                 await SquirrelHelper.TryRemoveClickOnceAncestor();
 
@@ -344,10 +334,13 @@ namespace DeepfreezeApp
         {
             await this.CheckForUpdate();
 
-            // after the 1st automatic check, reset it's interval to 1 day.
-            this._updateTimer.Stop();
-            this._updateTimer.Interval = new TimeSpan(1, 0, 0, 0);
-            this._updateTimer.Start();
+            if (this._updateTimer.Interval == INITIAL_FAST_CHECK_TIMESPAN)
+            {
+                // after the 1st automatic check, reset it's interval to 1 day.
+                this._updateTimer.Stop();
+                this._updateTimer.Interval = DAILY_CHECK_TIMESPAN;
+                this._updateTimer.Start();
+            }
         }
 
         protected override void OnActivate()
