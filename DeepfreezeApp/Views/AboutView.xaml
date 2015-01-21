@@ -169,7 +169,7 @@
                                 VerticalAlignment="Center"
                                 />
 
-                    <CheckBox x:Name="DoAutomaticUpdates" 
+                    <!--<CheckBox x:Name="DoAutomaticUpdates" 
                           Margin="0 10 0 0"
                           FontSize="14"
                           >
@@ -179,7 +179,7 @@
                                    VerticalAlignment="Bottom"
                                    />
                         </CheckBox.Content>
-                    </CheckBox>
+                    </CheckBox>-->
 
                 </StackPanel>
 
