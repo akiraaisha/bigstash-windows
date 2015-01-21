@@ -36,8 +36,8 @@ namespace DeepfreezeApp
         private bool _updateFound = false;
 
         DispatcherTimer _updateTimer;
-        private const TimeSpan INITIAL_FAST_CHECK_TIMESPAN = new TimeSpan(0, 1, 0);
-        private const TimeSpan DAILY_CHECK_TIMESPAN = new TimeSpan(1, 0, 0, 0);
+        private static readonly TimeSpan INITIAL_FAST_CHECK_TIMESPAN = new TimeSpan(0, 1, 0);
+        private static readonly TimeSpan DAILY_CHECK_TIMESPAN = new TimeSpan(1, 0, 0, 0);
 
         #endregion
 
