@@ -42,7 +42,7 @@
       <Value Profile="(Default)">.djf</Value>
     </Setting>
     <Setting Name="MinimizeOnClose" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="IsFirstLogin" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -79,6 +79,9 @@
     </Setting>
     <Setting Name="LocalUpdateURL" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Squirrel\</Value>
+    </Setting>
+    <Setting Name="SettingsUpgradeRequired" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>
