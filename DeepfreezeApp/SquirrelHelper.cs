@@ -245,8 +245,28 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public static async Task TryRemoveClickOnceAncestor()
         {
-            var migrator = new InSquirrelAppMigrator(Properties.Settings.Default.ApplicationFullName);
-            await migrator.Execute();
+            try
+            {
+                var migrator = new InSquirrelAppMigrator(Properties.Settings.Default.ApplicationFullName);
+                await migrator.Execute();
+            }
+            catch(Exception e)
+            {
+                if (e is InvalidOperationException)
+                {
+                    var ioe = (InvalidOperationException)e;
+
+                    if (ioe.Message == "Sequence contains no matching element")
+                    {
+                        // no clickonce installation found to remove, simply return.
+                        return;
+                    }
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         /// <summary>
