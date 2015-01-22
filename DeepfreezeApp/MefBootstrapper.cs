@@ -82,7 +82,15 @@ namespace DeepfreezeApp
             }    
             else
             {
-                // Else go on with normal startup.           
+                // Else go on with normal startup.         
+  
+                // Check if a settings upgrade is required.
+                if (Properties.Settings.Default.SettingsUpgradeRequired)
+                {
+                    Properties.Settings.Default.Upgrade();
+                    Properties.Settings.Default.SettingsUpgradeRequired = false;
+                    Properties.Settings.Default.Save();
+                }
 
                 // Change default ClickOnce icon in Programs and Features entry,
                 // if it's not already set.
