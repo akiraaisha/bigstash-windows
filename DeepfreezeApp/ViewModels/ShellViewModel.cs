@@ -21,7 +21,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartAppMessage>
+        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>
     {
         #region fields
 
@@ -312,7 +312,7 @@ namespace DeepfreezeApp
         /// Handle RestartAppMessage
         /// </summary>
         /// <param name="message"></param>
-        public void Handle(IRestartAppMessage message)
+        public void Handle(IRestartNeededMessage message)
         {
             if (message != null)
             {

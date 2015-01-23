@@ -7,8 +7,8 @@ using System.ComponentModel.Composition;
 
 namespace DeepfreezeApp
 {
-    [Export(typeof(IRestartAppMessage))]
-    public class RestartAppMessage : IRestartAppMessage
+    [Export(typeof(IRestartNeededMessage))]
+    public class RestartNeededMessage : IRestartNeededMessage
     {
         public bool RestartNeeded { get; set; }
     }

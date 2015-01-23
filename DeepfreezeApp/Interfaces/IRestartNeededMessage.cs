@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DeepfreezeApp
 {
-    public interface IRestartAppMessage
+    public interface IRestartNeededMessage
     {
         bool RestartNeeded { get; set; }
     }

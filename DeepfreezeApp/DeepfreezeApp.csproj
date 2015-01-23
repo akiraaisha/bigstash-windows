@@ -193,10 +193,12 @@
     <Compile Include="Interfaces\IAboutViewModel.cs" />
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
     <Compile Include="Interfaces\IMessageBoxViewModel.cs" />
+    <Compile Include="Interfaces\IPauseAllMessage.cs" />
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
     <Compile Include="Interfaces\ICheckForUpdateMessage.cs" />
-    <Compile Include="Interfaces\IRestartAppMessage.cs" />
-    <Compile Include="Messages\RestartAppMessage.cs" />
+    <Compile Include="Interfaces\IRestartNeededMessage.cs" />
+    <Compile Include="Messages\RestartNeededMessage.cs" />
+    <Compile Include="Messages\PauseAllMessage.cs" />
     <Compile Include="SquirrelHelper.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Converters\BoolToVisibility.cs" />
