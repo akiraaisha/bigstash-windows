@@ -323,6 +323,9 @@ namespace DeepfreezeApp
         /// </summary>
         public void RestartApplication()
         {
+            // This does not terminate gracefully, but uploading can resume without problems
+            // on the next instance start. So let's leave it like that for now. Just update the log file.
+            _log.Info("Restarting after update.\n\n.");
             SquirrelHelper.RestartApp();
         }
 
