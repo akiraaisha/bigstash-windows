@@ -296,12 +296,15 @@ namespace DeepfreezeApp
                 this.UpdateMessage = Properties.Resources.InstallingUpdateText;
                 var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
 
+                Properties.Settings.Default.SettingsUpgradeRequired = true;
+                Properties.Settings.Default.Save();
+
                 // update the UI to show that a restart is needed.
                 this.RestartNeeded = true;
                 this.UpdateMessage = Properties.Resources.RestartNeededText;
 
                 // send a message using the event aggregator to inform the shellviewmodel that a restart is needed.
-                var restartMessage = IoC.Get<IRestartAppMessage>();
+                var restartMessage = IoC.Get<IRestartNeededMessage>();
                 restartMessage.RestartNeeded = true;
                 this._eventAggregator.PublishOnUIThread(restartMessage);
             }
@@ -321,12 +324,17 @@ namespace DeepfreezeApp
         /// <summary>
         /// Restarts the app.
         /// </summary>
-        public void RestartApplication()
+        public void RestartApplicationAfterUpdate()
         {
-            // This does not terminate gracefully, but uploading can resume without problems
-            // on the next instance start. So let's leave it like that for now. Just update the log file.
-            _log.Info("Restarting after update.\n\n.");
-            SquirrelHelper.RestartApp();
+            Properties.Settings.Default.RestartAfterUpdate = true;
+            Properties.Settings.Default.Save();
+
+            _log.Debug("Sending a graceful restart message.");
+            // Let's send a RestartAppMessage with DoGracefulRestart = true;
+            var restartAppMessage = IoC.Get<IRestartAppMessage>();
+            restartAppMessage.DoGracefulRestart = true;
+            restartAppMessage.ConfigureSettingsMigration = true;
+            this._eventAggregator.BeginPublishOnUIThread(restartAppMessage);
         }
 
         #endregion
