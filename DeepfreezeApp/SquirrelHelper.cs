@@ -9,6 +9,7 @@ using ClickOnceToSquirrelMigrator;
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
+using System.Configuration;
 
 namespace DeepfreezeApp
 {
@@ -147,12 +148,15 @@ namespace DeepfreezeApp
         /// <summary>
         /// Restarts the app using Squirrel' UpdateManager.RestartApp().
         /// </summary>
-        public static void RestartApp()
+        public static void RunUpdatedExe()
         {
             _log.Debug("Called " + Utilities.GetCallerName() + ".");
 
             // Use Squirrel's restart method.
-            UpdateManager.RestartApp();
+            // UpdateManager.RestartApp();
+            var exeToStart = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+
+            Process.Start(GetUpdateExe(), String.Format("--processStart {0}", exeToStart));
         }
 
         public static async Task<ReleaseEntry> SilentUpdate()
@@ -180,15 +184,7 @@ namespace DeepfreezeApp
             using (var mgr = new UpdateManager(updateLocation, appName, FrameworkVersion.Net45))
             {
                 SquirrelAwareApp.HandleEvents(
-                    onInitialInstall: v => 
-                        {
-                            mgr.CreateShortcutForThisExe();
-
-                            Properties.Settings.Default.MinimizeOnClose = true;
-                            Properties.Settings.Default.VerboseDebugLogging = false;
-                            Properties.Settings.Default.DoAutomaticUpdates = true;
-                            Properties.Settings.Default.Save();
-                        },
+                    onInitialInstall: v => mgr.CreateShortcutForThisExe(),
                     onAppUpdate: v => mgr.CreateShortcutForThisExe(),
                     onAppUninstall: v =>
                         {
@@ -196,14 +192,6 @@ namespace DeepfreezeApp
                             RemoveCustomRegistryEntries();
                             StopBigStashOnUninstall();
                             CallBatchDelete(mgr.RootAppDirectory);
-                        },
-                    onFirstRun: () =>
-                        {
-                            //System.Windows.Forms.MessageBox.Show("Hooray! This is the first run!!!");
-                            //Properties.Settings.Default.MinimizeOnClose = true;
-                            //Properties.Settings.Default.VerboseDebugLogging = false;
-                            //Properties.Settings.Default.DoAutomaticUpdates = true;
-                            //Properties.Settings.Default.Save();
                         }
                         );
             }
@@ -304,13 +292,25 @@ namespace DeepfreezeApp
             var pid = Process.GetCurrentProcess().Id;
             StringBuilder sb = new StringBuilder();
 
+            sb.AppendLine("setlocal");
+            sb.AppendLine("set /a retry=3");
             sb.AppendLine(":loop");
-            sb.AppendLine("tasklist | find \"" + pid + "\" >nul");
-            sb.AppendLine("if not errorlevel 1 (");
-            sb.AppendLine("    timeout /t 2 >nul");
-            sb.AppendLine("goto :loop");
+            sb.AppendLine("if %retry% ==0 (goto :loopexited) else (");
+            sb.AppendLine("    tasklist | find \"" + pid + "\" >nul");
+            sb.AppendLine("    if not errorlevel 1 (");
+            sb.AppendLine("        timeout /t 2 >nul");
+            sb.AppendLine("        set /a retry=%retry%-1");
+            sb.AppendLine("        goto :loop");
+            sb.AppendLine("    )");
             sb.AppendLine(")");
+            sb.AppendLine(":loopexited");
+#if DEBUG
+            sb.AppendLine("pause");
+#endif
             sb.AppendLine("rmdir /s /q " + rootAppDirectory);
+#if DEBUG
+            sb.AppendLine("pause");
+#endif
             sb.AppendLine("call :deleteSelf&exit /b");
             sb.AppendLine(":deleteSelf");
             sb.AppendLine("start /b \"\" cmd /c del \"%~f0\"&exit /b");
@@ -323,10 +323,74 @@ namespace DeepfreezeApp
             var p = new Process();
             p.StartInfo.WorkingDirectory = tempPath;
             p.StartInfo.FileName = tempSavePath;
+
+#if DEBUG
+            p.StartInfo.CreateNoWindow = false;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+#else
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+#endif
 
             p.Start();
+        }
+
+        /// <summary>
+        /// Copy user.config to migrate to after updating.
+        /// </summary>
+        public static string CopyMigrationUserConfig()
+        {
+            _log.Debug("Copying user.config for post-update settings migration.");
+
+            // Perform a Save just to be sure that we have the latest valid settings.
+            Properties.Settings.Default.Save();
+
+            // Get current user.config.
+            var userConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+
+            try
+            {
+                if (userConfig.HasFile)
+                {
+                    var migrationUserConfigPath = Path.Combine(Properties.Settings.Default.ApplicationDataFolder, "migrate.user.config");
+
+                    if (File.Exists(migrationUserConfigPath))
+                    {
+                        File.Delete(migrationUserConfigPath);
+                    }
+
+                    userConfig.SaveAs(migrationUserConfigPath, ConfigurationSaveMode.Full, true);
+
+                    if (File.Exists(migrationUserConfigPath))
+                    {
+                        _log.Debug("Created migrate.user.config with path = \"" + migrationUserConfigPath + "\".");
+                    }
+
+                    return migrationUserConfigPath;
+                }
+                else
+                {
+                    _log.Debug("No settings migration needed since default settings are in use.");
+
+                    return null;
+                }
+            }
+            catch(Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " error while copying user.config with FilePath = \"" + userConfig.FilePath + "\", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+                throw;
+            }
+        }
+
+        private static string GetUpdateExe()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var updateDotExe = Path.Combine(Path.GetDirectoryName(assembly.Location), "..\\Update.exe");
+            var target = new FileInfo(updateDotExe);
+
+            if (!target.Exists) throw new Exception("Update.exe not found, not a Squirrel-installed app?");
+            return target.FullName;
         }
     }
 }
