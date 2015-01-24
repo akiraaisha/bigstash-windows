@@ -20,8 +20,8 @@ using Hardcodet.Wpf.TaskbarNotification;
 namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>
+    public class ShellViewModel : Conductor<Screen>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
+        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
     {
         #region fields
 
@@ -321,6 +321,35 @@ namespace DeepfreezeApp
             }
         }
 
+        public async Task Handle(IRestartAppMessage message)
+        {
+            if (message != null)
+            {
+                this._connectionTimer.Stop();
+
+                if (message.DoGracefulRestart)
+                {
+                    // This will finally restart by using squirrels RestartApp which does not terminate gracefully. 
+                    // So let's take care of gracefully stoping and saving uploads and settings before using it.
+                    
+                    //if (message.ConfigureSettingsMigration)
+                    //{
+                    //    this.ConfigureSettingsMigration();
+                    //}
+
+                    // OK let's deactivate all uploads.
+                    await this.UploadManagerVM.DeactivateAllUploads(true);
+
+                    while(this.Items.Count > 0)
+                    {
+                        this.DeactivateItem(this.Items.FirstOrDefault(), true);
+                    }
+                }
+
+                Application.Current.Shutdown();
+            }
+        }
+
         #endregion
 
         #region events
@@ -488,6 +517,12 @@ namespace DeepfreezeApp
                 this._tray.Visibility = Visibility.Collapsed;
                 this._tray.Dispose();
             }
+
+            //if (this.ShowRestartNeeded)
+            //{
+            //    this.ConfigureSettingsMigration();
+            //}
+
             base.OnDeactivate(close);
         }
 
@@ -684,6 +719,25 @@ namespace DeepfreezeApp
             {
                 MessageBox.Show("Setting custom endpoint to: " + debugEndpoint);
                 this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+            }
+        }
+
+        /// <summary>
+        /// Call SquirrelHelper.CopyMigrationUserConfig() to copy settings for migrating on the next run.
+        /// </summary>
+        /// <returns></returns>
+        private string ConfigureSettingsMigration()
+        {
+            try
+            {
+                // Copy current user settings to migrate to.
+                var migrationUserConfigPath = SquirrelHelper.CopyMigrationUserConfig();
+                return migrationUserConfigPath;
+            }
+            catch(Exception)
+            {
+                _log.Error("Settings migration failed. Default settings will be used if the next instance is an update.");
+                return null;
             }
         }
 
