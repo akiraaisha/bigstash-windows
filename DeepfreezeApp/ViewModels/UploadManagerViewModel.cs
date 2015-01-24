@@ -167,6 +167,57 @@ namespace DeepfreezeApp
             NotifyOfPropertyChange(() => this.HasCompletedUploads);
         }
 
+        /// <summary>
+        /// Pause all active uploads.
+        /// </summary>
+        /// <returns></returns>
+        public async Task PauseAllActiveUploads()
+        {
+            foreach(var pendingUpload in this.PendingUploads)
+            {
+                if (pendingUpload.IsUploading)
+                {
+                    await pendingUpload.PauseUpload(true);
+                }
+            }
+
+            // for all to pause before returning with 100 ms intervals between checks.
+            while(this.PendingUploads.Where(x => x.IsUploading).Count() > 0)
+            {
+                // wait 100 ms before checking again.
+                await Task.Delay(100);
+            }
+
+            return;
+        }
+
+        /// <summary>
+        /// Deactivate and close all child UploadViewModel instances.
+        /// Provide close parameter with true value to close them as well. 
+        /// </summary>
+        /// <returns></returns>
+        public async Task DeactivateAllUploads(bool close = false)
+        {
+            while(this.Items.Count > 0)
+            {
+                this.DeactivateItem(this.Items.FirstOrDefault(), true);
+            }
+
+            var activeUploadViewModels = new List<UploadViewModel>();
+
+            // get all active upload view models, pending or completed
+            activeUploadViewModels.AddRange(this.PendingUploads);
+            activeUploadViewModels.AddRange(this.CompletedUploads);
+
+            // for all to deactivate before returning with 100 ms intervals between checks.
+            while (activeUploadViewModels.Where(x => x.IsActive).Count() > 0)
+            {
+                await Task.Delay(100);
+            }
+
+            return;
+        }
+
         #endregion
 
         #region private methods
