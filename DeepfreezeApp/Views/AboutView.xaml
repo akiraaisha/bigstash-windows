@@ -116,7 +116,7 @@
                                 FontFamily="Segoe UI Symbol"
                                 FontSize="16"
                                 Style="{DynamicResource MetroCircleButtonStyle}"
-                                cal:Message.Attach="RestartApplication"
+                                cal:Message.Attach="RestartApplicationAfterUpdate"
                                 Visibility="{Binding RestartNeeded, Converter={StaticResource BoolToVisibilityConverter}}"
                                 >
 
