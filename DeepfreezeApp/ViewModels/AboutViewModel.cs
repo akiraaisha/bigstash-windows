@@ -326,6 +326,10 @@ namespace DeepfreezeApp
         /// </summary>
         public void RestartApplicationAfterUpdate()
         {
+            // Call Update.exe to run the new executable.
+            // It will wait until this instance is closed before it executes the new instance.
+            SquirrelHelper.RunUpdatedExe();
+
             Properties.Settings.Default.RestartAfterUpdate = true;
             Properties.Settings.Default.Save();
 
