@@ -23,7 +23,7 @@ namespace DeepfreezeApp
 #if DEBUG
             return "BigStashDebug";
 #else
-            return Properties.Settings.Default.ApplicationName;
+            return Properties.Settings.Default.ApplicationName + "Windows";
 #endif
         }
 
