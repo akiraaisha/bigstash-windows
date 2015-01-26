@@ -30,7 +30,7 @@ namespace DeepfreezeApp
         public static string GetUpdateLocation()
         {
 #if DEBUG
-            return @"C:\Squirrel\Debug\";
+            return "https://www.bigstash.co/apps/windows/beta/"; // return @"C:\Squirrel\Debug\";
 #else
             return Properties.Settings.Default.BigStashUpdateURL;
 #endif
