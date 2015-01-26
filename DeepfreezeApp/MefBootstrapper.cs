@@ -170,9 +170,6 @@ namespace DeepfreezeApp
             {
                 _log.Info("Exiting application.");
 
-                bool restartRequested = Properties.Settings.Default.RestartAfterUpdate;
-                Properties.Settings.Default.RestartAfterUpdate = false;
-
                 // make sure to save one final time the application wide settings.
                 Properties.Settings.Default.Save();
 
@@ -198,12 +195,6 @@ namespace DeepfreezeApp
                 if (Properties.Settings.Default.SettingsUpgradeRequired)
                 {
                     SquirrelHelper.CopyMigrationUserConfig();
-                }
-
-                if (restartRequested)
-                {
-                    SquirrelHelper.RunUpdatedExe();
-                    _log.Info("Restarting the application for updates to take effect...\n\n");
                 }
             }
 
