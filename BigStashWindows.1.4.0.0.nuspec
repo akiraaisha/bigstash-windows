@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>BigStashWindows</id>
+        <version>1.4.0.0</version>
+        <title>BigStash for Windows</title>
+        <authors>The Longaccess Company</authors>
+        <projectUrl>https://www.bigstash.co/</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>BigStash for Windows</description>
+        <summary />
+        <releaseNotes />
+        <copyright>The Longaccess Company</copyright>
+        <language>en-US</language>
+    </metadata>
+    <files>
+        <file src="DeepfreezeApp\bin\Release\AWSSDK.dll" target="lib\net45\AWSSDK.dll" />
+        <file src="DeepfreezeApp\bin\Release\AWSSDK.pdb" target="lib\net45\AWSSDK.pdb" />
+        <file src="DeepfreezeApp\bin\Release\Caliburn.Micro.dll" target="lib\net45\Caliburn.Micro.dll" />
+        <file src="DeepfreezeApp\bin\Release\Caliburn.Micro.Platform.dll" target="lib\net45\Caliburn.Micro.Platform.dll" />
+        <file src="DeepfreezeApp\bin\Release\ClickOnceToSquirrelMigrator.dll" target="lib\net45\ClickOnceToSquirrelMigrator.dll" />
+        <file src="DeepfreezeApp\bin\Release\Custom.Windows.dll" target="lib\net45\Custom.Windows.dll" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeApp.exe" target="lib\net45\DeepfreezeApp.exe" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeApp.exe.config" target="lib\net45\DeepfreezeApp.exe.config" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeApp.pdb" target="lib\net45\DeepfreezeApp.pdb" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeModel.dll" target="lib\net45\DeepfreezeModel.dll" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeModel.pdb" target="lib\net45\DeepfreezeModel.pdb" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeSDK.dll" target="lib\net45\DeepfreezeSDK.dll" />
+        <file src="DeepfreezeApp\bin\Release\DeepfreezeSDK.pdb" target="lib\net45\DeepfreezeSDK.pdb" />
+        <file src="DeepfreezeApp\bin\Release\DeltaCompressionDotNet.dll" target="lib\net45\DeltaCompressionDotNet.dll" />
+        <file src="DeepfreezeApp\bin\Release\DeltaCompressionDotNet.MsDelta.dll" target="lib\net45\DeltaCompressionDotNet.MsDelta.dll" />
+        <file src="DeepfreezeApp\bin\Release\DeltaCompressionDotNet.PatchApi.dll" target="lib\net45\DeltaCompressionDotNet.PatchApi.dll" />
+        <file src="DeepfreezeApp\bin\Release\Hardcodet.Wpf.TaskbarNotification.dll" target="lib\net45\Hardcodet.Wpf.TaskbarNotification.dll" />
+        <file src="DeepfreezeApp\bin\Release\Hardcodet.Wpf.TaskbarNotification.pdb" target="lib\net45\Hardcodet.Wpf.TaskbarNotification.pdb" />
+        <file src="DeepfreezeApp\bin\Release\ICSharpCode.SharpZipLib.dll" target="lib\net45\ICSharpCode.SharpZipLib.dll" />
+        <file src="DeepfreezeApp\bin\Release\Log4Net.config" target="lib\net45\Log4Net.config" />
+        <file src="DeepfreezeApp\bin\Release\log4net.dll" target="lib\net45\log4net.dll" />
+        <file src="DeepfreezeApp\bin\Release\MahApps.Metro.dll" target="lib\net45\MahApps.Metro.dll" />
+        <file src="DeepfreezeApp\bin\Release\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll" target="lib\net45\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll" />
+        <file src="DeepfreezeApp\bin\Release\Microsoft.Web.XmlTransform.dll" target="lib\net45\Microsoft.Web.XmlTransform.dll" />
+        <file src="DeepfreezeApp\bin\Release\Mono.Cecil.dll" target="lib\net45\Mono.Cecil.dll" />
+        <file src="DeepfreezeApp\bin\Release\Mono.Cecil.Mdb.dll" target="lib\net45\Mono.Cecil.Mdb.dll" />
+        <file src="DeepfreezeApp\bin\Release\Mono.Cecil.Pdb.dll" target="lib\net45\Mono.Cecil.Pdb.dll" />
+        <file src="DeepfreezeApp\bin\Release\Mono.Cecil.Rocks.dll" target="lib\net45\Mono.Cecil.Rocks.dll" />
+        <file src="DeepfreezeApp\bin\Release\Newtonsoft.Json.dll" target="lib\net45\Newtonsoft.Json.dll" />
+        <file src="DeepfreezeApp\bin\Release\NuGet.Core.dll" target="lib\net45\NuGet.Core.dll" />
+        <file src="DeepfreezeApp\bin\Release\Splat.dll" target="lib\net45\Splat.dll" />
+        <file src="DeepfreezeApp\bin\Release\Splat.pdb" target="lib\net45\Splat.pdb" />
+        <file src="DeepfreezeApp\bin\Release\Squirrel.dll" target="lib\net45\Squirrel.dll" />
+        <file src="packages\squirrel.windows.0.8.0\tools\Squirrel.exe" target="lib\net45\Squirrel.exe" />
+        <file src="DeepfreezeApp\bin\Release\Squirrel.pdb" target="lib\net45\Squirrel.pdb" />
+        <file src="DeepfreezeApp\bin\Release\System.Windows.Interactivity.dll" target="lib\net45\System.Windows.Interactivity.dll" />
+    </files>
+</package>
