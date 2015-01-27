@@ -5,21 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel;
-using System.Deployment.Application;
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
+using System.Windows.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+
+using Caliburn.Micro;
+using DeepfreezeSDK;
 using Custom.Windows;
+
 
 namespace DeepfreezeApp
 {
     [Export(typeof(IAboutViewModel))]
-    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<ICheckForUpdateMessage>,
-        IHandle<IInternetConnectivityMessage>
+    public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<IInternetConnectivityMessage>
     {
         #region members
 
@@ -31,8 +31,13 @@ namespace DeepfreezeApp
         private bool _isBusy = false;
         private bool _isUpToDate = true;
         private string _errorMessage;
-        private string _updateMessage = Properties.Resources.UpToDateText;
+        private string _updateMessage;
         private bool _restartNeeded = false;
+        private bool _updateFound = false;
+
+        DispatcherTimer _updateTimer;
+        private static readonly TimeSpan INITIAL_FAST_CHECK_TIMESPAN = new TimeSpan(0, 1, 0);
+        private static readonly TimeSpan DAILY_CHECK_TIMESPAN = new TimeSpan(1, 0, 0, 0);
 
         #endregion
 
@@ -44,6 +49,9 @@ namespace DeepfreezeApp
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;
+
+            // get a new DispatcherTimer on the UI Thread.
+            this._updateTimer = new DispatcherTimer(INITIAL_FAST_CHECK_TIMESPAN, DispatcherPriority.Normal, UpdateTick, Application.Current.Dispatcher);
         }
 
         #endregion
@@ -93,13 +101,7 @@ namespace DeepfreezeApp
         {
             get
             {
-                if (ApplicationDeployment.IsNetworkDeployed)
-                {
-                    ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-                    return Properties.Resources.VersionHeaderText + " " + ad.CurrentVersion.ToString();
-                }
-                else
-                    return "Debugging mode";
+                return Properties.Resources.VersionHeaderText + " " + this._deepfreezeClient.ApplicationVersion;
             }
         }
 
@@ -150,17 +152,28 @@ namespace DeepfreezeApp
         public string CheckForUpdateAutomaticText
         { get { return Properties.Resources.CheckForUpdateAutomaticText; } }
 
-        public bool DoAutomaticUpdates
-        {
-            get { return Properties.Settings.Default.DoAutomaticUpdates; }
-            set
-            {
-                Properties.Settings.Default.DoAutomaticUpdates = value;
-                Properties.Settings.Default.Save();
-                NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
-                NotifyOfPropertyChange(() => ShowCheckForUpdate);
-            }
-        }
+        //public bool DoAutomaticUpdates
+        //{
+        //    get { return Properties.Settings.Default.DoAutomaticUpdates; }
+        //    set
+        //    {
+        //        Properties.Settings.Default.DoAutomaticUpdates = value;
+        //        Properties.Settings.Default.Save();
+
+        //        // When changing the automatic updates setting, set the update timer's operation accordingly.
+        //        if (value)
+        //        {
+        //            this._updateTimer.Start();
+        //        }
+        //        else
+        //        {
+        //            this._updateTimer.Stop();
+        //        }
+
+        //        NotifyOfPropertyChange(() => this.DoAutomaticUpdates);
+        //        //NotifyOfPropertyChange(() => ShowCheckForUpdate);
+        //    }
+        //}
 
         public bool IsInternetConnected
         {
@@ -189,6 +202,22 @@ namespace DeepfreezeApp
             }
         }
 
+        public bool UpdateFound
+        {
+            get
+            {
+                return this._updateFound;
+            }
+            set
+            {
+                this._updateFound = value;
+                NotifyOfPropertyChange(() => this.UpdateFound);
+            }
+        }
+
+        public string UpdateFoundText
+        { get { return Properties.Resources.UpdateFoundText; } }
+
         #endregion
 
         #region methods
@@ -215,10 +244,17 @@ namespace DeepfreezeApp
             Process.Start(authority);
         }
 
-        public async void CheckForUpdate()
+        public async Task CheckForUpdate()
         {
-            UpdateCheckInfo info = null;
             this.ErrorMessage = null;
+
+            // No need to check for update when already checking and/or installing one.
+            // The same holds for when a restart is needed because of a previously installed update,
+            // while still running the same application instance.
+            if (this.IsBusy || this.RestartNeeded)
+            {
+                return;
+            }
 
             if (!this._deepfreezeClient.IsInternetConnected)
             {
@@ -226,113 +262,101 @@ namespace DeepfreezeApp
                 return;
             }
 
-            if (ApplicationDeployment.IsNetworkDeployed)
+            IsUpToDate = false;
+            this.IsBusy = true;
+
+            // set UI message to checking for update
+            this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
+
+            try
             {
-                ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
+                // Verify that old ClickOnce deployments are removed.
+                await SquirrelHelper.TryRemoveClickOnceAncestor();
 
-                DeploymentProgressChangedEventHandler progressEventHandler = (sender, eventArgs) =>
+                // check for update
+                var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
+                var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
+
+                if (!hasUpdates)
                 {
-                    string action = "";
-                    switch(eventArgs.State)
-                    {
-                        case DeploymentProgressState.DownloadingApplicationFiles:
-                            action = Properties.Resources.DowloadingUpdateText;
-                            this.UpdateMessage = action + eventArgs.ProgressPercentage + "%";
-                            break;
-                    }
-                };
-
-                ad.UpdateProgressChanged += progressEventHandler;
-
-                AsyncCompletedEventHandler completedEventHandler = (sender, eventArgs) =>
-                {
-                    ad.UpdateProgressChanged -= progressEventHandler;
-                    this.RestartNeeded = true;
+                    // no updates found, update the UI and return
                     this.IsBusy = false;
-                    this.UpdateMessage = Properties.Resources.UpdateCompletedText;
-
-                    Properties.Settings.Default.RestartAfterUpdate = true;
-                    Properties.Settings.Default.Save();
-                };
-
-                ad.UpdateCompleted += completedEventHandler;
-
-                try
-                {
-                    IsUpToDate = false;
-                    this.IsBusy = true;
-
-                    this.UpdateMessage = Properties.Resources.CheckingForUpdateText;
-
-                    info = await Task.Run(() => ad.CheckForDetailedUpdate(false));
-
-                    // insert a delay here so the user has a chance to actually see the messages
-                    // and know that the check is ongoing.
-                    await Task.Delay(1000);
-                }
-                catch (DeploymentDownloadException dde)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
-                    return;
-                }
-                catch (InvalidDeploymentException ide)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorInvalidDeploymentExceptionGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + ide.GetType().ToString() + " with message \"" + ide.Message + "\".");
-                    return;
-                }
-                catch (InvalidOperationException ioe)
-                {
-                    IsBusy = false;
-                    this.ErrorMessage = Properties.Resources.ErrorInvalidOperationCheckingForUpdateGenericText;
-                    _log.Error(Utilities.GetCallerName() + " threw " + ioe.GetType().ToString() + " with message \"" + ioe.Message + "\".");
-                    return;
-                }
-                finally
-                {
-                    if (String.IsNullOrEmpty(this.ErrorMessage))
-                    {
-                        this.UpdateMessage = Properties.Resources.UpdateVersionInfoOutdatedText;
-                    }
-                }
-
-                if (info.UpdateAvailable)
-                {
-                    try
-                    {
-                        this.UpdateMessage = Properties.Resources.UpdatingToLatestVersionText;
-                        ad.UpdateAsync();
-                    }
-                    catch (DeploymentDownloadException dde)
-                    {
-                        IsBusy = false;
-                        this.ErrorMessage = Properties.Resources.ErrorDownloadingUpdateGenericText;
-                        _log.Error(Utilities.GetCallerName() + " threw " + dde.GetType().ToString() + " with message \"" + dde.Message + "\".");
-                    }
-                }
-                else
-                {
-                    IsBusy = false;
-                    IsUpToDate = true;
-                    RestartNeeded = false;
+                    this.IsUpToDate = true;
+                    this.RestartNeeded = false;
+                    this.UpdateFound = false;
                     this.UpdateMessage = Properties.Resources.UpToDateText;
+                    return;
                 }
+
+                // Update found, continue with download
+                this.UpdateMessage = Properties.Resources.DowloadingUpdateText;
+                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply);
+
+                // Update donwload finished, continue with install
+                this.UpdateMessage = Properties.Resources.InstallingUpdateText;
+                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
+
+                Properties.Settings.Default.SettingsUpgradeRequired = true;
+                Properties.Settings.Default.Save();
+
+                // update the UI to show that a restart is needed.
+                this.RestartNeeded = true;
+                this.UpdateMessage = Properties.Resources.RestartNeededText;
+
+                // send a message using the event aggregator to inform the shellviewmodel that a restart is needed.
+                var restartMessage = IoC.Get<IRestartNeededMessage>();
+                restartMessage.RestartNeeded = true;
+                this._eventAggregator.PublishOnUIThread(restartMessage);
+            }
+            catch (Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
+                this.UpdateMessage = null;
+                this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
+            }
+            finally
+            {
+                this.IsBusy = false;
             }
         }
 
-        public void RestartApplication()
+        /// <summary>
+        /// Restarts the app.
+        /// </summary>
+        public void RestartApplicationAfterUpdate()
         {
-            // send a message to pause here before actually starting a new instance
-            System.Windows.Forms.Application.Restart();
-            Application.Current.Shutdown();
+            // Call Update.exe to run the new executable.
+            // It will wait until this instance is closed before it executes the new instance.
+            SquirrelHelper.RunUpdatedExe();
+
+            Properties.Settings.Default.RestartAfterUpdate = true;
+            Properties.Settings.Default.Save();
+
+            _log.Debug("Sending a graceful restart message.");
+            // Let's send a RestartAppMessage with DoGracefulRestart = true;
+            var restartAppMessage = IoC.Get<IRestartAppMessage>();
+            restartAppMessage.DoGracefulRestart = true;
+            restartAppMessage.ConfigureSettingsMigration = true;
+            this._eventAggregator.BeginPublishOnUIThread(restartAppMessage);
         }
 
         #endregion
 
         #region events
+
+        private async void UpdateTick(object sender, object e)
+        {
+            await this.CheckForUpdate();
+
+            if (this._updateTimer.Interval == INITIAL_FAST_CHECK_TIMESPAN)
+            {
+                // after the 1st automatic check, reset it's interval to 1 day.
+                this._updateTimer.Stop();
+                this._updateTimer.Interval = DAILY_CHECK_TIMESPAN;
+                this._updateTimer.Start();
+            }
+        }
 
         protected override void OnActivate()
         {
@@ -349,14 +373,6 @@ namespace DeepfreezeApp
         #endregion
 
         #region message_handlers
-
-        public void Handle(ICheckForUpdateMessage message)
-        {
-            if (message != null && !RestartNeeded)
-            {
-                this.CheckForUpdate();
-            }
-        }
 
         public void Handle(IInternetConnectivityMessage message)
         {

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
-using System.Deployment.Application;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
@@ -54,35 +53,6 @@ namespace DeepfreezeApp
             set { this._isOpen = value; NotifyOfPropertyChange(() => IsOpen); }
         }
 
-        public string ApplicationNameHeader
-        {
-            get { return Properties.Settings.Default.ApplicationFullName; }
-        }
-
-        public string VersionText
-        {
-            get
-            {
-                if (ApplicationDeployment.IsNetworkDeployed)
-                {
-                    ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-                    return Properties.Resources.VersionHeaderText + " " + ad.CurrentVersion.ToString();
-                }
-                else
-                    return "Debugging mode";
-            }
-        }
-
-        public string DebugHelpText
-        {
-            get { return Properties.Resources.DebugHelpText; }
-        }
-
-        public string DebugButtonContent
-        {
-            get { return Properties.Resources.DebugButtonContent; }
-        }
-
         public string ErrorMessage
         {
             get { return this._errorMessage; }
@@ -112,6 +82,7 @@ namespace DeepfreezeApp
             set
             {
                 Properties.Settings.Default.VerboseDebugLogging = value;
+                Properties.Settings.Default.Save(); 
                 NotifyOfPropertyChange(() => this.VerboseDebugLogging);
                 FlipVerboseDebugLogging();
             }
@@ -170,13 +141,18 @@ namespace DeepfreezeApp
 
             this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
 
+            if (Properties.Settings.Default.VerboseDebugLogging)
+            {
+                this.FlipVerboseDebugLogging();
+            }
+            
             // After the first ever login, set MinimizeOnClose to true.
             // Future login actions will simply ignore this.
-            if (Properties.Settings.Default.IsFirstLogin)
-            {
-                Properties.Settings.Default.IsFirstLogin = false;
-                this.MinimizeOnClose = true;
-            }
+            //if (Properties.Settings.Default.IsFirstLogin)
+            //{
+            //    Properties.Settings.Default.IsFirstLogin = false;
+            //    this.MinimizeOnClose = true;
+            //}
 
             this.ActivateItem(this.UserVM);
 

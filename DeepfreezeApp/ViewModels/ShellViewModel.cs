@@ -20,8 +20,8 @@ using Hardcodet.Wpf.TaskbarNotification;
 namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<Object>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>
+    public class ShellViewModel : Conductor<Screen>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
+        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
     {
         #region fields
 
@@ -50,6 +50,7 @@ namespace DeepfreezeApp
 
         private DispatcherTimer _connectionTimer;
         private bool _isInternetConnected = true;
+        private bool _restartNeeded = false;
 
         #endregion
 
@@ -126,7 +127,12 @@ namespace DeepfreezeApp
         public bool IsAboutFlyoutOpen
         {
             get { return this._isAboutFlyoutOpen; }
-            set { this._isAboutFlyoutOpen = value; NotifyOfPropertyChange(() => IsAboutFlyoutOpen); }
+            set 
+            { 
+                this._isAboutFlyoutOpen = value; 
+                NotifyOfPropertyChange(() => this.IsAboutFlyoutOpen);
+                NotifyOfPropertyChange(() => this.ShowRestartNeeded);
+            }
         }
 
         public string PreferencesHeader
@@ -146,6 +152,20 @@ namespace DeepfreezeApp
             get { return this._isInternetConnected; }
             set { this._isInternetConnected = value; NotifyOfPropertyChange(() => IsInternetConnected); }
         }
+
+        public bool ShowRestartNeeded
+        {
+            get 
+            {
+                if (this.IsAboutFlyoutOpen)
+                    return false;
+                else
+                    return this._restartNeeded; 
+            }
+        }
+
+        public string UpdateFoundButtonTooltipText
+        { get { return Properties.Resources.UpdateFoundButtonTooltipText; } }
 
         #endregion
 
@@ -171,14 +191,6 @@ namespace DeepfreezeApp
             if (IsAboutFlyoutOpen)
             {
                 IsPreferencesFlyoutOpen = false;
-
-                // send a message with the aggregator to check for updates
-                // only if the user has automatic updates settings enabled.\
-                if (Properties.Settings.Default.DoAutomaticUpdates)
-                {
-                    var checkForUpdateMessage = IoC.Get<ICheckForUpdateMessage>() as CheckForUpdatesMessage;
-                    this._eventAggregator.PublishOnUIThread(checkForUpdateMessage);
-                }
             }
         }
 
@@ -293,6 +305,48 @@ namespace DeepfreezeApp
                         _shellWindow.ShowInTaskbar = true;
                         break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Handle RestartAppMessage
+        /// </summary>
+        /// <param name="message"></param>
+        public void Handle(IRestartNeededMessage message)
+        {
+            if (message != null)
+            {
+                this._restartNeeded = message.RestartNeeded;
+                NotifyOfPropertyChange(() => this.ShowRestartNeeded);
+            }
+        }
+
+        public async Task Handle(IRestartAppMessage message)
+        {
+            if (message != null)
+            {
+                this._connectionTimer.Stop();
+
+                if (message.DoGracefulRestart)
+                {
+                    // This will finally restart by using squirrels RestartApp which does not terminate gracefully. 
+                    // So let's take care of gracefully stoping and saving uploads and settings before using it.
+                    
+                    //if (message.ConfigureSettingsMigration)
+                    //{
+                    //    this.ConfigureSettingsMigration();
+                    //}
+
+                    // OK let's deactivate all uploads.
+                    await this.UploadManagerVM.DeactivateAllUploads(true);
+
+                    while(this.Items.Count > 0)
+                    {
+                        this.DeactivateItem(this.Items.FirstOrDefault(), true);
+                    }
+                }
+
+                Application.Current.Shutdown();
             }
         }
 
@@ -463,6 +517,12 @@ namespace DeepfreezeApp
                 this._tray.Visibility = Visibility.Collapsed;
                 this._tray.Dispose();
             }
+
+            //if (this.ShowRestartNeeded)
+            //{
+            //    this.ConfigureSettingsMigration();
+            //}
+
             base.OnDeactivate(close);
         }
 
@@ -659,6 +719,25 @@ namespace DeepfreezeApp
             {
                 MessageBox.Show("Setting custom endpoint to: " + debugEndpoint);
                 this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.DebugServerBaseAddress;
+            }
+        }
+
+        /// <summary>
+        /// Call SquirrelHelper.CopyMigrationUserConfig() to copy settings for migrating on the next run.
+        /// </summary>
+        /// <returns></returns>
+        private string ConfigureSettingsMigration()
+        {
+            try
+            {
+                // Copy current user settings to migrate to.
+                var migrationUserConfigPath = SquirrelHelper.CopyMigrationUserConfig();
+                return migrationUserConfigPath;
+            }
+            catch(Exception)
+            {
+                _log.Error("Settings migration failed. Default settings will be used if the next instance is an update.");
+                return null;
             }
         }
 

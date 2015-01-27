@@ -1,8 +1,5 @@
-﻿#define DEBUG 
-
-using Caliburn.Micro;
-using DeepfreezeSDK;
-using System;
+﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -12,13 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Diagnostics;
-using System.Deployment.Application;
- 
 
 using Newtonsoft.Json;
+using Caliburn.Micro;
+using DeepfreezeSDK;
 using DeepfreezeModel;
-using System.Threading.Tasks;
 using Custom.Windows;
+using System.Configuration;
 
 namespace DeepfreezeApp
 {
@@ -31,6 +28,7 @@ namespace DeepfreezeApp
         public MefBootstrapper()
         {
             Initialize();
+            SquirrelHelper.CustomSquirrelSetup();
         }
 
         protected override void Configure()
@@ -82,29 +80,38 @@ namespace DeepfreezeApp
             if (!(app == null || app.IsFirstInstance))
             {
                 app.Shutdown();
-            }
-                
+            }    
             else
             {
                 // Else go on with normal startup.
- 
-                bool firstDeployedRun = ApplicationDeployment.IsNetworkDeployed &&
-                    ApplicationDeployment.CurrentDeployment.IsFirstRun;
+
+                // Try migrating old settings after an update.
+                // migrate.user.config must exist in AppData\BigStash\
+                TryMigratingOldUserConfig();
+
+                // Upgrade settings from previous squirrel installation.
+                //if (Properties.Settings.Default.SettingsUpgradeRequired)
+                //{
+                //    Properties.Settings.Default.Upgrade();
+                //    Properties.Settings.Default.SettingsUpgradeRequired = false;
+                //    Properties.Settings.Default.Save();
+                //    Properties.Settings.Default.Reload();
+                //}
 
                 // Change default ClickOnce icon in Programs and Features entry,
                 // if it's not already set.
                 SetAddRemoveProgramsIcon();
 
-                // get the application version to be used in user agent header of api requests.
-                var currentVersion = SetVersionForUserAgent();
-
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-#if DEBUG
-                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
-                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
-                Properties.Settings.Default.VerboseDebugLogging = true;
-#endif
+//#if DEBUG
+//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+//                Properties.Settings.Default.VerboseDebugLogging = true;
+//#endif
+
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+                this.SetVersionForUserAgent(currentVersion);
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
                 _log.Info("*****************************************************");
@@ -170,7 +177,7 @@ namespace DeepfreezeApp
 
                 if (client.IsLogged())
                 {
-                    _log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".\n\n");
+                    _log.Info("Saving preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
                     // Reset the api endpoint to the default 'ServerBaseAddress' before saving the preferences file
                     // for the last time.
@@ -181,8 +188,13 @@ namespace DeepfreezeApp
                 }
                 else
                 {
-                    _log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\"\n\n");
+                    _log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".");
                     File.Delete(Properties.Settings.Default.SettingsFilePath);
+                }
+
+                if (Properties.Settings.Default.SettingsUpgradeRequired)
+                {
+                    SquirrelHelper.CopyMigrationUserConfig();
                 }
             }
 
@@ -351,16 +363,10 @@ namespace DeepfreezeApp
             client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
         }
 
-        private string SetVersionForUserAgent()
+        private void SetVersionForUserAgent(string version)
         {
             var client = IoC.Get<IDeepfreezeClient>();
-
-            if (ApplicationDeployment.IsNetworkDeployed)
-                client.ApplicationVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
-            else
-                client.ApplicationVersion = "debug";
-
-            return client.ApplicationVersion;
+            client.ApplicationVersion = version;
         }
 
         private async Task ShowBigStashUpdateMessage()
@@ -473,6 +479,51 @@ namespace DeepfreezeApp
             Directory.Delete(deepfreezeFolderPath, true);
 
             return true;
+        }
+
+        /// <summary>
+        /// After the clickonce to squirrel migration we need to copy the old.user.config file
+        /// which is the user settings as they were the time the migration took place.
+        /// This method tries the migration if the old.user.config file exists in the BigStash appdata folder.
+        /// </summary>
+        private void TryMigratingOldUserConfig()
+        {
+            // do this to make sure that the user.config dir and file are created.
+            Properties.Settings.Default.SettingsUpgradeRequired = false;
+            Properties.Settings.Default.Save();
+
+            // check if the old.user.config exists in the local application data folder of bigstash
+            var oldUserConfig = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BigStash", "migrate.user.config");
+
+            if (!File.Exists(oldUserConfig))
+            {
+                return;
+            }
+
+            try
+            {
+                _log.Info("Migrating settings after clickonce-to-squirrel migration.");
+
+                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+
+                var configDir = Path.GetDirectoryName(config.FilePath);
+                if (!Directory.Exists(configDir))
+                {
+                    Directory.CreateDirectory(configDir);
+                }
+
+                File.Copy(oldUserConfig, config.FilePath, true);
+                File.Delete(oldUserConfig);
+                Properties.Settings.Default.Reload();
+
+                // update settings upgrade required again to false now.
+                Properties.Settings.Default.SettingsUpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
+            catch(Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
 
         #endregion

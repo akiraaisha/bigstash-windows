@@ -141,7 +141,7 @@
     <comment>Used for cancel button content.</comment>
   </data>
   <data name="CheckForUpdateAutomaticText" xml:space="preserve">
-    <value>Automatic check and installation of updates, every time the About page is opened.</value>
+    <value>Automatically check for updates.</value>
   </data>
   <data name="CheckForUpdateText" xml:space="preserve">
     <value>Check for update</value>
@@ -241,7 +241,7 @@
     <value>Remove</value>
   </data>
   <data name="RestartNeededText" xml:space="preserve">
-    <value>Click Restart for changes to take effect.</value>
+    <value>Restart to install updates.</value>
   </data>
   <data name="ResumeButtonContent" xml:space="preserve">
     <value>Resume</value>
@@ -253,7 +253,7 @@
     <value>https://www.bigstash.co/account/</value>
   </data>
   <data name="StatusCompletedText" xml:space="preserve">
-    <value>Completed</value>
+    <value>Archived</value>
   </data>
   <data name="StatusErrorNotificationText" xml:space="preserve">
     <value>There was an error freezing Archive</value>
@@ -268,7 +268,7 @@
     <value>Pending</value>
   </data>
   <data name="StatusUploadedText" xml:space="preserve">
-    <value>Uploaded</value>
+    <value>Uploaded. Waiting for server verification.</value>
   </data>
   <data name="StatusUploadingText" xml:space="preserve">
     <value>Uploading</value>
@@ -405,7 +405,7 @@
     <value>You can't delete your upload without an active Internet connection.</value>
   </data>
   <data name="DowloadingUpdateText" xml:space="preserve">
-    <value>Downloading... </value>
+    <value>Downloading the update... </value>
   </data>
   <data name="ResumeButtonDisabledTooltipText" xml:space="preserve">
     <value>You can't resume your upload without an active Internet connection.</value>
@@ -499,5 +499,26 @@
   </data>
   <data name="ClearAllCompletedButtonHelpText" xml:space="preserve">
     <value>Click to remove all your completed uploads.</value>
+  </data>
+  <data name="FetchUploadTakingTooLongText" xml:space="preserve">
+    <value>Status refresh is taking too long. We're still trying...</value>
+  </data>
+  <data name="WaitingForCompletedStatusText" xml:space="preserve">
+    <value>Waiting for the service to verify your files.</value>
+  </data>
+  <data name="ErrorCheckingForUpdateGenericText" xml:space="preserve">
+    <value>There was an error while checking for updates.</value>
+  </data>
+  <data name="NoUpdatesFoundText" xml:space="preserve">
+    <value>No updates found.</value>
+  </data>
+  <data name="UpdateFoundText" xml:space="preserve">
+    <value>There are updates to be installed. Click to download and install them.</value>
+  </data>
+  <data name="InstallingUpdateText" xml:space="preserve">
+    <value>Installing the update...</value>
+  </data>
+  <data name="UpdateFoundButtonTooltipText" xml:space="preserve">
+    <value>A new software update is available.</value>
   </data>
 </root>
