@@ -31,4 +31,4 @@ If you want to disable it, then check the ```packages.config``` file for exact v
 
 Deployment and releases
 -----------------------
-The application is now released using [Squirrel](https://github.com/Squirrel/Squirrel.Windows). See [instructions](https://github.com/longaccess/deepfreeze-windows-app/blob/master/docs/Squirrel%20Instructions.MD) for more information.
+The application is now released (beginning with version [1.4.0.0](https://github.com/longaccess/deepfreeze-windows-app/tree/1.4.0.0)) using [Squirrel](https://github.com/Squirrel/Squirrel.Windows). See [instructions](https://github.com/longaccess/deepfreeze-windows-app/blob/master/docs/Squirrel%20Instructions.MD) for more information.
