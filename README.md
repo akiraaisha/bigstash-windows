@@ -19,6 +19,7 @@ Third party project dependencies
 - ```log4net```
 - ```WPF instance aware application```
 - ```Hardcodet.Wpf.TaskbarNotification```
+- ```Squirrel```
 
 Build
 -----
