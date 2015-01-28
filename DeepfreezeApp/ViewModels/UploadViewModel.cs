@@ -949,7 +949,6 @@ namespace DeepfreezeApp
 
                     // setup the s3 client.
                     this.SetS3Info(this.Upload.S3);
-                    this.SetupS3Client(this.Upload.S3);
 
                     foreach (var info in this.LocalUpload.ArchiveFilesInfo)
                     {
@@ -1026,7 +1025,6 @@ namespace DeepfreezeApp
                     this.LocalUpload.Status = this.Upload.Status.GetStringValue();
                     this.TryMoveSelfToCompleted();
                     this.SetS3Info(this.Upload.S3);
-                    this.SetupS3Client(this.Upload.S3);
                 }
             }
             catch (Exception) { throw; }
@@ -1056,15 +1054,7 @@ namespace DeepfreezeApp
             {
                 this._s3Info = s3;
             }
-        }
-
-        /// <summary>
-        /// Set DeepfreezeS3Client's amazon s3 client credentials and session token.
-        /// </summary>
-        /// <param name="s3"></param>
-        private void SetupS3Client(S3Info s3)
-        {
-            this._s3Client.Setup(s3.TokenAccessKey, s3.TokenSecretKey, s3.TokenSession);
+            this._s3Client.Setup(this._s3Info);
         }
 
         /// <summary>

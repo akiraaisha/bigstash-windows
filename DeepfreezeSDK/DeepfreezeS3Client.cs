@@ -47,16 +47,17 @@ namespace DeepfreezeSDK
         //    _secretAccessKey = secretAccessKey;
         //}
 
-        public void Setup(string accessKeyID, string secretAccessKey, string sessionToken)
+        public void Setup(S3Info s3)
         {
             try
             {
+                AWSConfigs.CorrectForClockSkew = true; // enable clock skew correction since it defaults to false (should be true though (???))
+
                 // set the standard us region endpoint.
                 _s3Config = new AmazonS3Config();
                 _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USWest2;
                 _s3Config.ProgressUpdateInterval = 2 * 100 * 1024; // fire progress update event every 500 KB.
-                AWSConfigs.CorrectForClockSkew = true; // enable clock skew correction since it defaults to false (should be true though (???))
-                s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
+                s3Client = new AmazonS3Client(s3.TokenAccessKey, s3.TokenSecretKey, s3.TokenSession, _s3Config);
             }
             catch (Exception) { throw; }
         }
