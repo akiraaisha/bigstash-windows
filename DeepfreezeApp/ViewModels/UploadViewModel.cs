@@ -32,6 +32,7 @@ namespace DeepfreezeApp
         private static object lockObject = new Object();
 
         private const int INTERVAL_FOR_FAST_COMPLETION_CHECK = 5;
+        private const int PARALLEL_NUM_OF_FILES_UPLOAD = 10;
 
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
@@ -39,7 +40,7 @@ namespace DeepfreezeApp
         private bool _isBusy = false;
         private bool _isUploading = false;
         private bool _isRefreshing = false;
-        private bool _currentUploadIsMultipart = false;
+        //private bool _currentUploadIsMultipart = false;
         private string _errorMessage;
         private long _progress = 0;
         private string _busyMessage;
@@ -49,7 +50,7 @@ namespace DeepfreezeApp
         private LocalUpload _localUpload;
         private ArchiveFileInfo _currentFileInfo;
 
-        private long _currentFileProgress = 0;
+        //private long _currentFileProgress = 0;
         private long _totalProgress = 0; // this is updated when a file completes upload and not while uploading.
 
         private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
@@ -65,6 +66,8 @@ namespace DeepfreezeApp
 
         private bool _fetchUploadTakingTooLong = false;
         private bool _isWaitingForCompletedStatus = false;
+
+        private List<ArchiveFileInfo> _currentFilesUploading = new List<ArchiveFileInfo>();
 
         #endregion
 
@@ -307,6 +310,7 @@ namespace DeepfreezeApp
 
                 // set timer interval to 5 seconds to catch progress updates
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 5);
+                this._refreshProgressTimer.Start();
 
                 // skip files with IsUploaded = true entirely.
                 var lstFilesToUpload = this.LocalUpload.ArchiveFilesInfo.Where(x => !x.IsUploaded).ToList();
@@ -318,72 +322,62 @@ namespace DeepfreezeApp
                         " files since they are already uploaded.");
                 }
 
-                foreach (var info in lstFilesToUpload)
+                var filesToUploadQueue = new Queue<ArchiveFileInfo>(lstFilesToUpload);
+
+                var runningTasks = new List<Task>();
+                while (runningTasks.Count < PARALLEL_NUM_OF_FILES_UPLOAD && filesToUploadQueue.Count > 0)
                 {
-                    CurrentFileInfo = info;
-                    this._currentFileProgress = 0;
+                    var fileToUpload = filesToUploadQueue.Dequeue();
+                    var taskToStart = this.CreateUploadFileTask(fileToUpload, token);
+                    runningTasks.Add(taskToStart);
+                }
 
-                    _log.Info("Start uploading file: \"" + info.FileName + "\".");
+                while (runningTasks.Count > 0)
+                {
+                    token.ThrowIfCancellationRequested();
 
-                    // if UploadId is null then we mark this file info as a completely new S3 upload
-                    // else it's an upload started in the past.
-                    bool isNewFileUpload = (info.UploadId == null);
+                    var finishedTask = await Task.WhenAny(runningTasks).ConfigureAwait(false);
 
-                    if (!isNewFileUpload && info.LastModified < new FileInfo(info.FilePath).LastWriteTimeUtc)
+                    runningTasks.Remove(finishedTask);
+
+                    if (finishedTask.Status == TaskStatus.Faulted)
                     {
-                        throw new Exception("The file " + info.FileName + " has changed since you selected it for archiving.\nCancel the upload and create a new archive.");
+                        runningTasks.Clear();
+                        filesToUploadQueue.Clear();
+
+                        throw finishedTask.Exception;
                     }
 
-                    // Check if there is already an uploadID for the current file upload.
-                    // If not initiate a new S3 upload and set the UploadId property.
-                    if (isNewFileUpload && info.Size > MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD)
+                    if (finishedTask.Status == TaskStatus.Canceled)
                     {
-                        InitiateMultipartUploadResponse initResponse =
-                            await this._s3Client.InitiateMultipartUploadAsync(this._s3Info.Bucket, info.KeyName, token).ConfigureAwait(false);
-
-                        info.UploadId = initResponse.UploadId;
-
-                        await this.SaveLocalUpload();
+                        runningTasks.Clear();
+                        filesToUploadQueue.Clear();
                     }
 
-                    bool uploadFinished = false;
-                    this._refreshProgressTimer.Start();
-
-                    this._currentUploadIsMultipart = info.Size > MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD;
-
-                    if (this._currentUploadIsMultipart)
-                    {
-                        // If this file info has an UploadId and IsUploaded = false, then proceed with uploading the file.
-                        uploadFinished = await this._s3Client.UploadMultipartFileAsync(isNewFileUpload, this._s3Info.Bucket, info, this._cts, token).ConfigureAwait(false);
-
-                        if (uploadFinished)
-                        {
-                            this._refreshProgressTimer.Stop();
-
-                            // send a complete request to finish the s3 upload.
-                            var completeResponse = await this._s3Client.CompleteMultipartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, token)
-                                .ConfigureAwait(false);
-
-                            // set the UploadId to null since it's completed and no longer exists.
-                            info.UploadId = null;
-                        }
-                    }
-                    else
-                    {
-                        uploadFinished = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, info.KeyName, info.FilePath, token).ConfigureAwait(false);
-                        this._refreshProgressTimer.Stop();
-                    }
-
-                    info.IsUploaded = uploadFinished;
-
-                    _log.Info("Finished uploading file: \"" + info.FileName + "\".");
+                    finishedTask = null;
 
                     // So, at this point, a file finished uploading, so we check the total uploaded bytes.
-                    await this.CalculateTotalUploadedSize().ConfigureAwait(false);
-                    this.Progress = this._totalProgress;
+                    //await this.CalculateTotalUploadedSize().ConfigureAwait(false);
+                    //this.Progress = this._totalProgress;
 
-                    await this.SaveLocalUpload();
+                    long newProgress = this.LocalUpload.ArchiveFilesInfo.Select(x => x.Progress).Sum();
+
+                    if (this.Progress < newProgress)
+                    {
+                        this.Progress = newProgress;
+                    }
+
+                    if (filesToUploadQueue.Count > 0)
+                    {
+                        var fileToUpload = filesToUploadQueue.Dequeue();
+                        var taskToStart = this.CreateUploadFileTask(fileToUpload, token);
+                        runningTasks.Add(taskToStart);
+                    }
                 }
+
+                this._refreshProgressTimer.Stop();
+
+                token.ThrowIfCancellationRequested();
 
                 // Since all files are uploaded send a patch to upload url with status uploaded to complete it.
                 this.Upload = await this._deepfreezeClient.FinishUploadAsync(this.Upload).ConfigureAwait(false);
@@ -448,6 +442,93 @@ namespace DeepfreezeApp
 
             IsUploading = false;
             IsBusy = false;
+        }
+
+        /// <summary>
+        /// Creates a task for uploading a file, single or multipart.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        private Task CreateUploadFileTask(ArchiveFileInfo info, CancellationToken token)
+        {
+            // CurrentFileInfo = info;
+            //this._currentFileProgress = 0;
+            var task = Task.Run(async () =>
+                {
+                    this._currentFilesUploading.Add(info);
+
+                    lock (lockObject) { this.CurrentFileInfo = info; }
+
+                    _log.Info("Start uploading file: \"" + info.FileName + "\".");
+
+                    // if UploadId is null then we mark this file info as a completely new S3 upload
+                    // else it's an upload started in the past.
+                    bool isNewFileUpload = (info.UploadId == null);
+
+                    if (!isNewFileUpload && info.LastModified < new FileInfo(info.FilePath).LastWriteTimeUtc)
+                    {
+                        throw new Exception("The file " + info.FileName + " has changed since you selected it for archiving.\nCancel the upload and create a new archive.");
+                    }
+
+                    // Check if there is already an uploadID for the current file upload.
+                    // If not initiate a new S3 upload and set the UploadId property.
+                    if (isNewFileUpload && info.Size > MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD)
+                    {
+                        InitiateMultipartUploadResponse initResponse =
+                            await this._s3Client.InitiateMultipartUploadAsync(this._s3Info.Bucket, info.KeyName, token).ConfigureAwait(false);
+
+                        info.UploadId = initResponse.UploadId;
+
+                        await this.SaveLocalUpload();
+                    }
+
+                    bool uploadFinished = false;
+
+                    // this._refreshProgressTimer.Start();
+
+                    var currentUploadIsMultipart = info.Size > MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD;
+
+                    if (currentUploadIsMultipart)
+                    {
+                        // If this file info has an UploadId and IsUploaded = false, then proceed with uploading the file.
+                        uploadFinished = await this._s3Client.UploadMultipartFileAsync(isNewFileUpload, this._s3Info.Bucket, info, this._cts, token).ConfigureAwait(false);
+
+                        if (uploadFinished)
+                        {
+                            // this._refreshProgressTimer.Stop();
+
+                            // send a complete request to finish the s3 upload.
+                            var completeResponse = await this._s3Client.CompleteMultipartUploadAsync(this._s3Info.Bucket, info.KeyName, info.UploadId, token)
+                                .ConfigureAwait(false);
+
+                            // set the UploadId to null since it's completed and no longer exists.
+                            info.UploadId = null;
+                        }
+                    }
+                    else
+                    {
+                        uploadFinished = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, info.KeyName, info.FilePath, info, token).ConfigureAwait(false);
+                        // this._refreshProgressTimer.Stop();
+                    }
+
+                    info.IsUploaded = uploadFinished;
+
+                    _log.Info("Finished uploading file: \"" + info.FileName + "\".");
+
+                    await this.SaveLocalUpload();
+
+                    Dispatcher.CurrentDispatcher.Invoke((System.Action)delegate()
+                    {
+                        lock (lockObject)
+                        {
+                            this._currentFilesUploading.Remove(info);
+                            this.CurrentFileInfo = this._currentFilesUploading.LastOrDefault();
+                        }
+                    });
+                }, token);
+
+            return task;
         }
 
         /// <summary>
@@ -1118,7 +1199,7 @@ namespace DeepfreezeApp
                 }
 
                 // Upload the zip containing the manifest file to S3.
-                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), tempSavePath, token).ConfigureAwait(false);
+                var manifestUploaded = await this._s3Client.UploadSingleFileAsync(this._s3Info.Bucket, manifestKeyNameSb.ToString(), tempSavePath, token: token).ConfigureAwait(false);
 
                 // Delete the manifest file.
                 if (File.Exists(tempSavePath))
@@ -1365,12 +1446,14 @@ namespace DeepfreezeApp
                 {
                     await this.RenewUploadTokenAsync();
 
-                    if (this._currentUploadIsMultipart)
-                        this._currentFileProgress = this._s3Client.MultipartUploadProgress.Sum(x => x.Value);
-                    else
-                        this._currentFileProgress = this._s3Client.SingleUploadProgress;
+                    //if (this._currentUploadIsMultipart)
+                    //    this._currentFileProgress = this._s3Client.MultipartUploadProgress.Sum(x => x.Value);
+                    //else
+                    //    this._currentFileProgress = this._s3Client.SingleUploadProgress;
 
-                    long newProgress = this._currentFileProgress + this._totalProgress;
+                    //long newProgress = this._currentFileProgress + this._totalProgress;
+
+                    long newProgress = this.LocalUpload.ArchiveFilesInfo.Select(x => x.Progress).Sum();
 
                     if (this.Progress < newProgress)
                         this.Progress = newProgress;
