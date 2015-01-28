@@ -104,13 +104,16 @@ namespace DeepfreezeApp
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-                //#if DEBUG
-                //                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
-                //                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
-                //                Properties.Settings.Default.VerboseDebugLogging = true;
-                //#endif
-
-                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
+//#if DEBUG
+//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+//                Properties.Settings.Default.VerboseDebugLogging = true;
+//#endif
+#if DEBUG
+                if (!String.IsNullOrEmpty(Properties.Settings.Default.AWSEndpointDefinition))
+                    ConfigurationManager.AppSettings["AWSEndpointDefinition"] = Properties.Settings.Default.AWSEndpointDefinition;
+#endif
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
                 this.SetVersionForUserAgent(currentVersion);
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
