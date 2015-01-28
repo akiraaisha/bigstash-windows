@@ -303,8 +303,6 @@ namespace DeepfreezeSDK
                 FilePath = path,
             };
 
-            putRequest.Headers.ContentEncoding = "gzip";
-
             putRequest.StreamTransferProgress += (sender, eventArgs) =>
             {
                 if (info != null)
