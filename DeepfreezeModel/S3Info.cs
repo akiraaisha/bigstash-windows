@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace DeepfreezeModel
@@ -11,6 +12,9 @@ namespace DeepfreezeModel
 
         [DataMember(Name="prefix")]
         public string Prefix { get; set; }
+
+        [DataMember(Name="region")]
+        public string Region { get; set; }
 
         [DataMember(Name="token_expiration")]
         public DateTime TokenExpiration { get; set; }
@@ -26,5 +30,10 @@ namespace DeepfreezeModel
 
         [DataMember(Name="token_access_key")]
         public string TokenAccessKey { get; set; }
+
+        public S3Info()
+        {
+            this.Region = "us-west-2";
+        }
     }
 }
