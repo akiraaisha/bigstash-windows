@@ -289,24 +289,28 @@ namespace DeepfreezeSDK
         /// <param name="info"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> UploadSingleFileAsync(string existingBucketName, string keyName, string path, CancellationToken token)
+        public async Task<bool> UploadSingleFileAsync(string existingBucketName, string keyName, string path, ArchiveFileInfo info = null, CancellationToken token = default(CancellationToken))
         {
             _log.Debug("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + keyName +
                 "\", FilePath = \"" + path + "\".");
 
-            this.SingleUploadProgress = 0;
+            //this.SingleUploadProgress = 0;
 
             var putRequest = new PutObjectRequest()
             {
                 BucketName = existingBucketName,
                 Key = keyName,
-                FilePath = path
+                FilePath = path,
             };
+
+            putRequest.Headers.ContentEncoding = "gzip";
 
             putRequest.StreamTransferProgress += (sender, eventArgs) =>
             {
-                this.SingleUploadProgress = eventArgs.TransferredBytes;
-                Console.WriteLine("Single Upload Progress: " + this.SingleUploadProgress);
+                if (info != null)
+                    info.Progress = eventArgs.TransferredBytes;
+
+                Console.WriteLine(keyName + ": " + info.Progress + " / " + info.Size + " bytes.");
             };
 
             int retries = 2;
