@@ -10,6 +10,7 @@ namespace DeepfreezeModel
 {
     public static class LocalStorage
     {
+        private static object _syncLock = new object();
         /// <summary>
         /// Write json to file, given a file path and a json string.
         /// If the file does not exist, a new file will be created.
@@ -19,22 +20,25 @@ namespace DeepfreezeModel
         /// <returns>bool</returns>
         public static bool WriteJson(string path, object json, Encoding encoding)
         {
-            try
+            lock (_syncLock)
             {
-                using (FileStream fs = File.Open(path, FileMode.Create))
-                using (StreamWriter sw = new StreamWriter(fs, encoding))
-                using (JsonWriter jw = new JsonTextWriter(sw))
+                try
                 {
-                    jw.Formatting = Formatting.Indented;
-
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(jw, json);
+                
+                    using (FileStream fs = File.Open(path, FileMode.Create))
+                    using (StreamWriter sw = new StreamWriter(fs, encoding))
+                    using (JsonWriter jw = new JsonTextWriter(sw))
+                    {
+                        jw.Formatting = Formatting.Indented;
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.Serialize(jw, json);
+                    }
 
                     return true;
                 }
+                catch (Exception e)
+                { throw e; }
             }
-            catch (Exception e)
-            { throw e; }
         }
     }
 }
