@@ -70,19 +70,10 @@
     <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\longaccess.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestCertificateThumbprint>8438848DCB9CFC79561303F2CBEB83801828F207</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>..\longaccess.pfx</ManifestKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK, Version=2.3.24.3, Culture=neutral, PublicKeyToken=9f476d3089b52be3, processorArchitecture=MSIL">
@@ -298,11 +289,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\longaccess.pfx">
-      <Link>longaccess.pfx</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
@@ -418,14 +404,4 @@
   <PropertyGroup>
     <PostBuildEvent>copy $(SolutionDir)\Log4Net.config $(TargetDir)\.</PostBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <Target Name="AfterCompile">
-    <Exec Command="&quot;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\bin\signtool.exe&quot; sign /a /v &quot;$(ProjectDir)obj\$(ConfigurationName)\$(TargetFileName)&quot;" />
-  </Target>
 </Project>

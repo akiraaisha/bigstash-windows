@@ -36,9 +36,6 @@
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\longaccess.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK, Version=2.3.24.3, Culture=neutral, PublicKeyToken=9f476d3089b52be3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,9 +78,6 @@
   <ItemGroup>
     <None Include="..\Log4Net.config">
       <Link>Log4Net.config</Link>
-    </None>
-    <None Include="..\longaccess.pfx">
-      <Link>longaccess.pfx</Link>
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
