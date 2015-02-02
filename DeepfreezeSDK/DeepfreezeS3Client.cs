@@ -23,14 +23,11 @@ namespace DeepfreezeSDK
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
 
         protected static readonly long PART_SIZE = 5 * 1024 * 1024;
-        protected static readonly int PARALLEL_NUM = Environment.ProcessorCount - 1;
-
-        public IAmazonS3 s3Client;
+        protected static readonly int MAX_PARALLEL_ALLOWED = Environment.ProcessorCount;
 
         private static AmazonS3Config _s3Config;
 
-        public Dictionary<int, long> MultipartUploadProgress = new Dictionary<int, long>();
-        public long SingleUploadProgress = 0;
+        public IAmazonS3 s3Client;
 
         public bool IsUploading = false;
 
@@ -71,6 +68,8 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<InitiateMultipartUploadResponse> InitiateMultipartUploadAsync(string existingBucketName, string keyName, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called InitiateMultipartUploadAsync with parameter keyName = \"" + keyName + "\".");
 
             try
@@ -103,6 +102,8 @@ namespace DeepfreezeSDK
         /// <returns>Task<List<PartDetail>></returns>
         public async Task<List<PartDetail>> ListPartsAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called ListPartsAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
 
             List<PartDetail> parts = new List<PartDetail>();
@@ -119,6 +120,8 @@ namespace DeepfreezeSDK
 
                 while(response.IsTruncated)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     request.PartNumberMarker = response.NextPartNumberMarker.ToString();
                     response = await this.s3Client.ListPartsAsync(request, token).ConfigureAwait(false);
                     parts.AddRange(response.Parts);
@@ -149,6 +152,8 @@ namespace DeepfreezeSDK
         public async Task<CompleteMultipartUploadRequest> CompleteMultipartUploadAsync(string existingBucketName, string keyName, string uploadId, 
             CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called CompleteMultipartUploadAsync with parameters keyName = \"" + keyName + "\" and uploadID = \"" + uploadId + "\".");
 
             try
@@ -170,6 +175,8 @@ namespace DeepfreezeSDK
                 }
 
                 completeRequest.AddPartETags(eTags);
+
+                token.ThrowIfCancellationRequested();
 
                 CompleteMultipartUploadResponse completeResponse = await s3Client.CompleteMultipartUploadAsync(completeRequest, token).ConfigureAwait(false);
 
@@ -223,8 +230,10 @@ namespace DeepfreezeSDK
         /// <param name="uploadPartRequest"></param>
         /// <param name="token"></param>
         /// <returns>Task<UploadPartResponse></returns>
-        public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, Dictionary<int, long> partsProgress, CancellationToken token)
+        public async Task<UploadPartResponse> UploadPartAsync(UploadPartRequest uploadPartRequest, ArchiveFileInfo fileInfo, Dictionary<int, long> partsProgress, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called UploadPartAsync with UploadPartRequest properties: KeyName = \"" + uploadPartRequest.Key + 
                 "\", PartNumber = " + uploadPartRequest.PartNumber + ", PartSize = " + uploadPartRequest.PartSize +
                 ", UploadId = \"" + uploadPartRequest.UploadId + ", FilePath = \"" + uploadPartRequest.FilePath + "\".");
@@ -234,7 +243,12 @@ namespace DeepfreezeSDK
             uploadPartRequest.StreamTransferProgress += (sender, eventArgs) =>
             {
                 partsProgress[uploadPartRequest.PartNumber] = eventArgs.TransferredBytes;
-                Console.WriteLine("Part " + uploadPartRequest.PartNumber + " transferred bytes: " + partsProgress[uploadPartRequest.PartNumber]);
+                fileInfo.Progress = partsProgress.Values.Sum();
+
+#if DEBUG
+                Console.WriteLine(fileInfo.KeyName + ": " + fileInfo.Progress + " / " + fileInfo.Size + " bytes.");
+                Console.WriteLine("    Part " + uploadPartRequest.PartNumber + " progress: " + partsProgress[uploadPartRequest.PartNumber] + " bytes.");
+#endif
             };
 
             while (true)
@@ -291,10 +305,10 @@ namespace DeepfreezeSDK
         /// <returns></returns>
         public async Task<bool> UploadSingleFileAsync(string existingBucketName, string keyName, string path, ArchiveFileInfo info = null, CancellationToken token = default(CancellationToken))
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called UploadSingleFileAsync with ArchiveFileInfo properties: KeyName = \"" + keyName +
                 "\", FilePath = \"" + path + "\".");
-
-            //this.SingleUploadProgress = 0;
 
             var putRequest = new PutObjectRequest()
             {
@@ -308,7 +322,9 @@ namespace DeepfreezeSDK
                 if (info != null)
                     info.Progress = eventArgs.TransferredBytes;
 
+#if DEBUG
                 Console.WriteLine(keyName + ": " + info.Progress + " / " + info.Size + " bytes.");
+#endif
             };
 
             int retries = 2;
@@ -428,15 +444,16 @@ namespace DeepfreezeSDK
         public async Task<bool> UploadMultipartFileAsync(bool isNewFileUpload, string existingBucketName, ArchiveFileInfo fileInfo,
             CancellationTokenSource cts, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called UploadMultipartFileAsync with ArchiveFileInfo properties: KeyName = \"" + fileInfo.KeyName +
                 "\", FilePath = \"" + fileInfo.FilePath + "\".");
 
             bool hasException = false;
             this.IsUploading = true;
 
-            this.MultipartUploadProgress.Clear();
-
             List<PartDetail> uploadedParts = new List<PartDetail>();
+            Dictionary<int, long> multipartUploadProgress = new Dictionary<int, long>();
 
             var uploadPartTasks = new List<Task<UploadPartResponse>>();
             Queue<UploadPartRequest> partRequests = new Queue<UploadPartRequest>();
@@ -455,14 +472,14 @@ namespace DeepfreezeSDK
                 token.ThrowIfCancellationRequested();
 
                 // create all part requests.
-                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, uploadedParts, this.MultipartUploadProgress);
+                partRequests = this.PreparePartRequests(isNewFileUpload, existingBucketName, fileInfo, uploadedParts, multipartUploadProgress);
 
                 token.ThrowIfCancellationRequested();
 
                 // initialize first tasks to run.
-                while (runningTasks.Count < PARALLEL_NUM && partRequests.Count > 0)
+                while (runningTasks.Count < MAX_PARALLEL_ALLOWED && partRequests.Count > 0)
                 {
-                    var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), this.MultipartUploadProgress, token);
+                    var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), fileInfo, multipartUploadProgress, token);
                     runningTasks.Add(uploadTask);
                 }
 
@@ -481,7 +498,7 @@ namespace DeepfreezeSDK
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), this.MultipartUploadProgress, token);
+                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), fileInfo, multipartUploadProgress, token);
                         runningTasks.Add(uploadTask);
                     }
                 }
@@ -497,7 +514,9 @@ namespace DeepfreezeSDK
 
                 partRequests.Clear();
                 runningTasks.Clear();
-                this.MultipartUploadProgress.Clear();
+                multipartUploadProgress.Clear();
+                uploadedParts.Clear();
+                uploadPartTasks.Clear();
 
                 throw;
             }
@@ -507,6 +526,12 @@ namespace DeepfreezeSDK
                 {
                     cts.Cancel();
                 }
+
+                uploadedParts.Clear();
+                multipartUploadProgress.Clear();
+                uploadPartTasks.Clear();
+                partRequests.Clear();
+                runningTasks.Clear();
 
                 this.IsUploading = false;
             }
@@ -518,10 +543,12 @@ namespace DeepfreezeSDK
         /// <param name="existingBucketName"></param>
         /// <param name="keyName"></param>
         /// <param name="uploadID"></param>
-        /// <param name="cts"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        public async Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadId, CancellationToken cts)
+        public async Task AbortMultiPartUploadAsync(string existingBucketName, string keyName, string uploadId, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             _log.Debug("Called AbortMultiPartUploadAsync with parameters keyName = \"" + keyName +
                 "\", UploadId = \"" + uploadId + "\".");
 
@@ -534,7 +561,7 @@ namespace DeepfreezeSDK
 
             try
             {
-                await s3Client.AbortMultipartUploadAsync(request, cts).ConfigureAwait(false);
+                await s3Client.AbortMultipartUploadAsync(request, token).ConfigureAwait(false);
             }
             catch(Exception e)
             {
