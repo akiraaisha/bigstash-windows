@@ -7,6 +7,7 @@ using System.ComponentModel.Composition;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.IO;
 using Newtonsoft.Json;
@@ -332,6 +333,11 @@ namespace DeepfreezeApp
                 // Try deserializing the read text to a LocalUpload object.
                 localUpload = JsonConvert.DeserializeObject<LocalUpload>(content);
 
+                if (localUpload == null)
+                {
+                    var jsonException = new Newtonsoft.Json.JsonReaderException("Deserialization of the local json upload file: \"" + path + "\" returned null.");
+                    throw new BigStashException("Deserialization error.", jsonException, ErrorType.Client);
+                }
                 return localUpload;
             }
             catch(Exception e)
