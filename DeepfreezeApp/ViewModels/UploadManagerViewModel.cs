@@ -248,6 +248,8 @@ namespace DeepfreezeApp
 
                 foreach(var uploadFilePath in uploadFilesPaths)
                 {
+                    var isValid = true;
+
                     // Try reading and deserializing the local file.
                     var localUpload = this.TryReadAndDeserializeLocalUploadFile(uploadFilePath);
 
@@ -260,17 +262,22 @@ namespace DeepfreezeApp
                         }
 
                         localUpload = this.TryReadAndDeserializeLocalUploadFile(uploadFilePath + ".bak");
+                    }
 
-                        // if this fails once again, skip it.
-                        if (localUpload == null)
+                    // if this fails once again, skip it.
+                    if (localUpload == null)
+                    {
+                        isValid = false;
+                        localUpload = new LocalUpload()
                         {
-                            continue;
-                        }
+                            Progress = 0,
+                            Status = Enumerations.Status.Corrupted.GetStringValue()
+                        };
                     }
 
                     // if a local upload file has an empty url value then exclude the upload
                     // and create a log warning about excluding it.
-                    if (String.IsNullOrEmpty(localUpload.Url))
+                    if (isValid && String.IsNullOrEmpty(localUpload.Url))
                     {
                         _log.Warn("Local Upload saved at \"" + uploadFilePath + "\" has url=\"" + localUpload.Url + "\" and it will be excluded from the uploads list.");
                         continue;
@@ -281,7 +288,7 @@ namespace DeepfreezeApp
                     // which contains the api endpoint.
                     // Also, update the SavePath property using the files' paths, because this value
                     // is not preserved in the local files' content.
-                    if (!localUpload.Url.Contains(this._deepfreezeClient.Settings.ApiEndpoint))
+                    if (isValid && !localUpload.Url.Contains(this._deepfreezeClient.Settings.ApiEndpoint))
                     {
                         _log.Warn("Local Upload saved at \"" + uploadFilePath + "\" has a different endpoint than the one in use, skipping it.");
                         continue;
