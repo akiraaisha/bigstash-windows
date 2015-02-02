@@ -893,6 +893,16 @@ namespace DeepfreezeApp
 
                     // Delete the LocalUpload file
                     File.Delete(this.LocalUpload.SavePath);
+
+                    // Take care of deleting the temp and/or backup file if it exists.
+                    if (File.Exists(this.LocalUpload.SavePath + ".bak"))
+                    {
+                        File.Delete(this.LocalUpload.SavePath + ".bak");
+                    }
+                    if (File.Exists(this.LocalUpload.SavePath + ".tmp"))
+                    {
+                        File.Delete(this.LocalUpload.SavePath + ".tmp");
+                    }
                 }
 
                 // Set this to null since the local file doesn't exist anymore.
