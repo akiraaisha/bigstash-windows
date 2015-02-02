@@ -108,14 +108,31 @@
                      Margin="0 5 0 5"
                      />
 
-            <TextBlock Grid.Row="3"
-                   Grid.ColumnSpan="2"
-                   Margin="0 5 0 5"
-                   FontSize="11"
-                   Text="{Binding CurrentFileInfo.FileName}"
-                   TextWrapping="WrapWithOverflow"
-                   Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
-                   />
+            <WrapPanel Grid.Row="3"
+                       Grid.ColumnSpan="2"
+                       Margin="0 5 0 5"
+                       Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
+                       VerticalAlignment="Top"
+                       HorizontalAlignment="Stretch"
+                       >
+                
+                <TextBlock Text="Now uploading: " 
+                           FontSize="11"
+                           Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Left"
+                           />
+
+                <TextBlock Margin="5 0 0 0" 
+                           FontSize="11"
+                           Text="{Binding CurrentFileName}"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding ElementName=PauseUpload, Path=Visibility}"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Stretch"
+                           />
+
+            </WrapPanel>
 
             <WrapPanel Grid.Row="1" Grid.ColumnSpan="2">
                 
@@ -173,11 +190,11 @@
             </WrapPanel>
             
             <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
-                           Text="{Binding ProgressText}"
-                           VerticalAlignment="Center"
+                       Text="{Binding ProgressText}"
+                       VerticalAlignment="Center"
                        HorizontalAlignment="Right"
-                           FontSize="14"
-                           />
+                       FontSize="14"
+                       />
 
             <StackPanel Grid.Row="4"
                         Grid.ColumnSpan="2"
