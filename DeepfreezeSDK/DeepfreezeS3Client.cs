@@ -23,7 +23,7 @@ namespace DeepfreezeSDK
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
 
         protected static readonly long PART_SIZE = 5 * 1024 * 1024;
-        protected static readonly int MAX_PARALLEL_ALLOWED = Environment.ProcessorCount;
+        protected static readonly int MAX_PARALLEL_ALLOWED = Environment.ProcessorCount - 1;
 
         private static AmazonS3Config _s3Config;
 
