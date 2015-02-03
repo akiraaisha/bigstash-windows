@@ -521,4 +521,7 @@
   <data name="UpdateFoundButtonTooltipText" xml:space="preserve">
     <value>A new software update is available.</value>
   </data>
+  <data name="ErrorInitializingUploadLogText" xml:space="preserve">
+    <value>There was an error while initializing your upload. Please export the log file for more information using the "Open Log" button in the About screen and contact the BigStash team attaching the exported log file in your conversation.</value>
+  </data>
 </root>

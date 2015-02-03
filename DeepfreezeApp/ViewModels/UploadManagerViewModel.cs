@@ -7,6 +7,7 @@ using System.ComponentModel.Composition;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
+using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.IO;
 using Newtonsoft.Json;
@@ -247,41 +248,111 @@ namespace DeepfreezeApp
 
                 foreach(var uploadFilePath in uploadFilesPaths)
                 {
-                    var content = File.ReadAllText(uploadFilePath, Encoding.UTF8);
+                    var isValid = true;
 
-                    if (content != null)
+                    // Try reading and deserializing the local file.
+                    var localUpload = this.TryReadAndDeserializeLocalUploadFile(uploadFilePath);
+
+                    if (localUpload == null)
                     {
-                        var localUpload = JsonConvert.DeserializeObject<LocalUpload>(content);
-
-                        // if a local upload file has an empty url value then exclude the upload
-                        // and create a log warning about excluding it.
-                        if (String.IsNullOrEmpty(localUpload.Url))
+                        // Try finding a backup and load that if it exists.
+                        if (File.Exists(uploadFilePath + ".bak"))
                         {
-                            _log.Warn("Local Upload has url=\"" + localUpload.Url + "\" and it will be excluded from the uploads list.");
-                            continue;
+                            _log.Warn("Backup found for \"" + uploadFilePath + "\".");
                         }
 
-                        // load only those local uploads that use the currently used api endpoint.
-                        // we can filter this because each local upload has the URL property,
-                        // which contains the api endpoint.
-                        // Also, update the SavePath property using the files' paths, because this value
-                        // is not preserved in the local files' content.
-                        if (localUpload.Url.Contains(this._deepfreezeClient.Settings.ApiEndpoint))
-                        {
-                            localUpload.SavePath = uploadFilePath;
-                            localUploads.Add(localUpload);
-                        }
+                        localUpload = this.TryReadAndDeserializeLocalUploadFile(uploadFilePath + ".bak");
                     }
+
+                    // if this fails once again, skip it.
+                    if (localUpload == null)
+                    {
+                        isValid = false;
+                        localUpload = new LocalUpload()
+                        {
+                            Progress = 0,
+                            Status = Enumerations.Status.Corrupted.GetStringValue()
+                        };
+                    }
+
+                    // if a local upload file has an empty url value then exclude the upload
+                    // and create a log warning about excluding it.
+                    if (isValid && String.IsNullOrEmpty(localUpload.Url))
+                    {
+                        _log.Warn("Local Upload saved at \"" + uploadFilePath + "\" has url=\"" + localUpload.Url + "\" and it will be excluded from the uploads list.");
+                        continue;
+                    }
+
+                    // load only those local uploads that use the currently used api endpoint.
+                    // we can filter this because each local upload has the URL property,
+                    // which contains the api endpoint.
+                    // Also, update the SavePath property using the files' paths, because this value
+                    // is not preserved in the local files' content.
+                    if (isValid && !localUpload.Url.Contains(this._deepfreezeClient.Settings.ApiEndpoint))
+                    {
+                        _log.Warn("Local Upload saved at \"" + uploadFilePath + "\" has a different endpoint than the one in use, skipping it.");
+                        continue;
+                    }
+
+                    localUpload.SavePath = uploadFilePath;
+                    localUploads.Add(localUpload);
                 }
 
-                _log.Info("Loaded " + localUploads.Count() + " local upload files.");
+                _log.Info("Finally loaded " + localUploads.Count() + " local upload files.");
 
                 return localUploads.OrderByDescending(x => x.SavePath).ToList();
             }
             catch (Exception e) 
             {
-                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
                 throw; 
+            }
+        }
+
+        /// <summary>
+        /// Try reading and deserializing a local upload json file.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private LocalUpload TryReadAndDeserializeLocalUploadFile(string path)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    return null;
+                }
+
+                LocalUpload localUpload = null;
+
+                _log.Debug("Try reading the local json upload file: \"" + path + "\".");
+
+                // Try reading the text from the local file.
+                var content = File.ReadAllText(path, Encoding.UTF8);
+
+                if (content == null)
+                {
+                    return null;
+                }
+
+                _log.Debug("Try deserializing the local json upload file: \"" + path + "\".");
+
+                // Try deserializing the read text to a LocalUpload object.
+                localUpload = JsonConvert.DeserializeObject<LocalUpload>(content);
+
+                if (localUpload == null)
+                {
+                    var jsonException = new Newtonsoft.Json.JsonReaderException("Deserialization of the local json upload file: \"" + path + "\" returned null.");
+                    throw new BigStashException("Deserialization error.", jsonException, ErrorType.Client);
+                }
+                return localUpload;
+            }
+            catch(Exception e)
+            {
+                _log.Warn("An exception was thrown while reading or deserializing the Local Upload saved at \"" + path + "\" and it will be excluded from the uploads list.");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
+                return null;
             }
         }
 

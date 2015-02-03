@@ -30,7 +30,10 @@ namespace DeepfreezeModel
             Uploading,
 
             [StringValue("not_found")]
-            NotFound // use this for cases when the upload is deleted from the server, but the client still has the local upload file.
+            NotFound, // use this for cases when the upload is deleted from the server, but the client still has the local upload file.
+
+            [StringValue("corrupted")]
+            Corrupted
         }
 
         public static Status GetStatusFromString(string statusString)
@@ -53,6 +56,12 @@ namespace DeepfreezeModel
                     break;
                 case "pending":
                     status = Status.Paused;
+                    break;
+                case "not_found":
+                    status = Status.NotFound;
+                    break;
+                case "corrupted":
+                    status = Status.Corrupted;
                     break;
             }
 

@@ -475,6 +475,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error while initializing your upload. Please export the log file for more information using the &quot;Open Log&quot; button in the About screen and contact the BigStash team attaching the exported log file in your conversation..
+        /// </summary>
+        internal static string ErrorInitializingUploadLogText {
+            get {
+                return ResourceManager.GetString("ErrorInitializingUploadLogText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot check for a new version of BigStash for Windows. Please reinstall the application..
         /// </summary>
         internal static string ErrorInvalidDeploymentExceptionGenericText {

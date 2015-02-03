@@ -849,7 +849,10 @@ namespace DeepfreezeApp
         /// <returns></returns>
         private async Task<bool> SaveLocalUpload(bool useAsync = true)
         {
-            if (this.IsBusy || this.LocalUpload == null)
+            if (this.IsBusy || 
+                this.LocalUpload == null ||
+                this.LocalUpload.Status == Enumerations.Status.Corrupted.GetStringValue() ||
+                this.LocalUpload.Status == Enumerations.Status.NotFound.GetStringValue())
                 return false;
 
             try
@@ -893,6 +896,16 @@ namespace DeepfreezeApp
 
                     // Delete the LocalUpload file
                     File.Delete(this.LocalUpload.SavePath);
+
+                    // Take care of deleting the temp and/or backup file if it exists.
+                    if (File.Exists(this.LocalUpload.SavePath + ".bak"))
+                    {
+                        File.Delete(this.LocalUpload.SavePath + ".bak");
+                    }
+                    if (File.Exists(this.LocalUpload.SavePath + ".tmp"))
+                    {
+                        File.Delete(this.LocalUpload.SavePath + ".tmp");
+                    }
                 }
 
                 // Set this to null since the local file doesn't exist anymore.
@@ -925,7 +938,14 @@ namespace DeepfreezeApp
             try
             {
                 if (this.LocalUpload == null)
-                    throw new Exception("No local upload file found.");
+                {
+                    throw new Exception("No local upload file found");
+                }
+
+                if (this.LocalUpload.Status == Enumerations.Status.Corrupted.GetStringValue())
+                {
+                    throw new Exception(Properties.Resources.ErrorInitializingUploadLogText);
+                }
 
                 if (this.Upload == null || this._isRefreshing)
                 {
@@ -988,11 +1008,26 @@ namespace DeepfreezeApp
 
                 this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
 
-                // if the archive doesn't exist on the server, simply remove the upload from the client.
-                if (this.LocalUpload != null && this.Upload != null && this.Archive == null)
+                if (this.LocalUpload != null && this.Archive == null)
                 {
-                    this.RemoveUpload();
+                    if (this.LocalUpload.Status != Enumerations.Status.Corrupted.GetStringValue())
+                    {
+                        this.LocalUpload.Status = Enumerations.Status.NotFound.GetStringValue();
+                    }
+
+                    this.Archive = new Archive()
+                    {
+                        Size = 1,
+                        Key = Path.GetFileNameWithoutExtension(this.LocalUpload.SavePath)
+                    };
+
+                    this.OperationStatus = Enumerations.Status.Error;
                 }
+                // if the archive doesn't exist on the server, simply remove the upload from the client.
+                //if (this.LocalUpload != null && this.Upload != null && this.Archive == null)
+                //{
+                //    this.RemoveUpload();
+                //}
 
                 // this may get thrown when calculating the actual uploaded size to S3.
                 if (e is AmazonS3Exception)
@@ -1433,8 +1468,11 @@ namespace DeepfreezeApp
             // PrepareUploadAsync handles it's exceptions
             // and updates the UI so there's no need to
             // use a try-catch block here.
-            if (!String.IsNullOrEmpty(this.LocalUpload.Url))
+            if (!String.IsNullOrEmpty(this.LocalUpload.Url) ||
+                this.LocalUpload.Status == Enumerations.Status.Corrupted.GetStringValue())
+            {
                 await this.PrepareUploadAsync().ConfigureAwait(false);
+            }
 
         }
 
