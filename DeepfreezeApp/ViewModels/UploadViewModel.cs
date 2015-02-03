@@ -376,8 +376,9 @@ namespace DeepfreezeApp
                 var smallFilesQueue = new Queue<ArchiveFileInfo>(lstFilesToUpload.
                                                                     Where(x => x.Size > (ONE_MEGABYTE / 2) && x.Size <= 2 * MIN_FILE_SIZE_FOR_MULTI_PART_UPLOAD));
 
+                parallelLimit = (PROCESSOR_COUNT - 1) == 0 ? PROCESSOR_COUNT : PROCESSOR_COUNT - 1;
                 // upload the small files queue
-                await UploadFilesQueueAsync(smallFilesQueue, PROCESSOR_COUNT, token).ConfigureAwait(false);
+                await UploadFilesQueueAsync(smallFilesQueue, parallelLimit, token).ConfigureAwait(false);
 
                 // Get the medium files
                 var mediumFilesQueue = new Queue<ArchiveFileInfo>(lstFilesToUpload.
@@ -679,11 +680,10 @@ namespace DeepfreezeApp
                         }
 
                         // update the current file progress if upload is not null (for cases when this fires when shutting down the app).
-                        if (this.Upload != null)
+                        if (info != null)
                         {
-                            var fileName = fileProgress.Item1.Replace(this.Upload.S3.Prefix.Remove(0, 1), "");
                             var totalFileProgress = (info.Size == 0) ? 100 : Math.Round(((double)info.Progress / info.Size) * 100, 2, MidpointRounding.AwayFromZero);
-                            this.CurrentFileName = fileName + " (" + totalFileProgress + "%)";
+                            this.CurrentFileName = info.FileName + " (" + totalFileProgress + "%)";
                         }
                     }
                 };
