@@ -310,10 +310,20 @@ namespace DeepfreezeApp
             }
             catch (Exception e)
             {
-                _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+                // if RELEASES is not found, don't display an error, just write it in the log and show that the app is up to date.
+                if (e.Message.Contains("RELEASES") && e.Message.Contains("does not exist"))
+                {
+                    _log.Warn(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
-                this.UpdateMessage = null;
-                this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
+                    this.UpdateMessage = Properties.Resources.NoUpdatesFoundText;
+                }
+                else
+                {
+                    _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
+                    this.UpdateMessage = null;
+                    this.ErrorMessage = Properties.Resources.ErrorCheckingForUpdateGenericText;
+                }
             }
             finally
             {

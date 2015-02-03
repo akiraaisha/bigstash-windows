@@ -56,6 +56,13 @@ namespace DeepfreezeModel
         /// True if file has finished uploading after
         /// a successful Complete Upload Request
         /// </summary>
+        [JsonProperty("progress")]
+        public long Progress { get; set; }
+
+        /// <summary>
+        /// True if file has finished uploading after
+        /// a successful Complete Upload Request
+        /// </summary>
         [JsonProperty("uploadid")]
         public string UploadId { get; set; }
 

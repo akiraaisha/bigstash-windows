@@ -38,7 +38,6 @@ namespace DeepfreezeApp
 
         public static string GetCurrentlyInstalledVersion()
         {
-            string version = String.Empty;
             bool isDebug = false;
             var updateUrl = GetUpdateLocation();
 
@@ -49,13 +48,22 @@ namespace DeepfreezeApp
 
             using (var mgr = new Squirrel.UpdateManager(updateUrl, Properties.Settings.Default.ApplicationName, Squirrel.FrameworkVersion.Net45))
             {
-                if (!isDebug)
+                var version = mgr.CurrentlyInstalledVersion();
+
+                if (version != null)
                 {
                     return mgr.CurrentlyInstalledVersion().ToString();
                 }
                 else
                 {
-                    return DEBUGVERSION;
+                    if (isDebug)
+                    {
+                        return DEBUGVERSION;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
         }
@@ -79,9 +87,8 @@ namespace DeepfreezeApp
                     var updateInfo = await mgr.CheckForUpdate().ConfigureAwait(false);
                     ret = updateInfo;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    _log.Error(Utilities.GetCallerName() + " error while checking for update with UpdateLocation = \"" + updateLocation + "\" and AppName = " + appName + ", thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
                     throw;
                 }
 
@@ -304,13 +311,13 @@ namespace DeepfreezeApp
             sb.AppendLine("    )");
             sb.AppendLine(")");
             sb.AppendLine(":loopexited");
-#if DEBUG
-            sb.AppendLine("pause");
-#endif
+//#if DEBUG
+//            sb.AppendLine("pause");
+//#endif
             sb.AppendLine("rmdir /s /q " + rootAppDirectory);
-#if DEBUG
-            sb.AppendLine("pause");
-#endif
+//#if DEBUG
+//            sb.AppendLine("pause");
+//#endif
             sb.AppendLine("call :deleteSelf&exit /b");
             sb.AppendLine(":deleteSelf");
             sb.AppendLine("start /b \"\" cmd /c del \"%~f0\"&exit /b");
@@ -324,13 +331,13 @@ namespace DeepfreezeApp
             p.StartInfo.WorkingDirectory = tempPath;
             p.StartInfo.FileName = tempSavePath;
 
-#if DEBUG
-            p.StartInfo.CreateNoWindow = false;
-            p.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-#else
+//#if DEBUG
+//            p.StartInfo.CreateNoWindow = false;
+//            p.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+//#else
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-#endif
+//#endif
 
             p.Start();
         }
