@@ -21,128 +21,136 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Margin="5"
-                Visibility="{Binding HasUploads, Converter={StaticResource BoolToVisibilityConverter}}"
-                >
-
-        <TextBlock x:Name="ErrorMessage"
-                   Foreground="Red"
-                   HorizontalAlignment="Center"
-                   TextWrapping="Wrap"
-                   Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
-                   />
+    <StackPanel Margin="5">
+        <StackPanel Margin="5"
+                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                    >
         
-        <Label Content="Pending uploads" 
-               VerticalAlignment="Top"
-               Style="{StaticResource DescriptionHeaderStyle}"
-               HorizontalAlignment="Stretch"
-               />
-
-        <Border BorderThickness="1"
-                BorderBrush="Gray"
-                HorizontalAlignment="Stretch"
-                />
-
-        <StackPanel>
-
-            <TextBlock x:Name="TotalPendingUploadsText"
-                       FontSize="14"
-                       FontStyle="Italic"
-                       Foreground="Gray"
+            <TextBlock x:Name="ErrorMessage"
+                       Foreground="Red"
+                       HorizontalAlignment="Center"
                        TextWrapping="Wrap"
-                       HorizontalAlignment="Left"
-                       Visibility="{Binding TotalPendingUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
                        />
-
-            <controls:ProgressRing Height="20"
-                                   Width="20" 
-                                   IsActive="{Binding IsBusy}"
-                                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
-                                   VerticalAlignment="Top"
-                                   HorizontalAlignment="Center"
-                                   />
 
         </StackPanel>
 
-        <ItemsControl x:Name="PendingUploads" 
-                      Margin="5 0 5 30"
-                      VerticalAlignment="Top"
-                      >
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl cal:View.Model="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <StackPanel Margin="5"
+                    Visibility="{Binding HasUploads, Converter={StaticResource BoolToVisibilityConverter}}"
+                    >
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <Label Grid.Column="0"
-                   Content="Completed uploads" 
+            <Label Content="Pending uploads" 
+                   VerticalAlignment="Top"
                    Style="{StaticResource DescriptionHeaderStyle}"
+                   HorizontalAlignment="Stretch"
                    />
 
-            <TextBlock Grid.Column="1" 
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center"
-                       Text="{Binding ClearAllButtonContent}"
-                       Cursor="Hand"
-                       Foreground="Blue"
-                       cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ClearAllCompletedUploads()]"
-                       ToolTipService.ShowDuration="30000"
-                       FontSize="14"
-                       Visibility="{Binding HasCompletedUploads, Converter={StaticResource BoolToVisibilityConverter}}"
-                       >
-                <TextBlock.ToolTip>
-                    <TextBlock Text="{Binding ClearAllCompletedButtonHelpText}"
-                               TextWrapping="Wrap"
-                               />
-                </TextBlock.ToolTip>
+            <Border BorderThickness="1"
+                    BorderBrush="Gray"
+                    HorizontalAlignment="Stretch"
+                    />
 
-                    </TextBlock>
+            <StackPanel>
 
-        </Grid>
+                <TextBlock x:Name="TotalPendingUploadsText"
+                           FontSize="14"
+                           FontStyle="Italic"
+                           Foreground="Gray"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Left"
+                           Visibility="{Binding TotalPendingUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                           />
 
-        <Border BorderThickness="1"
-                BorderBrush="Gray"
-                HorizontalAlignment="Stretch"
-                />
+                <controls:ProgressRing Height="20"
+                                       Width="20" 
+                                       IsActive="{Binding IsBusy}"
+                                       Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       VerticalAlignment="Top"
+                                       HorizontalAlignment="Center"
+                                       />
 
-        <StackPanel>
+            </StackPanel>
 
-            <TextBlock x:Name="TotalCompletedUploadsText"
-                       FontSize="14"
-                       FontStyle="Italic"
-                       Foreground="Gray"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Left"
-                       Visibility="{Binding TotalCompletedUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+            <ItemsControl x:Name="PendingUploads" 
+                          Margin="5 0 5 30"
+                          VerticalAlignment="Top"
+                          >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl cal:View.Model="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0"
+                       Content="Completed uploads" 
+                       Style="{StaticResource DescriptionHeaderStyle}"
                        />
 
-            <controls:ProgressRing Height="20"
-                                   Width="20" 
-                                   IsActive="{Binding IsBusy}"
-                                   Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
-                                   VerticalAlignment="Top"
-                                   HorizontalAlignment="Center"
+                <TextBlock Grid.Column="1" 
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{Binding ClearAllButtonContent}"
+                           Cursor="Hand"
+                           Foreground="Blue"
+                           cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ClearAllCompletedUploads()]"
+                           ToolTipService.ShowDuration="30000"
+                           FontSize="14"
+                           Visibility="{Binding HasCompletedUploads, Converter={StaticResource BoolToVisibilityConverter}}"
+                           >
+                    <TextBlock.ToolTip>
+                        <TextBlock Text="{Binding ClearAllCompletedButtonHelpText}"
+                                   TextWrapping="Wrap"
                                    />
+                    </TextBlock.ToolTip>
+
+                        </TextBlock>
+
+            </Grid>
+
+            <Border BorderThickness="1"
+                    BorderBrush="Gray"
+                    HorizontalAlignment="Stretch"
+                    />
+
+            <StackPanel>
+
+                <TextBlock x:Name="TotalCompletedUploadsText"
+                           FontSize="14"
+                           FontStyle="Italic"
+                           Foreground="Gray"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Left"
+                           Visibility="{Binding TotalCompletedUploadsText, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                           />
+
+                <controls:ProgressRing Height="20"
+                                       Width="20" 
+                                       IsActive="{Binding IsBusy}"
+                                       Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       VerticalAlignment="Top"
+                                       HorizontalAlignment="Center"
+                                       />
+
+            </StackPanel>
+        
+            <ItemsControl x:Name="CompletedUploads" 
+                          Margin="5 0 5 0"
+                          VerticalAlignment="Top"
+                          >
+               <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl cal:View.Model="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
         </StackPanel>
-        
-        <ItemsControl x:Name="CompletedUploads" 
-                      Margin="5 0 5 0"
-                      VerticalAlignment="Top"
-                      >
-           <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl cal:View.Model="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
 
     </StackPanel>
 
