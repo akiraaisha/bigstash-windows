@@ -248,9 +248,8 @@ namespace DeepfreezeSDK
                     var multiPartProgress = multipartUploadProgress.Sum(x => x.Value);
                     progress.Report(Tuple.Create(uploadPartRequest.Key, multiPartProgress));
                 }
-#if DEBUG
+
                 Console.WriteLine(uploadPartRequest.Key + " - part " + uploadPartRequest.PartNumber + ": " + eventArgs.TransferredBytes + " / " + eventArgs.TotalBytes + " bytes.");
-#endif
             };
 
             while (true)
@@ -326,9 +325,7 @@ namespace DeepfreezeSDK
                     progress.Report(Tuple.Create(keyName, eventArgs.TransferredBytes));
                 }
 
-#if DEBUG
                 Console.WriteLine(keyName + ": " + eventArgs.TransferredBytes + " / " + eventArgs.TotalBytes + " bytes.");
-#endif
             };
 
             int retries = 2;
@@ -480,8 +477,10 @@ namespace DeepfreezeSDK
 
                 token.ThrowIfCancellationRequested();
 
+                var parallelLimit = (MAX_PARALLEL_ALLOWED > 1) ? MAX_PARALLEL_ALLOWED : 2;
+
                 // initialize first tasks to run.
-                while (runningTasks.Count < MAX_PARALLEL_ALLOWED && partRequests.Count > 0)
+                while (runningTasks.Count < parallelLimit && partRequests.Count > 0)
                 {
                     var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), multipartUploadProgress, token, progress);
                     runningTasks.Add(uploadTask);
