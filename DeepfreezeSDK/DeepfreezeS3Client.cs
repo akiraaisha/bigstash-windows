@@ -403,16 +403,15 @@ namespace DeepfreezeSDK
                 var uploadedPart = uploadedParts.Where(x => x.PartNumber == i).FirstOrDefault();
                 if (uploadedPart != null) // uploadedParts.Select(x => x.PartNumber).Contains(i))
                 {
-                    //partsProgress.Add(i, uploadedPart.Size); // for each already uploaded part, add total part size as transferred bytes.
+                    // for each already uploaded part, add total part size as transferred bytes.
+                    partsProgress.Add(i, uploadedPart.Size); 
+                    // move the file position
                     filePosition += uploadedPart.Size;
                     continue;
                 }
 
                 // for each NOT uploaded part, add a pair in the progress dictionary with value = 0
-                if (partsProgress.ContainsKey(i))
-                    partsProgress[i] = 0;
-                else
-                    partsProgress.Add(i, 0);
+                partsProgress.Add(i, 0);
 
                 bool isLastPart = false;
 
@@ -501,7 +500,7 @@ namespace DeepfreezeSDK
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), multipartUploadProgress, token);
+                        var uploadTask = this.UploadPartAsync(partRequests.Dequeue(), multipartUploadProgress, token, progress);
                         runningTasks.Add(uploadTask);
                     }
 
