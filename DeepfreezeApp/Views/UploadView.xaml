@@ -106,13 +106,14 @@
             </Grid>
             
             <ProgressBar Grid.Row="2"
-                     Grid.ColumnSpan="2" 
-                     Minimum="0"
-                     Maximum="{Binding Archive.Size}"
-                     Value="{Binding Progress}"
-                     ToolTip="{Binding ProgressTooltip}"
-                     Margin="0 5 0 5"
-                     />
+                         Grid.ColumnSpan="2" 
+                         Minimum="0"
+                         Maximum="{Binding Archive.Size}"
+                         Value="{Binding Progress}"
+                         ToolTip="{Binding ProgressTooltip}"
+                         ToolTipService.ShowDuration="30000"
+                         Margin="0 5 0 5"
+                         />
 
             <TextBlock Grid.Row="3"
                        Grid.ColumnSpan="2"
