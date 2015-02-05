@@ -916,7 +916,7 @@ namespace DeepfreezeApp
             catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
-                           this.TryGetBigStashExceptionInformation(e), e);
+                           BigStashExceptionHelper.TryGetBigStashExceptionInformation(e), e);
 
                 this.ErrorMessage = Properties.Resources.ErrorCreatingUploadGenericText;
 
@@ -1274,7 +1274,7 @@ namespace DeepfreezeApp
                 _log.Error(Utilities.GetCallerName() + " error while preparing an upload from file \"" + 
                            this.LocalUpload.SavePath + "\", thrown " + e.GetType().ToString() +
                            " with message \"" + e.Message + "\"." +
-                           this.TryGetBigStashExceptionInformation(e), e);
+                           BigStashExceptionHelper.TryGetBigStashExceptionInformation(e), e);
 
                 this.ErrorMessage = Properties.Resources.ErrorPreparingUploadGenericText;
 
@@ -1463,7 +1463,7 @@ namespace DeepfreezeApp
                 if (e is BigStashException && e.InnerException == null)
                 {
                     _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
-                               this.TryGetBigStashExceptionInformation(e), e);
+                               BigStashExceptionHelper.TryGetBigStashExceptionInformation(e), e);
                 }
 
                 throw;
@@ -1548,31 +1548,31 @@ namespace DeepfreezeApp
         /// </summary>
         /// <param name="bgex"></param>
         /// <returns></returns>
-        private string TryGetBigStashExceptionInformation(Exception ex)
-        {
-            if (ex is BigStashException)
-            {
-                var bgex = ex as BigStashException;
-                var request = bgex.Request;
+        //private string TryGetBigStashExceptionInformation(Exception ex)
+        //{
+        //    if (ex is BigStashException)
+        //    {
+        //        var bgex = ex as BigStashException;
+        //        var request = bgex.Request;
 
-                if (request != null)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendLine();
-                    sb.AppendLine("Error Type: " + bgex.ErrorType);
-                    sb.AppendLine("Error Code: " + bgex.ErrorCode);
-                    sb.AppendLine("Status Code: " + bgex.StatusCode);
-                    sb.AppendLine("Failed Request:");
-                    sb.Append("    " + request.ToString().Replace(Environment.NewLine, Environment.NewLine + "        "));
+        //        if (request != null)
+        //        {
+        //            StringBuilder sb = new StringBuilder();
+        //            sb.AppendLine();
+        //            sb.AppendLine("Error Type: " + bgex.ErrorType);
+        //            sb.AppendLine("Error Code: " + bgex.ErrorCode);
+        //            sb.AppendLine("Status Code: " + bgex.StatusCode);
+        //            sb.AppendLine("Failed Request:");
+        //            sb.Append("    " + request.ToString().Replace(Environment.NewLine, Environment.NewLine + "        "));
 
-                    return sb.ToString();
-                }
+        //            return sb.ToString();
+        //        }
 
-                return "";
-            }
+        //        return "";
+        //    }
 
-            return "";
-        }
+        //    return "";
+        //}
 
         #endregion
 
@@ -1705,7 +1705,7 @@ namespace DeepfreezeApp
             catch (Exception ex)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"." +
-                           this.TryGetBigStashExceptionInformation(ex), ex);
+                           BigStashExceptionHelper.TryGetBigStashExceptionInformation(ex), ex);
 
                 this.ErrorMessage = Properties.Resources.ErrorRefreshingProgressGenericText;
             }
