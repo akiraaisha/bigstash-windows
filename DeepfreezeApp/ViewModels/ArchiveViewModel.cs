@@ -240,7 +240,7 @@ namespace DeepfreezeApp
                 }
                 catch (Exception e)
                 {
-                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"", e);
 
                     if (!this._isUserCancel)
                         this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
@@ -339,7 +339,7 @@ namespace DeepfreezeApp
                     }
                     catch (Exception ex)
                     {
-                        _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"");
+                        _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"", ex);
 
                         if (!this._isUserCancel)
                             this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
@@ -420,7 +420,8 @@ namespace DeepfreezeApp
             {
                 HasChosenFiles = true;
 
-                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"");
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"." +
+                           BigStashExceptionHelper.TryGetBigStashExceptionInformation(e), e);
 
                 this.ErrorCreatingArchive = Properties.Resources.ErrorCreatingArchiveGenericText;
             }
