@@ -34,6 +34,8 @@ namespace DeepfreezeApp
         private const int INTERVAL_FOR_TOKEN_REFRESH = 1;
         private const int INTERVAL_FOR_FAST_COMPLETION_CHECK = 5;
         private const int ONE_MEGABYTE = 1024 * 1024;
+        private const int MIN_BACKOFF_INTERVAL = 5; // in seconds
+        private const int MAX_BACKOFF_INTERVAL = 1200; // in seconds
 
         private readonly IEventAggregator _eventAggregator;
         private readonly IDeepfreezeClient _deepfreezeClient;
@@ -42,10 +44,12 @@ namespace DeepfreezeApp
         private bool _isBusy = false;
         private bool _isUploading = false;
         private bool _isRefreshing = false;
+        private bool _isWaitingToResume = false;
         //private bool _currentUploadIsMultipart = false;
         private string _errorMessage;
         private long _progress = 0;
         private string _busyMessage;
+        private string _resumingText;
 
         private Archive _archive;
         private Upload _upload;
@@ -68,6 +72,11 @@ namespace DeepfreezeApp
 
         private bool _fetchUploadTakingTooLong = false;
         private bool _isWaitingForCompletedStatus = false;
+
+        private int _resumeAttempts = 0;
+        private DateTime _lastErrorDateTime;
+        private double _waitToResumePeriod = MIN_BACKOFF_INTERVAL; // in seconds
+        private Stopwatch _stopwatch = new Stopwatch();
 
         #endregion
 
@@ -99,6 +108,12 @@ namespace DeepfreezeApp
         {
             get { return this._isUploading; }
             set { this._isUploading = value; NotifyOfPropertyChange(() => this.IsUploading); }
+        }
+
+        public bool IsWaitingToResume
+        {
+            get { return this._isWaitingToResume; }
+            set { this._isWaitingToResume = value; NotifyOfPropertyChange(() => this.IsWaitingToResume); }
         }
 
         public string ErrorMessage
@@ -297,6 +312,15 @@ namespace DeepfreezeApp
         public string FetchUploadTakingTooLongText
         { get { return Properties.Resources.FetchUploadTakingTooLongText; } }
 
+        public string ResumingText
+        {
+            get { return this._resumingText; }
+            set { this._resumingText = value; NotifyOfPropertyChange(() => this.ResumingText); }
+        }
+
+        public string StopWaitingtoResumeButtonContent
+        { get { return Properties.Resources.StopWaitingtoResumeButtonContent; } }
+
         #endregion
 
         #region action_methods
@@ -315,6 +339,7 @@ namespace DeepfreezeApp
         public async Task StartUpload()
         {
             bool hasException = false;
+            this.StopWaitingToResume();
 
             try
             {
@@ -475,7 +500,7 @@ namespace DeepfreezeApp
 
             IsUploading = false;
             IsBusy = false;
-        }        
+        }
 
         /// <summary>
         /// Pause the upload operation after the specified cancelAfter value (in ms).
@@ -511,6 +536,14 @@ namespace DeepfreezeApp
                         this._cts.Cancel();
                     }
                 }).ConfigureAwait(false);
+            }
+
+            // Let's make our best effort to continue uploading. If this paused automatically,
+            // then send a message to start the upload again immediately.
+            if (isAutomatic &&
+                this.Upload.Status == Enumerations.Status.Pending)
+            {
+                this.AutoResumeAfterError();
             }
         }
 
@@ -610,6 +643,33 @@ namespace DeepfreezeApp
             {
                 var authority = new Uri(this.Archive.Url).Authority;
                 Process.Start("https://" + authority + "/a/" + this.Archive.Key);
+            }
+        }
+
+        /// <summary>
+        /// Stop waiting to resume. This method clears all those variables included in the waiting process.
+        /// </summary>
+        public void StopWaitingToResume(bool userAsked = false)
+        {
+            if (this.IsWaitingToResume)
+            {
+                this.IsWaitingToResume = false;
+
+                if (userAsked)
+                {
+                    this._resumeAttempts = 0;
+                }
+
+                if (this._stopwatch.IsRunning)
+                {
+                    this._stopwatch.Stop();
+                }
+                this._stopwatch.Reset();
+
+                if (this._refreshProgressTimer.IsEnabled)
+                {
+                    this._refreshProgressTimer.Stop();
+                }
             }
         }
 
@@ -1506,6 +1566,8 @@ namespace DeepfreezeApp
             this._refreshProgressTimer.Tick -= Tick;
             this._refreshProgressTimer.Stop();
             this._refreshProgressTimer = null;
+            this._stopwatch.Stop();
+            this._stopwatch = null;
         }
 
         private void TryMoveSelfToCompleted()
@@ -1544,35 +1606,57 @@ namespace DeepfreezeApp
         }
 
         /// <summary>
-        /// Gets the request body of the sent request which resulted in the BigStashException throw.
+        /// Configure auto resume periods after an error occurs.
         /// </summary>
-        /// <param name="bgex"></param>
-        /// <returns></returns>
-        //private string TryGetBigStashExceptionInformation(Exception ex)
-        //{
-        //    if (ex is BigStashException)
-        //    {
-        //        var bgex = ex as BigStashException;
-        //        var request = bgex.Request;
+        private void AutoResumeAfterError()
+        {
+            var diff = new TimeSpan(0, 0, 0, 0, 0);
+            var newestErrorDateTime = DateTime.Now;
 
-        //        if (request != null)
-        //        {
-        //            StringBuilder sb = new StringBuilder();
-        //            sb.AppendLine();
-        //            sb.AppendLine("Error Type: " + bgex.ErrorType);
-        //            sb.AppendLine("Error Code: " + bgex.ErrorCode);
-        //            sb.AppendLine("Status Code: " + bgex.StatusCode);
-        //            sb.AppendLine("Failed Request:");
-        //            sb.Append("    " + request.ToString().Replace(Environment.NewLine, Environment.NewLine + "        "));
+            // calculate the time difference since the last error occured.
+            if (this._lastErrorDateTime != null)
+            {
+                diff = newestErrorDateTime.Subtract(this._lastErrorDateTime);
+            }
 
-        //            return sb.ToString();
-        //        }
+            // if the last auto resume occured more than an hour ago,
+            // then reset the resume counter.
+            if (diff.TotalSeconds > (this._waitToResumePeriod + 60))
+            {
+                this._resumeAttempts = 0;
+                this._waitToResumePeriod = MIN_BACKOFF_INTERVAL;
+            }
 
-        //        return "";
-        //    }
+            // increment the attempts counter;
+            this._resumeAttempts++;
+            // update the _lastErrorDateTime
+            this._lastErrorDateTime = newestErrorDateTime;
 
-        //    return "";
-        //}
+            // stop the refresh progress timer if it's running (it probably isn't but just in case).
+            if (this._refreshProgressTimer.IsEnabled)
+            {
+                this._refreshProgressTimer.Stop();
+            }
+
+            // start the refresh progress timer with an interval of 1 second.
+            // set the _waitToResumePeriod timespan to an exponential backoff
+            // this._waitToResumePeriod = Utilities.CalculateExponentialBackOff(this._resumeAttempts, MIN_BACKOFF_INTERVAL, MAX_BACKOFF_INTERVAL);
+            if (this._resumeAttempts > 1)
+            {
+                this._waitToResumePeriod += this._waitToResumePeriod / 2;
+            }
+
+            // Cap the waiting time to the max allowed backoff.
+            if (this._waitToResumePeriod > MAX_BACKOFF_INTERVAL)
+            {
+                this._waitToResumePeriod = MAX_BACKOFF_INTERVAL;
+            }
+
+            this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 1);
+
+            this._refreshProgressTimer.Start();
+            this._stopwatch.Start();
+        }
 
         #endregion
 
@@ -1650,7 +1734,12 @@ namespace DeepfreezeApp
 
         #region events
 
-        private async void Tick(object sender, object e)
+        /// <summary>
+        /// Handler for the refresh progress timer's tick event.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void Tick(object sender, EventArgs e)
         {
             // When the timer is initialized in StartUpload to check for the completed status,
             // it's interval is set to 10 seconds to catch fast archive completions. So after it's first tick
@@ -1661,6 +1750,54 @@ namespace DeepfreezeApp
                 this._refreshProgressTimer.Stop();
                 this._refreshProgressTimer.Interval = new TimeSpan(0, 0, 10);
                 this._refreshProgressTimer.Start();
+            }
+
+            // auto resume check block
+            if (this.Upload.Status == Enumerations.Status.Pending &&
+                this.OperationStatus == Enumerations.Status.Paused &&
+                !this.IsUploading && !this.LocalUpload.UserPaused)
+            {
+                if (!this.IsWaitingToResume)
+                {
+                    this.IsWaitingToResume = true;
+                }
+
+                var remainingWait = (int)Math.Round(this._waitToResumePeriod - this._stopwatch.Elapsed.Seconds, 0, MidpointRounding.AwayFromZero);
+                var timeSpan = TimeSpan.FromSeconds(remainingWait);
+
+                var sb = new StringBuilder();
+                sb.Append(Properties.Resources.WaitingToResumeText);
+                sb.Append(" ");
+                if (timeSpan.Minutes > 0)
+                {
+                    sb.Append(timeSpan.Minutes);
+                    sb.Append(":");
+                    sb.Append(String.Format("{0:00}", timeSpan.Seconds));
+                }
+                else
+                {
+                    sb.Append(timeSpan.Seconds);
+                    sb.Append(" ");
+                    sb.Append(Properties.Resources.SecondText);
+                    if (timeSpan.Seconds > 1)
+                    {
+                        sb.Append("s");
+                    }
+                }
+                sb.Append(". ");
+                this.ResumingText = sb.ToString();
+
+                // if elapsed time in seconds >= this._waitToResumePeriod
+                // then stop this timer and send a message to resume.
+                if (this._stopwatch.Elapsed.TotalSeconds >= this._waitToResumePeriod)
+                {
+                    this.StopWaitingToResume();
+
+                    var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
+                    uploadActionMessage.UploadVM = this;
+                    this._eventAggregator.PublishOnUIThread(uploadActionMessage);
+                }
             }
             
             try
@@ -1686,7 +1823,7 @@ namespace DeepfreezeApp
                         this.ErrorMessage = null;
 
                         var notification = IoC.Get<INotificationMessage>();
-
+ 
                         bool isCompleted = this.Upload.Status == Enumerations.Status.Completed; // else status is error
 
                         if (isCompleted)
