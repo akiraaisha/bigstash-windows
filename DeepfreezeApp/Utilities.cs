@@ -257,6 +257,25 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Calculate a capped exponential backoff.
+        /// </summary>
+        /// <param name="attempts"></param>
+        /// <param name="minDelay"></param>
+        /// <param name="maxDelay"></param>
+        /// <returns></returns>
+        public static int CalculateExponentialBackOff(int attempts, int minInterval, int maxInterval)
+        {
+            var exponential = minInterval * ((int)Math.Pow(2, attempts) - 1);
+
+            if (exponential > maxInterval)
+            {
+                exponential = maxInterval;
+            }
+
+            return exponential;
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
