@@ -50,7 +50,6 @@
                                    />
 
         </WrapPanel>
-        
 
         <Grid Visibility="{Binding IsBusy, Converter={StaticResource InvertBoolToVisibilityConverter}}"
               HorizontalAlignment="Stretch"
@@ -102,6 +101,8 @@
                            Text="{Binding Archive.Key}"
                            VerticalAlignment="Bottom"
                            HorizontalAlignment="Right"
+                           Cursor="Hand"
+                           cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenArchivePage()]"
                            />
             </Grid>
             
@@ -154,12 +155,12 @@
 
             <WrapPanel Grid.Row="1" Grid.ColumnSpan="2">
                 
-                <TextBlock 
-                       Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       FontSize="14"
-                       >
+                <TextBlock Text="{Binding OperationStatus, Converter={StaticResource UploadStatusToTextConverter}}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           FontSize="14"
+                           Visibility="{Binding IsWaitingToResume, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                           >
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -170,6 +171,25 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
+
+                <TextBlock Text="{Binding ResumingText}"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   TextAlignment="Center"
+                   Visibility="{Binding IsWaitingToResume, Converter={StaticResource BoolToVisibilityConverter}}"
+                   FontSize="14"
+                   />
+
+                <TextBlock HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Text="{Binding StopWaitingtoResumeButtonContent}"
+                           Cursor="Hand"
+                           Foreground="Blue"
+                           cal:Message.Attach="[Event MouseLeftButtonUp] = [Action StopWaitingToResume('true')]"
+                           FontSize="14"
+                           TextDecorations="Underline"
+                           Visibility="{Binding IsWaitingToResume, Converter={StaticResource BoolToVisibilityConverter}}"
+                           />
                 
             </WrapPanel>
             
