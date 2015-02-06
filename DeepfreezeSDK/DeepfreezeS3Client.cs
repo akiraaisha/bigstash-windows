@@ -276,12 +276,19 @@ namespace DeepfreezeSDK
 
                         this.LogAmazonException(messagePart, e);
 
-                        // if the exception is AmazonS3Exception with error type Sender,
+                        // if the exception is AmazonS3Exception or AmazonServiceException with error type Sender,
                         // which means that the client is responsible for the error,
                         // then throw do not retry.
                         if (e is AmazonS3Exception)
                         {
                             var ae = e as AmazonS3Exception;
+
+                            if (ae.ErrorType == ErrorType.Sender)
+                                throw;
+                        }
+                        if (e is AmazonServiceException)
+                        {
+                            var ae = e as AmazonServiceException;
 
                             if (ae.ErrorType == ErrorType.Sender)
                                 throw;
@@ -353,12 +360,19 @@ namespace DeepfreezeSDK
 
                         this.LogAmazonException(messagePart, e);
 
-                        // if the exception is AmazonS3Exception with error type Sender,
+                        // if the exception is AmazonS3Exception or AmazonServiceException with error type Sender,
                         // which means that the client is responsible for the error,
                         // then throw do not retry.
                         if (e is AmazonS3Exception)
                         {
                             var ae = e as AmazonS3Exception;
+
+                            if (ae.ErrorType == ErrorType.Sender)
+                                throw;
+                        }
+                        if (e is AmazonServiceException)
+                        {
+                            var ae = e as AmazonServiceException;
 
                             if (ae.ErrorType == ErrorType.Sender)
                                 throw;
