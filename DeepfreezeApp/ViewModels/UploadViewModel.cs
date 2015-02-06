@@ -541,7 +541,8 @@ namespace DeepfreezeApp
             // Let's make our best effort to continue uploading. If this paused automatically,
             // then send a message to start the upload again immediately.
             if (isAutomatic &&
-                this.Upload.Status == Enumerations.Status.Pending)
+                this.Upload.Status == Enumerations.Status.Pending &&
+                this._deepfreezeClient.IsInternetConnected)
             {
                 this.AutoResumeAfterError();
             }
