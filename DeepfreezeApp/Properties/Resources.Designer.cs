@@ -646,6 +646,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to minute.
+        /// </summary>
+        internal static string MinuteText {
+            get {
+                return ResourceManager.GetString("MinuteText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Click to open the BigStash FAQ website page..
         /// </summary>
         internal static string NameRulesFAQURLHelpText {
@@ -853,6 +862,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to second.
+        /// </summary>
+        internal static string SecondText {
+            get {
+                return ResourceManager.GetString("SecondText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Don&apos;t know your password?.
         /// </summary>
         internal static string SetPasswordText {
@@ -930,6 +948,15 @@ namespace DeepfreezeApp.Properties {
         internal static string StatusUploadingText {
             get {
                 return ResourceManager.GetString("StatusUploadingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stop.
+        /// </summary>
+        internal static string StopWaitingtoResumeButtonContent {
+            get {
+                return ResourceManager.GetString("StopWaitingtoResumeButtonContent", resourceCulture);
             }
         }
         
@@ -1128,6 +1155,15 @@ namespace DeepfreezeApp.Properties {
         internal static string WaitingForCompletedStatusText {
             get {
                 return ResourceManager.GetString("WaitingForCompletedStatusText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resuming in.
+        /// </summary>
+        internal static string WaitingToResumeText {
+            get {
+                return ResourceManager.GetString("WaitingToResumeText", resourceCulture);
             }
         }
         

@@ -524,4 +524,16 @@
   <data name="ErrorInitializingUploadLogText" xml:space="preserve">
     <value>There was an error while initializing your upload. Please export the log file for more information using the "Open Log" button in the About screen and contact the BigStash team attaching the exported log file in your conversation.</value>
   </data>
+  <data name="SecondText" xml:space="preserve">
+    <value>second</value>
+  </data>
+  <data name="WaitingToResumeText" xml:space="preserve">
+    <value>Resuming in</value>
+  </data>
+  <data name="StopWaitingtoResumeButtonContent" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="MinuteText" xml:space="preserve">
+    <value>minute</value>
+  </data>
 </root>
