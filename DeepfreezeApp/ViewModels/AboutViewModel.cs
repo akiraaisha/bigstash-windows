@@ -247,6 +247,15 @@ namespace DeepfreezeApp
         public async Task CheckForUpdate()
         {
             this.ErrorMessage = null;
+            bool isDebug = false;
+#if DEBUG
+            isDebug = true;
+#endif
+            // when debugging do nothing.
+            if (isDebug)
+            {
+                return;
+            }
 
             // No need to check for update when already checking and/or installing one.
             // The same holds for when a restart is needed because of a previously installed update,
