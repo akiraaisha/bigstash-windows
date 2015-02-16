@@ -35,11 +35,13 @@ namespace DeepfreezeApp
         private PreferencesViewModel _preferencesVM;
         private AboutViewModel _aboutVM;
         private UploadManagerViewModel _uploadManagerVM;
+        private NotificationsViewModel _notificationsVM;
 
         private MetroWindow _shellWindow;
         private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
         private bool _isAboutFlyoutOpen = false;
+        private bool _isNotificationsFlyoutOpen = false;
 
         private bool _isBusy = false;
         private bool _hasError = false;
@@ -118,6 +120,11 @@ namespace DeepfreezeApp
             set { this._uploadManagerVM = value; NotifyOfPropertyChange(() => UploadManagerVM); }
         }
 
+        public NotificationsViewModel NotificationsVM
+        {
+            get { return this._notificationsVM; }
+            set { this._notificationsVM = value; NotifyOfPropertyChange(() => this.NotificationsVM); }
+        }
         public bool IsPreferencesFlyoutOpen
         {
             get { return this._isPreferencesFlyoutOpen; }
@@ -135,6 +142,16 @@ namespace DeepfreezeApp
             }
         }
 
+        public bool IsNotificationsFlyoutOpen
+        {
+            get { return this._isNotificationsFlyoutOpen; }
+            set
+            {
+                this._isNotificationsFlyoutOpen = value;
+                NotifyOfPropertyChange(() => this.IsNotificationsFlyoutOpen);
+            }
+        }
+
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
 
@@ -143,6 +160,9 @@ namespace DeepfreezeApp
 
         public string AboutButtonTooltip
         { get { return Properties.Resources.AboutButtonTooltip; } }
+
+        public string NotificationsHeader
+        { get { return Properties.Resources.NotificationsHeader; } }
 
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
@@ -176,21 +196,34 @@ namespace DeepfreezeApp
         /// </summary>
         public void TogglePreferencesFlyout()
         {
-            IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
+            this.IsPreferencesFlyoutOpen = !this.IsPreferencesFlyoutOpen;
 
-            if (IsPreferencesFlyoutOpen)
+            if (this.IsPreferencesFlyoutOpen)
             {
-                IsAboutFlyoutOpen = false;
+                this.IsAboutFlyoutOpen = false;
+                this.IsNotificationsFlyoutOpen = false;
             }
         }
 
         public void ToggleAboutFlyout()
         {
-            IsAboutFlyoutOpen = !IsAboutFlyoutOpen;
+            this.IsAboutFlyoutOpen = !this.IsAboutFlyoutOpen;
 
-            if (IsAboutFlyoutOpen)
+            if (this.IsAboutFlyoutOpen)
             {
-                IsPreferencesFlyoutOpen = false;
+                this.IsPreferencesFlyoutOpen = false;
+                this.IsNotificationsFlyoutOpen = false;
+            }
+        }
+
+        public void ToggleNotificationsFlyout()
+        {
+            this.IsNotificationsFlyoutOpen = !this.IsNotificationsFlyoutOpen;
+
+            if (this.IsNotificationsFlyoutOpen)
+            {
+                this.IsAboutFlyoutOpen = false;
+                this.IsPreferencesFlyoutOpen = false;
             }
         }
 
@@ -457,6 +490,7 @@ namespace DeepfreezeApp
                         InstatiatePreferencesViewModel();
                         InstatiateAboutViewModel();
                         InstatiateUploadManagerViewModel();
+                        InstatiateNotificationsViewModel();
                     }
                     else
                     {
@@ -664,6 +698,18 @@ namespace DeepfreezeApp
                 UploadManagerVM = IoC.Get<IUploadManagerViewModel>() as UploadManagerViewModel;
             }
             this.ActivateItem(UploadManagerVM);
+        }
+
+        /// <summary>
+        /// Instatiate a new NotificationsViewModel and activate it.
+        /// </summary>
+        private void InstatiateNotificationsViewModel()
+        {
+            if (NotificationsVM == null)
+            {
+                NotificationsVM = IoC.Get<INotificationsViewModel>() as NotificationsViewModel;
+            }
+            this.ActivateItem(NotificationsVM);
         }
 
         /// <summary>
