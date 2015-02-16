@@ -55,6 +55,11 @@
                          Stretch="Uniform"
                          Visual="{StaticResource appbar_arrow_up}" 
                          />
+            
+            <VisualBrush x:Key="NoNotificationsVisualBrush"
+                         Stretch="Uniform"
+                         Visual="{StaticResource appbar_flag}"
+                         />
 
             <Style x:Key="SettingsIconStyle" TargetType="{x:Type Rectangle}">
                 <Setter Property="Fill" Value="{StaticResource SettingsIconVisualBrush}" />
@@ -70,6 +75,12 @@
 
             <Style x:Key="UpdateFoundIconStyle" TargetType="{x:Type Rectangle}">
                 <Setter Property="Fill" Value="{StaticResource UpdateFoundIconVisualBrush}" />
+                <Setter Property="Height" Value="15" />
+                <Setter Property="Width" Value="15" />
+            </Style>
+            
+            <Style x:Key="NotificationsIconStyle" TargetType="{x:Type Rectangle}">
+                <Setter Property="Fill" Value="{StaticResource NoNotificationsVisualBrush}" />
                 <Setter Property="Height" Value="15" />
                 <Setter Property="Width" Value="15" />
             </Style>
@@ -92,7 +103,20 @@
                 <Rectangle Style="{StaticResource UpdateFoundIconStyle}" />
 
             </Button>
-            
+
+            <Button ToolTip="{Binding NotificationsHeader}" 
+                    FontFamily="Segoe UI Symbol"
+                    FontSize="16"
+                    Style="{DynamicResource MetroWindowButtonStyle}"
+                    cal:Message.Attach="ToggleNotificationsFlyout"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                    >
+
+                <Rectangle Style="{StaticResource NotificationsIconStyle}" />
+
+            </Button>
+
             <Button ToolTip="{Binding PreferencesHeader}" 
                     FontFamily="Segoe UI Symbol"
                     FontSize="16"
@@ -147,7 +171,19 @@
                 <controls:MetroContentControl cal:View.Model="{Binding AboutVM}" />
 
             </controls:Flyout>
-            
+
+            <controls:Flyout 
+                x:Name="NotificationsFlyout" 
+                Header="{Binding NotificationsHeader}"
+                Position="Right" IsOpen="{Binding IsNotificationsFlyoutOpen}"
+                IsModal="True"
+                Theme="Adapt"
+                >
+
+                <controls:MetroContentControl cal:View.Model="{Binding NotificationsVM}" />
+
+            </controls:Flyout>
+
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
