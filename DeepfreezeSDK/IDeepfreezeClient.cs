@@ -25,26 +25,26 @@ namespace DeepfreezeSDK
         string ApplicationVersion { get; set; }
 
         /// <summary>
-        /// Create a new Deepfreeze API token using user credentials.
+        /// Create a new BigStash API token using user credentials.
         /// </summary>
         /// <param name="authorizationString"></param>
         /// <returns>Token</returns>
         Task<Token> CreateTokenAsync(string authorizationString);
 
         /// <summary>
-        /// Get the Deepfreeze User.
+        /// Get the BigStash User.
         /// </summary>
         /// <returns></returns>
         Task<User> GetUserAsync();
 
         /// <summary>
-        /// Send a GET "archives/id" request which returns a user's Deepfreeze archive.
+        /// Send a GET "archives/id" request which returns a user's BigStash archive.
         /// </summary>
         /// <returns>List of Archive</returns>
         Task<Archive> GetArchiveAsync(string url);
 
         /// <summary>
-        /// Send a POST "archives/" request which returns a Deepfreeze archive.
+        /// Send a POST "archives/" request which returns a BigStash archive.
         /// This request is responsible for creating a new archive given a size and a title.
         /// </summary>
         /// <param name="size"></param>
@@ -53,13 +53,13 @@ namespace DeepfreezeSDK
         Task<Archive> CreateArchiveAsync(long size, string title);
 
         /// <summary>
-        /// Send a GET "uploads/id" request which returns a user's Deepfreeze upload.
+        /// Send a GET "uploads/id" request which returns a user's BigStash upload.
         /// </summary>
         /// <returns>Upload</returns>
         Task<Upload> GetUploadAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// Send a POST "Upload.Url"-url request which returns a Deepfreeze upload.
+        /// Send a POST "Upload.Url"-url request which returns a BigStash upload.
         /// This request is responsible for creating a new upload given an archive.
         /// </summary>
         /// <param name="archive"></param>
@@ -67,7 +67,7 @@ namespace DeepfreezeSDK
         Task<Upload> InitiateUploadAsync(Archive archive);
 
         /// <summary>
-        /// Send a DELETE "Upload.Url"-url request which deletes a Deepfreeze upload.
+        /// Send a DELETE "Upload.Url"-url request which deletes a BigStash upload.
         /// </summary>
         /// <param name="archive"></param>
         /// <returns>bool</returns>
@@ -79,5 +79,11 @@ namespace DeepfreezeSDK
         /// <param name="upload"></param>
         /// <returns></returns>
         Task<Upload> FinishUploadAsync(Upload upload);
+
+        /// <summary>
+        /// Send a GET "notifications/" request which returns a list of Notification objects.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<Notification>> GetNotificationsAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

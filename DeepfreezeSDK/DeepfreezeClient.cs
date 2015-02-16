@@ -45,6 +45,7 @@ namespace DeepfreezeSDK
         private readonly string _userUri = "user/";
         private readonly string _uploadsUri = "uploads/";
         private readonly string _archivesUri = "archives/";
+        private readonly string _notificationsUri = "notifications/";
 
         private readonly int FASTRETRY = 1;
         private readonly int LONGRETRY = 4;
@@ -610,6 +611,113 @@ namespace DeepfreezeSDK
                 //response.EnsureSuccessStatusCode();
 
                 return true;
+            }
+            catch (Exception e)
+            {
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
+            }
+        }
+
+        /// <summary>
+        /// Send a GET "notifications/" request with an optional page parameter which returns an enumerable of user's BigStash Notification objects.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Notification>> GetNotificationsAsync(string url = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            _log.Debug("Called GetNotificationsAsync.");
+
+            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri)
+                                                    : CreateHttpRequestWithSignature(GET, url, false);
+            HttpResponseMessage response;
+            string content = String.Empty;
+
+            try
+            {
+                var retries = LONGRETRY;
+
+                if (tryForever)
+                {
+                    retries = Int16.MaxValue;
+                }
+
+                using(var httpClient = this.CreateHttpClientWithRetryLogic(retries))
+                {
+                    response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+
+                content = await response.Content.ReadAsStringAsync();
+
+                JObject json = JObject.Parse(content);
+
+                if ((int)json["meta"]["count"] > 0)
+                {
+                    var notifications = JsonConvert.DeserializeObject<IEnumerable<Notification>>(json["results"].ToString());
+
+                    return notifications;
+                }
+                else
+                {
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
+                }
+            }
+            catch(Exception e)
+            {
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
+            }
+        }
+
+        /// <summary>
+        /// Send a GET "notifications/id" request which returns a user's BigStash Notification object.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Notification> GetNotificationAsync(string id, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            _log.Debug("Called GetNotificationAsync with parameter id = \"" + id + "\".");
+
+            var url = _notificationsUri + id + "/";
+            var request = CreateHttpRequestWithSignature(GET, url, false);
+            HttpResponseMessage response;
+            string content = String.Empty;
+
+            try
+            {
+                var retries = LONGRETRY;
+
+                // if tryForever is true, then set retries to the Int16 max value, that is 32767,
+                // to ensure a large number of max retries are completed when transient errors occur.
+                if (tryForever)
+                {
+                    retries = Int16.MaxValue;
+                }
+
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(retries))
+                {
+                    response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+
+                content = await response.Content.ReadAsStringAsync();
+
+                if (content != null)
+                {
+                    var notification = JsonConvert.DeserializeObject<Notification>(content);
+                    return notification;
+                }
+                else
+                {
+                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
+                }
             }
             catch (Exception e)
             {
