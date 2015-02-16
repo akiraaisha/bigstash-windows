@@ -1659,6 +1659,62 @@ namespace DeepfreezeApp
             this._stopwatch.Start();
         }
 
+        /// <summary>
+        /// Checks if an auto resume is pending and sends
+        /// a message to start the upload if the waiting time is over.
+        /// Also, the UI is updated with the waiting time.
+        /// </summary>
+        private void CheckForAutoResume()
+        {
+            // auto resume check block
+            if (this.Upload.Status == Enumerations.Status.Pending &&
+                this.OperationStatus == Enumerations.Status.Paused &&
+                !this.IsUploading && !this.LocalUpload.UserPaused)
+            {
+                if (!this.IsWaitingToResume)
+                {
+                    this.IsWaitingToResume = true;
+                }
+
+                var remainingWait = (int)Math.Round(this._waitToResumePeriod - this._stopwatch.Elapsed.Seconds, 0, MidpointRounding.AwayFromZero);
+                var timeSpan = TimeSpan.FromSeconds(remainingWait);
+
+                var sb = new StringBuilder();
+                sb.Append(Properties.Resources.WaitingToResumeText);
+                sb.Append(" ");
+                if (timeSpan.Minutes > 0)
+                {
+                    sb.Append(timeSpan.Minutes);
+                    sb.Append(":");
+                    sb.Append(String.Format("{0:00}", timeSpan.Seconds));
+                }
+                else
+                {
+                    sb.Append(timeSpan.Seconds);
+                    sb.Append(" ");
+                    sb.Append(Properties.Resources.SecondText);
+                    if (timeSpan.Seconds > 1)
+                    {
+                        sb.Append("s");
+                    }
+                }
+                sb.Append(". ");
+                this.ResumingText = sb.ToString();
+
+                // if elapsed time in seconds >= this._waitToResumePeriod
+                // then stop this timer and send a message to resume.
+                if (this._stopwatch.Elapsed.TotalSeconds >= this._waitToResumePeriod)
+                {
+                    this.StopWaitingToResume();
+
+                    var uploadActionMessage = IoC.Get<IUploadActionMessage>();
+                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
+                    uploadActionMessage.UploadVM = this;
+                    this._eventAggregator.PublishOnUIThread(uploadActionMessage);
+                }
+            }
+        }
+
         #endregion
 
         #region message_handlers
@@ -1753,53 +1809,9 @@ namespace DeepfreezeApp
                 this._refreshProgressTimer.Start();
             }
 
-            // auto resume check block
-            if (this.Upload.Status == Enumerations.Status.Pending &&
-                this.OperationStatus == Enumerations.Status.Paused &&
-                !this.IsUploading && !this.LocalUpload.UserPaused)
-            {
-                if (!this.IsWaitingToResume)
-                {
-                    this.IsWaitingToResume = true;
-                }
-
-                var remainingWait = (int)Math.Round(this._waitToResumePeriod - this._stopwatch.Elapsed.Seconds, 0, MidpointRounding.AwayFromZero);
-                var timeSpan = TimeSpan.FromSeconds(remainingWait);
-
-                var sb = new StringBuilder();
-                sb.Append(Properties.Resources.WaitingToResumeText);
-                sb.Append(" ");
-                if (timeSpan.Minutes > 0)
-                {
-                    sb.Append(timeSpan.Minutes);
-                    sb.Append(":");
-                    sb.Append(String.Format("{0:00}", timeSpan.Seconds));
-                }
-                else
-                {
-                    sb.Append(timeSpan.Seconds);
-                    sb.Append(" ");
-                    sb.Append(Properties.Resources.SecondText);
-                    if (timeSpan.Seconds > 1)
-                    {
-                        sb.Append("s");
-                    }
-                }
-                sb.Append(". ");
-                this.ResumingText = sb.ToString();
-
-                // if elapsed time in seconds >= this._waitToResumePeriod
-                // then stop this timer and send a message to resume.
-                if (this._stopwatch.Elapsed.TotalSeconds >= this._waitToResumePeriod)
-                {
-                    this.StopWaitingToResume();
-
-                    var uploadActionMessage = IoC.Get<IUploadActionMessage>();
-                    uploadActionMessage.UploadAction = Enumerations.UploadAction.Start;
-                    uploadActionMessage.UploadVM = this;
-                    this._eventAggregator.PublishOnUIThread(uploadActionMessage);
-                }
-            }
+            // Check if an auto resume will take place.
+            // Update the UI accordingly.
+            this.CheckForAutoResume();
             
             try
             {
