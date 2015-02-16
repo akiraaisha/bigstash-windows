@@ -62,6 +62,7 @@
     <Compile Include="FileManifest.cs" />
     <Compile Include="LocalStorage.cs" />
     <Compile Include="LocalUpload.cs" />
+    <Compile Include="Notification.cs" />
     <Compile Include="PartInfo.cs" />
     <Compile Include="Quota.cs" />
     <Compile Include="S3Info.cs" />
