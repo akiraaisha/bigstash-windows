@@ -536,4 +536,7 @@
   <data name="MinuteText" xml:space="preserve">
     <value>minute</value>
   </data>
+  <data name="NotificationsHeader" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
 </root>

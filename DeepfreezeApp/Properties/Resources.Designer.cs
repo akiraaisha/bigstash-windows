@@ -691,6 +691,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Notifications.
+        /// </summary>
+        internal static string NotificationsHeader {
+            get {
+                return ResourceManager.GetString("NotificationsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No updates found..
         /// </summary>
         internal static string NoUpdatesFoundText {
