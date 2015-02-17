@@ -7,7 +7,8 @@
              xmlns:local="clr-namespace:DeepfreezeApp"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="350">
+             d:DesignHeight="300" d:DesignWidth="350"
+             MinWidth="400">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -24,26 +25,52 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Width="350"
-                >
+        <StackPanel x:Name="ParentStackPanel" Margin="10 0 10 0">
 
-        <ItemsControl x:Name="Notifications" 
-                          Margin="5 0 5 30"
-                          VerticalAlignment="Top"
-                          >
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl cal:View.Model="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <TextBlock x:Name="ErrorMessage"
+            <TextBlock x:Name="ErrorMessage"
+                   Margin="5 0 0 10"
                    Foreground="Red"
                    TextWrapping="Wrap"
                    HorizontalAlignment="Left"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource EmptyStringToBoolToVisibilityConverter}}"
                    />
 
-    </StackPanel>
+            <ItemsControl x:Name="Notifications" 
+                          VerticalAlignment="Top"
+                          Cursor="Hand"
+                          Margin="5 0 0 0"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          ScrollViewer.CanContentScroll="True"
+                          Height="{Binding Path=ActualHeight, ElementName=ParentStackPanel}"
+                          >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl cal:View.Model="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <Border BorderThickness="{TemplateBinding Border.BorderThickness}"
+                                Padding="{TemplateBinding Control.Padding}"
+                                BorderBrush="{TemplateBinding Border.BorderBrush}"
+                                Background="{TemplateBinding Panel.Background}"
+                                SnapsToDevicePixels="True"
+                                >
+                            <ScrollViewer Padding="{TemplateBinding Control.Padding}"
+                                          Focusable="False"
+                                          >
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+            </ItemsControl>
+
+        </StackPanel>
+        
 </UserControl>
