@@ -21,7 +21,7 @@ namespace DeepfreezeApp
         {
             get
             {
-                return this._notification.CreationDate.ToString();
+                return this._notification.CreationDate.ToString("{dd/MM/yyyy hh:mm:ss}");
             }
         }
         public Notification Notification
@@ -29,7 +29,31 @@ namespace DeepfreezeApp
             get { return this._notification; }
             set 
             {
-                this._notification = value; 
+                var not = value;
+
+                // replace the ending of href tags since that's easy.
+                not.Verb = not.Verb.Replace("</a>", "");
+
+                // Strip the verb from all href tags.
+                // Get the <a and </a> index.
+
+                while(true)
+                {
+                    var startIndex = not.Verb.IndexOf("<a href=\"");
+                    var endIndex = not.Verb.IndexOf("\">");
+
+                    if (startIndex < endIndex)
+                    {
+                        not.Verb = not.Verb.Remove(startIndex, endIndex - startIndex + 2);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                
+
+                this._notification = not; 
                 NotifyOfPropertyChange(() => this.Notification); 
             }
         }
