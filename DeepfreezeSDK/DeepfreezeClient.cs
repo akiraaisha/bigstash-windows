@@ -625,7 +625,8 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Send a GET "notifications/" request with an optional page parameter which returns an enumerable of user's BigStash Notification objects.
+        /// Send a GET "notifications/" request with an optional page parameter 
+        /// which returns an ordered (descending date) enumerable of user's BigStash Notification objects.
         /// </summary>
         /// <returns></returns>
         public async Task<IEnumerable<Notification>> GetNotificationsAsync(string url = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
@@ -650,7 +651,7 @@ namespace DeepfreezeSDK
                 {
                     response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 }
-
+                
                 content = await response.Content.ReadAsStringAsync();
 
                 JObject json = JObject.Parse(content);
@@ -659,7 +660,7 @@ namespace DeepfreezeSDK
                 {
                     var notifications = JsonConvert.DeserializeObject<IEnumerable<Notification>>(json["results"].ToString());
 
-                    return notifications;
+                    return notifications.OrderByDescending(x => x.CreationDate);
                 }
                 else
                 {
