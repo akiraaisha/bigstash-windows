@@ -11,5 +11,7 @@ namespace DeepfreezeApp
     public interface INotificationViewModel
     {
         Notification Notification { get; set; }
+
+        bool IsNew { get; set; }
     }
 }
