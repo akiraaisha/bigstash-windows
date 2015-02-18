@@ -35,25 +35,32 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Margin="0 0 0 10"
-                Style="{StaticResource OnMouseOverStyle}"
-                ToolTip="Click to open https://www.bigstash.co"
+    <StackPanel Style="{StaticResource OnMouseOverStyle}"
+                ToolTip="{Binding Notification.Url}"
                 >
-        
-        <Grid Margin="5">
+
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="15" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+
+            <Button Grid.RowSpan="2" 
+                    Grid.ColumnSpan="2"
+                    x:Name="OpenNotificationUrl"
+                    Opacity="0"
+                    Panel.ZIndex="1"
+                    />
             
             <TextBlock Grid.Row="1"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Left"
+                       Margin="5 0 5 15"
                        Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibilityConverter}}"
                        >
                 <Rectangle Style="{DynamicResource NewNotificationIconStyle}" />
@@ -61,11 +68,10 @@
             
             <TextBlock Grid.Row="0" 
                        Grid.Column="1"
-                       Text="{Binding Notification.CreationDate}"
+                       Text="{Binding CreationDateText}"
                        FontSize="12"
-                       FontStyle="Italic"
                        Foreground="Gray"
-                       Margin="0 0 0 5"
+                       Margin="0 5 5 5"
                        VerticalAlignment="Center"
                        />
 
@@ -76,6 +82,7 @@
                        TextWrapping="Wrap"
                        TextTrimming="CharacterEllipsis"
                        VerticalAlignment="Center"
+                       Margin="0 0 5 15"
                        />
 
         </Grid>
