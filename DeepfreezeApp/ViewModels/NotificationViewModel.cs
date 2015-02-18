@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 
 using DeepfreezeModel;
 
@@ -28,7 +29,10 @@ namespace DeepfreezeApp
         {
             get
             {
-                return this._notification.CreationDate.ToString("{dd/MM/yyyy hh:mm:ss}");
+                var creationDateInUtc = this._notification.CreationDate;
+                var localTimeZone = TimeZoneInfo.Local;
+                var creationDateInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(creationDateInUtc, localTimeZone);
+                return creationDateInLocalTimeZone.ToString("MMM dd, yyyy, hh:mm tt");
             }
         }
 
@@ -70,6 +74,26 @@ namespace DeepfreezeApp
         {
             get { return this._isNew; }
             set { this._isNew = value; NotifyOfPropertyChange(() => this.IsNew); }
+        }
+
+        #endregion
+
+        #region action_methods
+
+        public void OpenNotificationUrl()
+        {
+            this.IsNew = false;
+
+            if (!String.IsNullOrEmpty(this.Notification.Url))
+            {
+                var uri = new Uri(this.Notification.Url, UriKind.Absolute);
+
+                if (!uri.IsFile && !uri.IsUnc && uri.IsWellFormedOriginalString() &&
+                    (uri.Scheme == "https" || uri.Scheme == "http"))
+                {
+                    Process.Start(this.Notification.Url);
+                }
+            }
         }
 
         #endregion
