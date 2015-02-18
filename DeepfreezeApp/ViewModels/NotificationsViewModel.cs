@@ -12,7 +12,7 @@ using DeepfreezeSDK;
 namespace DeepfreezeApp
 {
     [Export(typeof(INotificationsViewModel))]
-    public class NotificationsViewModel : Screen, INotificationsViewModel
+    public class NotificationsViewModel : Screen, INotificationsViewModel, IHandleWithTask<IFetchNotificationsMessage>
     {
         #region fields
 
@@ -22,6 +22,7 @@ namespace DeepfreezeApp
 
         private BindableCollection<INotificationViewModel> _notifications = new BindableCollection<INotificationViewModel>();
         private string _errorMessage;
+        private bool _hasNewNotifications = false;
 
         #endregion
 
@@ -50,21 +51,116 @@ namespace DeepfreezeApp
             set { this._errorMessage = value; NotifyOfPropertyChange(() => this.ErrorMessage); }
         }
 
+        public bool HasNewNotifications
+        {
+            get { return this._hasNewNotifications; }
+            set { this._hasNewNotifications = value; NotifyOfPropertyChange(() => this.HasNewNotifications); }
+        }
+
         #endregion
 
         #region action_methods
 
-        public async Task FetchNotifications()
+        public async Task FetchNotificationsAsync(int page = 0)
         {
-            string url = "http://localhost:3000/api/v1/notifications";
+            // TODO: Don't clear the notifications list.
+            this.Notifications.Clear();
 
-            var notifications = await this._deepfreezeClient.GetNotificationsAsync(url);
+            string url = (page == 0) ? "http://localhost:3000/api/v1/notifications"
+                                     : "http://localhost:3000/api/v1/notifications/?page=" + page;
+
+            var notifications = await this._deepfreezeClient.GetNotificationsAsync(url).ConfigureAwait(false);
 
             foreach(var notification in notifications)
             {
                 var notificationVM = IoC.Get<INotificationViewModel>();
                 notificationVM.Notification = notification;
+
+                this.SetUnreadStatusInNotification(notificationVM);
+
                 this.Notifications.Add(notificationVM);
+            }
+
+            this.UpdateHasNewNotifications();
+        }
+
+        public void SetAllNotificationsAsRead()
+        {
+            foreach (var notification in this.Notifications)
+            {
+                notification.IsNew = false;
+            }
+
+            this.UpdateHasNewNotifications();
+
+            var latestNotificationDate = this.Notifications.Max(x => x.Notification.CreationDate);
+            this.SetLastNotificationDate(latestNotificationDate);
+        }
+
+        #endregion
+
+        #region private_methods
+
+        private void SetUnreadStatusInNotification(INotificationViewModel notification)
+        {
+            DateTime mostRecentDate;
+            
+            if (Properties.Settings.Default.LastNotificationDate == null)
+            {
+                mostRecentDate = DateTime.Now.ToUniversalTime();
+            }
+            else
+            {
+                mostRecentDate = Properties.Settings.Default.LastNotificationDate.ToUniversalTime();
+            }
+
+            if (mostRecentDate >= notification.Notification.CreationDate)
+            {
+                notification.IsNew = false;
+            }
+            else
+            {
+                notification.IsNew = true;
+            }
+        }
+
+        private void SetLastNotificationDate(DateTime date)
+        {
+            if (date != null)
+            {
+                Properties.Settings.Default.LastNotificationDate = date;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void UpdateHasNewNotifications()
+        {
+            if (this.Notifications.Where(x => x.IsNew).Count() > 0)
+            {
+                this.HasNewNotifications = true;
+            }
+            else
+            {
+                this.HasNewNotifications = false;
+            }
+        }
+
+        #endregion
+
+        #region events
+
+        public async Task Handle(IFetchNotificationsMessage message)
+        {
+            if (message != null)
+            {
+                if (message.PagedResult != null)
+                {
+                    await this.FetchNotificationsAsync((int)message.PagedResult).ConfigureAwait(false);
+                }
+                else
+                {
+                    await this.FetchNotificationsAsync().ConfigureAwait(false);
+                }
             }
         }
 
@@ -75,8 +171,16 @@ namespace DeepfreezeApp
         protected async override void OnActivate()
         {
             base.OnActivate();
+            this._eventAggregator.Subscribe(this);
 
-            await this.FetchNotifications().ConfigureAwait(false);
+            await this.FetchNotificationsAsync(1).ConfigureAwait(false);
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            this.Notifications.Clear();
+
+            base.OnDeactivate(close);
         }
 
         #endregion
