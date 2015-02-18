@@ -190,6 +190,7 @@
   <ItemGroup>
     <Compile Include="BindingProxy.cs" />
     <Compile Include="Converters\HyperLinkConverter.cs" />
+    <Compile Include="Interfaces\IFetchNotificationsMessage.cs" />
     <Compile Include="Interfaces\INotificationsViewModel.cs" />
     <Compile Include="Interfaces\IAboutViewModel.cs" />
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
     <Compile Include="Interfaces\ICheckForUpdateMessage.cs" />
     <Compile Include="Interfaces\IRestartNeededMessage.cs" />
+    <Compile Include="Messages\FetchNotificationsMessage.cs" />
     <Compile Include="Messages\RestartNeededMessage.cs" />
     <Compile Include="Messages\PauseAllMessage.cs" />
     <Compile Include="Messages\RestartAppMessage.cs" />
