@@ -10,7 +10,7 @@ namespace DeepfreezeModel
     public class Notification
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("verb")]
         public string Verb { get; set; }
@@ -20,5 +20,8 @@ namespace DeepfreezeModel
 
         [JsonProperty("status")]
         public string Status { get; set; }
+
+        [JsonProperty("href")]
+        public string Url { get; set; }
     }
 }
