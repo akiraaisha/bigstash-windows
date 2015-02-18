@@ -125,6 +125,7 @@ namespace DeepfreezeApp
             get { return this._notificationsVM; }
             set { this._notificationsVM = value; NotifyOfPropertyChange(() => this.NotificationsVM); }
         }
+
         public bool IsPreferencesFlyoutOpen
         {
             get { return this._isPreferencesFlyoutOpen; }
@@ -147,6 +148,11 @@ namespace DeepfreezeApp
             get { return this._isNotificationsFlyoutOpen; }
             set
             {
+                if (!value && this.IsNotificationsFlyoutOpen)
+                {
+                    this.NotificationsVM.SetAllNotificationsAsRead();
+                }
+
                 this._isNotificationsFlyoutOpen = value;
                 NotifyOfPropertyChange(() => this.IsNotificationsFlyoutOpen);
             }
@@ -224,7 +230,22 @@ namespace DeepfreezeApp
             {
                 this.IsAboutFlyoutOpen = false;
                 this.IsPreferencesFlyoutOpen = false;
+
+                // Send a message to fetch the latest notifications
+                var fetchNotificationsMessage = IoC.Get<IFetchNotificationsMessage>();
+                fetchNotificationsMessage.PagedResult = 1;
+                this._eventAggregator.PublishOnUIThreadAsync(fetchNotificationsMessage);
             }
+        }
+
+        public void ShowOptionsContextMenu(object sender)
+        {
+            var button = sender as System.Windows.Controls.Button;
+            button.ContextMenu.PlacementTarget = button;
+            button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            button.ContextMenu.VerticalOffset = 5;
+            button.ContextMenu.HorizontalOffset = -120;
+            button.ContextMenu.IsOpen = true;
         }
 
         public void ShowShellWindow()
@@ -705,11 +726,11 @@ namespace DeepfreezeApp
         /// </summary>
         private void InstatiateNotificationsViewModel()
         {
-            if (NotificationsVM == null)
+            if (this.NotificationsVM == null)
             {
-                NotificationsVM = IoC.Get<INotificationsViewModel>() as NotificationsViewModel;
+                this.NotificationsVM = IoC.Get<INotificationsViewModel>() as NotificationsViewModel;
             }
-            this.ActivateItem(NotificationsVM);
+            this.ActivateItem(this.NotificationsVM);
         }
 
         /// <summary>
