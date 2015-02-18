@@ -62,8 +62,11 @@
             <TextBlock Grid.Row="0" 
                        Grid.Column="1"
                        Text="{Binding Notification.CreationDate}"
-                       FontSize="14"
+                       FontSize="12"
+                       FontStyle="Italic"
+                       Foreground="Gray"
                        Margin="0 0 0 5"
+                       VerticalAlignment="Center"
                        />
 
             <TextBlock Grid.Row="1" 
@@ -72,6 +75,7 @@
                        FontSize="14"
                        TextWrapping="Wrap"
                        TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center"
                        />
 
         </Grid>
