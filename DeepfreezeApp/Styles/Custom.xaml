@@ -3,6 +3,10 @@
                     xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
                     >
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../Resources/Icons.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    
     <Style x:Key="DescriptionHeaderStyle" TargetType="Label">
         <Setter Property="FontSize" Value="18" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
@@ -427,6 +431,65 @@
                 Value="34" />
         <Setter Property="Padding"
                 Value="0" />
+    </Style>
+
+    <VisualBrush x:Key="SettingsIconVisualBrush" 
+                 Stretch="Uniform"
+                 Visual="{StaticResource appbar_settings}" 
+                 />
+
+    <VisualBrush x:Key="AboutIconVisualBrush" 
+                 Stretch="Uniform"
+                 Visual="{StaticResource appbar_information}" 
+                 />
+
+    <VisualBrush x:Key="UpdateFoundIconVisualBrush" 
+                 Stretch="Uniform"
+                 Visual="{StaticResource appbar_arrow_up}" 
+                 />
+
+    <VisualBrush x:Key="NoNotificationsVisualBrush"
+                 Stretch="Uniform"
+                 Visual="{StaticResource appbar_flag}"
+                 />
+
+    <VisualBrush x:Key="NewNotificationIndicatorBrush"
+                 Stretch="Uniform"
+                 Visual="{DynamicResource appbar_moon_red}" 
+                 />
+
+    <Canvas x:Key="appbar_moon_red" Width="75.9905" Height="75.9905" Clip="F1 M 0,0L 75.9905,0L 75.9905,75.9905L 0,75.9905L 0,0">
+        <Ellipse Width="44.3278" Height="44.3278" Canvas.Left="15.8313" Canvas.Top="15.8312" Stretch="Fill" Fill="Red"/>
+    </Canvas>
+
+    <Style x:Key="SettingsIconStyle" TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="{StaticResource SettingsIconVisualBrush}" />
+        <Setter Property="Height" Value="15" />
+        <Setter Property="Width" Value="15" />
+    </Style>
+
+    <Style x:Key="AboutIconStyle" TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="{StaticResource AboutIconVisualBrush}" />
+        <Setter Property="Height" Value="15" />
+        <Setter Property="Width" Value="15" />
+    </Style>
+
+    <Style x:Key="UpdateFoundIconStyle" TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="{StaticResource UpdateFoundIconVisualBrush}" />
+        <Setter Property="Height" Value="15" />
+        <Setter Property="Width" Value="15" />
+    </Style>
+
+    <Style x:Key="NotificationsIconStyle" TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="{StaticResource NoNotificationsVisualBrush}" />
+        <Setter Property="Height" Value="15" />
+        <Setter Property="Width" Value="15" />
+    </Style>
+
+    <Style x:Key="NewNotificationIconStyle" TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="{StaticResource NewNotificationIndicatorBrush}" />
+        <Setter Property="Height" Value="5" />
+        <Setter Property="Width" Value="5" />
     </Style>
 
 </ResourceDictionary>
