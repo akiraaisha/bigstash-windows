@@ -15,7 +15,14 @@ namespace DeepfreezeApp
     [Export(typeof(INotificationViewModel))]
     public class NotificationViewModel : PropertyChangedBase, INotificationViewModel
     {
+        #region fields
+
         private Notification _notification;
+        private bool _isNew = false;
+
+        #endregion
+
+        #region properties
 
         public  string CreationDateText
         {
@@ -24,6 +31,7 @@ namespace DeepfreezeApp
                 return this._notification.CreationDate.ToString("{dd/MM/yyyy hh:mm:ss}");
             }
         }
+
         public Notification Notification
         {
             get { return this._notification; }
@@ -57,5 +65,13 @@ namespace DeepfreezeApp
                 NotifyOfPropertyChange(() => this.Notification); 
             }
         }
+
+        public bool IsNew
+        {
+            get { return this._isNew; }
+            set { this._isNew = value; NotifyOfPropertyChange(() => this.IsNew); }
+        }
+
+        #endregion
     }
 }
