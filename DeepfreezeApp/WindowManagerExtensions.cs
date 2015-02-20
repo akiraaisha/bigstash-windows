@@ -59,5 +59,32 @@ namespace DeepfreezeApp
                 _log.Error("WindowManagerExtensions.ShowViewDialogAsync threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
         }
+
+        public static T GetDescendantByType<T>(this System.Windows.Media.Visual element) where T : class
+        {
+            if (element == null)
+            {
+                return default(T);
+            }
+            if (element.GetType() == typeof(T))
+            {
+                return element as T;
+            }
+            T foundElement = null;
+            if (element is FrameworkElement)
+            {
+                (element as FrameworkElement).ApplyTemplate();
+            }
+            for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var visual = System.Windows.Media.VisualTreeHelper.GetChild(element, i) as System.Windows.Media.Visual;
+                foundElement = visual.GetDescendantByType<T>();
+                if (foundElement != null)
+                {
+                    break;
+                }
+            }
+            return foundElement;
+        }
     }
 }
