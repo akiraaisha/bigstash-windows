@@ -15,11 +15,6 @@ using DeepfreezeModel;
 using DeepfreezeSDK.Exceptions;
 using DeepfreezeSDK.Retry;
 
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.Runtime;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using log4net;
@@ -629,12 +624,13 @@ namespace DeepfreezeSDK
         /// which returns an ordered (descending date) enumerable of user's BigStash Notification objects.
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Notification>> GetNotificationsAsync(string url = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<ResponseMetadata, IEnumerable<Notification>>> GetNotificationsAsync(string url = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            _log.Debug("Called GetNotificationsAsync.");
-
-            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri)
+            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri + "?page=1")
                                                     : CreateHttpRequestWithSignature(GET, url, false);
+
+            _log.Debug("Called GetNotificationsAsync with parameter url = \"" + url + "\".");
+
             HttpResponseMessage response;
             string content = String.Empty;
 
@@ -656,71 +652,30 @@ namespace DeepfreezeSDK
 
                 JObject json = JObject.Parse(content);
 
-                if ((int)json["meta"]["count"] > 0)
+                if ((int)json["count"] > 0)
                 {
                     var notifications = JsonConvert.DeserializeObject<IEnumerable<Notification>>(json["results"].ToString());
 
-                    return notifications.OrderByDescending(x => x.CreationDate);
+                    var responseMetadata = new ResponseMetadata()
+                    {
+                        Count = (int)json["count"],
+                        NextPageUri = (string)json["next"],
+                        PreviousPageUri = (string)json["previous"],
+                        Etag = response.Headers.ETag.Tag
+                    };
+
+                    content = null;
+                    json = null;
+                    response = null;
+
+                    return new Tuple<ResponseMetadata, IEnumerable<Notification>>(responseMetadata, notifications.OrderByDescending(x => x.CreationDate));
                 }
                 else
                 {
-                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
+                    return null;
                 }
             }
             catch(Exception e)
-            {
-                // If the caught exception is a BigStashException, then return it immediately
-                // in order to be propagated to the higher caller as is, without wrapping it in
-                // a new BigStashException instance.
-                if (e is BigStashException)
-                    throw;
-
-                throw this.BigStashExceptionHandler(e);
-            }
-        }
-
-        /// <summary>
-        /// Send a GET "notifications/id" request which returns a user's BigStash Notification object.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<Notification> GetNotificationAsync(string id, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            _log.Debug("Called GetNotificationAsync with parameter id = \"" + id + "\".");
-
-            var url = _notificationsUri + id + "/";
-            var request = CreateHttpRequestWithSignature(GET, url, false);
-            HttpResponseMessage response;
-            string content = String.Empty;
-
-            try
-            {
-                var retries = LONGRETRY;
-
-                // if tryForever is true, then set retries to the Int16 max value, that is 32767,
-                // to ensure a large number of max retries are completed when transient errors occur.
-                if (tryForever)
-                {
-                    retries = Int16.MaxValue;
-                }
-
-                using (var httpClient = this.CreateHttpClientWithRetryLogic(retries))
-                {
-                    response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                }
-
-                content = await response.Content.ReadAsStringAsync();
-
-                if (content != null)
-                {
-                    var notification = JsonConvert.DeserializeObject<Notification>(content);
-                    return notification;
-                }
-                else
-                {
-                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
-                }
-            }
-            catch (Exception e)
             {
                 // If the caught exception is a BigStashException, then return it immediately
                 // in order to be propagated to the higher caller as is, without wrapping it in
@@ -855,7 +810,7 @@ namespace DeepfreezeSDK
 
             sb.AppendFormat("(request-line): {0} ", method.ToLower());
 
-            sb.Append(String.Join("", requestUri.Segments));
+            sb.Append(requestUri.PathAndQuery);
             sb.Append("\n");
 
             sb.AppendFormat("host: {0}\n", requestUri.Authority);
