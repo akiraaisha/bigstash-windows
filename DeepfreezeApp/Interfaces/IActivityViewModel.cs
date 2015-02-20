@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DeepfreezeApp
 {
-    public interface INotificationsViewModel
+    public interface IActivityViewModel
     {
     }
 }
