@@ -35,13 +35,13 @@ namespace DeepfreezeApp
         private PreferencesViewModel _preferencesVM;
         private AboutViewModel _aboutVM;
         private UploadManagerViewModel _uploadManagerVM;
-        private NotificationsViewModel _notificationsVM;
+        private ActivityViewModel _activityVM;
 
         private MetroWindow _shellWindow;
         private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
         private bool _isAboutFlyoutOpen = false;
-        private bool _isNotificationsFlyoutOpen = false;
+        private bool _isActivityFlyoutOpen = false;
 
         private bool _isBusy = false;
         private bool _hasError = false;
@@ -120,10 +120,10 @@ namespace DeepfreezeApp
             set { this._uploadManagerVM = value; NotifyOfPropertyChange(() => UploadManagerVM); }
         }
 
-        public NotificationsViewModel NotificationsVM
+        public ActivityViewModel ActivityVM
         {
-            get { return this._notificationsVM; }
-            set { this._notificationsVM = value; NotifyOfPropertyChange(() => this.NotificationsVM); }
+            get { return this._activityVM; }
+            set { this._activityVM = value; NotifyOfPropertyChange(() => this.ActivityVM); }
         }
 
         public bool IsPreferencesFlyoutOpen
@@ -143,18 +143,19 @@ namespace DeepfreezeApp
             }
         }
 
-        public bool IsNotificationsFlyoutOpen
+        public bool IsActivityFlyoutOpen
         {
-            get { return this._isNotificationsFlyoutOpen; }
+            get { return this._isActivityFlyoutOpen; }
             set
             {
-                if (!value && this.IsNotificationsFlyoutOpen)
+                if (!value && this.IsActivityFlyoutOpen)
                 {
-                    this.NotificationsVM.SetAllNotificationsAsRead();
+                    this.ActivityVM.SetAllNotificationsAsRead();
+                    // this.ActivityVM.ForgetBeyondPageOneResults();
                 }
 
-                this._isNotificationsFlyoutOpen = value;
-                NotifyOfPropertyChange(() => this.IsNotificationsFlyoutOpen);
+                this._isActivityFlyoutOpen = value;
+                NotifyOfPropertyChange(() => this.IsActivityFlyoutOpen);
             }
         }
 
@@ -167,8 +168,8 @@ namespace DeepfreezeApp
         public string AboutButtonTooltip
         { get { return Properties.Resources.AboutButtonTooltip; } }
 
-        public string NotificationsHeader
-        { get { return Properties.Resources.NotificationsHeader; } }
+        public string ActivityHeader
+        { get { return Properties.Resources.ActivityHeader; } }
 
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
@@ -207,7 +208,7 @@ namespace DeepfreezeApp
             if (this.IsPreferencesFlyoutOpen)
             {
                 this.IsAboutFlyoutOpen = false;
-                this.IsNotificationsFlyoutOpen = false;
+                this.IsActivityFlyoutOpen = false;
             }
         }
 
@@ -218,15 +219,15 @@ namespace DeepfreezeApp
             if (this.IsAboutFlyoutOpen)
             {
                 this.IsPreferencesFlyoutOpen = false;
-                this.IsNotificationsFlyoutOpen = false;
+                this.IsActivityFlyoutOpen = false;
             }
         }
 
-        public void ToggleNotificationsFlyout()
+        public void ToggleActivityFlyout()
         {
-            this.IsNotificationsFlyoutOpen = !this.IsNotificationsFlyoutOpen;
+            this.IsActivityFlyoutOpen = !this.IsActivityFlyoutOpen;
 
-            if (this.IsNotificationsFlyoutOpen)
+            if (this.IsActivityFlyoutOpen)
             {
                 this.IsAboutFlyoutOpen = false;
                 this.IsPreferencesFlyoutOpen = false;
@@ -236,6 +237,10 @@ namespace DeepfreezeApp
                 fetchNotificationsMessage.PagedResult = 1;
                 this._eventAggregator.PublishOnUIThreadAsync(fetchNotificationsMessage);
             }
+            else
+            {
+                
+            }
         }
 
         public void ShowOptionsContextMenu(object sender)
@@ -244,7 +249,6 @@ namespace DeepfreezeApp
             button.ContextMenu.PlacementTarget = button;
             button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             button.ContextMenu.VerticalOffset = 5;
-            button.ContextMenu.HorizontalOffset = -120;
             button.ContextMenu.IsOpen = true;
         }
 
@@ -726,11 +730,11 @@ namespace DeepfreezeApp
         /// </summary>
         private void InstatiateNotificationsViewModel()
         {
-            if (this.NotificationsVM == null)
+            if (this.ActivityVM == null)
             {
-                this.NotificationsVM = IoC.Get<INotificationsViewModel>() as NotificationsViewModel;
+                this.ActivityVM = IoC.Get<IActivityViewModel>() as ActivityViewModel;
             }
-            this.ActivateItem(this.NotificationsVM);
+            this.ActivateItem(this.ActivityVM);
         }
 
         /// <summary>
