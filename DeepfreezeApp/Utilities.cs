@@ -276,6 +276,48 @@ namespace DeepfreezeApp
             return exponential;
         }
 
+        public static DateTime ConvertDateUTCToLocalTimeZone(DateTime date)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(date, TimeZoneInfo.Local);
+        }
+
+        public static string RemoveHrefFromString(string verb)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(verb);
+
+            // replace the ending of href tags since that's easy.
+            sb.Replace("</a>", "");
+
+            // Strip the verb from all href tags.
+            // Get the <a and </a> index.
+
+            while (true)
+            {
+                var temp = sb.ToString();
+                var startIndex = temp.IndexOf("<a href=");
+                var endIndex = -1;
+
+                if (startIndex > 0)
+                {
+                    endIndex = temp.IndexOf(">", startIndex);
+                }
+
+                verb = null;
+
+                if (startIndex < endIndex)
+                {
+                    sb.Remove(startIndex, endIndex - startIndex + 1);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
