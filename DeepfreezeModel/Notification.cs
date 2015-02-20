@@ -23,5 +23,8 @@ namespace DeepfreezeModel
 
         [JsonProperty("href")]
         public string Url { get; set; }
+
+        [JsonIgnore]
+        public bool IsNew { get; set; }
     }
 }
