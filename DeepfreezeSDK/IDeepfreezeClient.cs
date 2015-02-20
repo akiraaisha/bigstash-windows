@@ -84,6 +84,6 @@ namespace DeepfreezeSDK
         /// Send a GET "notifications/" request which returns a list of Notification objects.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<Notification>> GetNotificationsAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Tuple<ResponseMetadata, IEnumerable<Notification>>> GetNotificationsAsync(string url, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
