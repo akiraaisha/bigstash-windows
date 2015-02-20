@@ -118,7 +118,7 @@ namespace DeepfreezeApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("BigStash for Windows")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BigStash")]
         public string ApplicationFullName {
             get {
                 return ((string)(this["ApplicationFullName"]));

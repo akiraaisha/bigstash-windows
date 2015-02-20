@@ -30,7 +30,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ApplicationFullName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">BigStash for Windows</Value>
+      <Value Profile="(Default)">BigStash</Value>
     </Setting>
     <Setting Name="LogFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Log.txt</Value>
