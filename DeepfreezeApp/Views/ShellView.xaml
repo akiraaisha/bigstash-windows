@@ -90,14 +90,14 @@
 
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Notifications" cal:Message.Attach="[Event Click] = [Action ToggleActivityFlyout()]">
+                        <MenuItem Header="{Binding ActivityHeader}" cal:Message.Attach="[Event Click] = [Action ToggleActivityFlyout()]">
                             <MenuItem.Icon>
                                 <Rectangle Style="{DynamicResource NewNotificationIconStyle}"
                                                 Visibility="{Binding ActivityVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Preferences" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
-                        <MenuItem Header="About" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
+                        <MenuItem Header="{Binding PreferencesHeader}" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
+                        <MenuItem Header="{Binding AboutHeader}" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
                     </ContextMenu>
                 </Button.ContextMenu>
 
