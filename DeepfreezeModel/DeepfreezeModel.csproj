@@ -65,6 +65,7 @@
     <Compile Include="Notification.cs" />
     <Compile Include="PartInfo.cs" />
     <Compile Include="Quota.cs" />
+    <Compile Include="ResponseMetadata.cs" />
     <Compile Include="S3Info.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="Upload.cs" />
