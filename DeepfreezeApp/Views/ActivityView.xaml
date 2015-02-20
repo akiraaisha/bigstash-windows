@@ -126,7 +126,7 @@
                    VerticalAlignment="Top"
                    >
 
-            <TextBlock Text="Fetching notifications..."
+            <TextBlock Text="Fetching activity..."
                        Margin="0 0 5 0"
                        VerticalAlignment="Top"
                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
