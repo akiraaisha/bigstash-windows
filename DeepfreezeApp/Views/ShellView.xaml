@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="BigStash"
         TitleCaps="False"
-        Icon="..\bigstash_windows_icon.ico"
+        Icon="..\bigstash-windows-icon.ico"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         GlowBrush="{DynamicResource GrayBrush7}"
@@ -61,45 +61,48 @@
 
             </Button>
 
-            <!--<Button ToolTip="{Binding NotificationsHeader}" 
+            <Button x:Name="OptionsButton" 
+                    ToolTip="{Binding PreferencesHeader}" 
                     FontFamily="Segoe UI Symbol"
                     FontSize="16"
-                    Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="ToggleNotificationsFlyout"
+                    Style="{StaticResource MetroWindowButtonStyle}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-                    >
-
-                <Rectangle Style="{DynamicResource NotificationsIconStyle}" />
-
-            </Button>-->
-
-            <!--<Button ToolTip="{Binding PreferencesHeader}" 
-                    FontFamily="Segoe UI Symbol"
-                    FontSize="16"
-                    Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="TogglePreferencesFlyout"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                    cal:Message.Attach="ShowOptionsContextMenu($source)"
+                    ContextMenuService.Placement="Bottom"
+                    ContextMenuService.VerticalOffset="5"
+                    ContextMenuService.PlacementTarget="{Binding ElementName=OptionsButton}"
+                    Width="20"
                     >
                 
-                <Rectangle Style="{StaticResource SettingsIconStyle}" />
-                
+                <StackPanel Orientation="Horizontal">
+
+                    <Rectangle Style="{DynamicResource SettingsIconStyle}" />
+
+                    <TextBlock VerticalAlignment="Top"
+                               HorizontalAlignment="Center"
+                               Visibility="{Binding ActivityVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"
+                               >
+                        <Rectangle Style="{DynamicResource NewNotificationIconStyle}" />
+                    </TextBlock>
+                    
+                </StackPanel>
+
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Notifications" cal:Message.Attach="[Event Click] = [Action ToggleActivityFlyout()]">
+                            <MenuItem.Icon>
+                                <Rectangle Style="{DynamicResource NewNotificationIconStyle}"
+                                                Visibility="{Binding ActivityVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Preferences" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
+                        <MenuItem Header="About" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+
             </Button>
 
-            <Button ToolTip="{Binding AboutButtonTooltip}" 
-                    FontFamily="Segoe UI Symbol"
-                    FontSize="16"
-                    Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="ToggleAboutFlyout"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-                    >
-                
-                    <Rectangle Style="{StaticResource AboutIconStyle}" />
-
-            </Button>-->
-            
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
 
@@ -117,27 +120,25 @@
 
             </controls:Flyout>
 
-            <controls:Flyout 
-                x:Name="AboutFlyout" 
-                Header="{Binding AboutHeader}"
-                Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
-                IsModal="True"
-                Theme="Adapt"
-                >
+            <controls:Flyout x:Name="AboutFlyout" 
+                             Header="{Binding AboutHeader}"
+                             Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
 
                 <controls:MetroContentControl cal:View.Model="{Binding AboutVM}" />
 
             </controls:Flyout>
 
-            <controls:Flyout 
-                x:Name="NotificationsFlyout" 
-                Header="{Binding NotificationsHeader}"
-                Position="Right" IsOpen="{Binding IsNotificationsFlyoutOpen}"
-                IsModal="True"
-                Theme="Adapt"
-                >
+            <controls:Flyout x:Name="ActivityFlyoout" 
+                             Header="{Binding ActivityHeader}"
+                             Position="Right" IsOpen="{Binding IsActivityFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
 
-                <controls:MetroContentControl cal:View.Model="{Binding NotificationsVM}" />
+                <controls:MetroContentControl cal:View.Model="{Binding ActivityVM}" />
 
             </controls:Flyout>
 
@@ -147,12 +148,11 @@
     <Grid Margin="0 0 0 10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
-                        IconSource="/bigstash_windows_icon.ico"
+                        IconSource="..\bigstash-windows-icon.ico"
                         ToolTipText="BigStash for Windows"
                         MenuActivation="RightClick"
                         cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
@@ -184,56 +184,10 @@
                                FontSize="16"
                                Margin="0 5 0 5"
                                />
-        </StackPanel>
-
-        <StackPanel Margin="0 5 10 0" 
-                    Grid.Row="1"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    >
-
-            <Button  
-                x:Name="OptionsButton" 
-                ToolTip="{Binding PreferencesHeader}" 
-                FontFamily="Segoe UI Symbol"
-                FontSize="16"
-                Style="{StaticResource MetroWindowButtonStyle}"
-                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-                cal:Message.Attach="ShowOptionsContextMenu($source)"
-                ContextMenuService.Placement="Bottom"
-                ContextMenuService.VerticalOffset="5"
-                ContextMenuService.HorizontalOffset="-120"
-                Width="20"
-                >
-
-                <Rectangle Style="{DynamicResource SettingsIconStyle}" />
-
-                <Button.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Notifications" cal:Message.Attach="[Event Click] = [Action ToggleNotificationsFlyout()]">
-                            <MenuItem.Icon>
-                                <Rectangle Style="{DynamicResource NewNotificationIconStyle}"
-                                           Visibility="{Binding NotificationsVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Preferences" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
-                        <MenuItem Header="About" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
-                    </ContextMenu>
-                </Button.ContextMenu>
-
-            </Button>
-
-            <TextBlock VerticalAlignment="Top"
-                       HorizontalAlignment="Center"
-                       Visibility="{Binding NotificationsVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"
-                       >
-                <Rectangle Style="{DynamicResource NewNotificationIconStyle}" />
-            </TextBlock>
             
         </StackPanel>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
 
             <TextBlock x:Name="ErrorMessage"
                    Foreground="Red"
