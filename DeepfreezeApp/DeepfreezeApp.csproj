@@ -64,7 +64,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>bigstash_windows_icon.ico</ApplicationIcon>
+    <ApplicationIcon>bigstash-windows-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
@@ -189,9 +189,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindingProxy.cs" />
+    <Compile Include="Converters\DateToLocalToFriendlyFormattedString.cs" />
     <Compile Include="Converters\HyperLinkConverter.cs" />
+    <Compile Include="Converters\RemoveHrefTagFromStringConverter.cs" />
     <Compile Include="Interfaces\IFetchNotificationsMessage.cs" />
-    <Compile Include="Interfaces\INotificationsViewModel.cs" />
+    <Compile Include="Interfaces\IActivityViewModel.cs" />
     <Compile Include="Interfaces\IAboutViewModel.cs" />
     <Compile Include="Interfaces\IExcludedFilesViewModel.cs" />
     <Compile Include="Interfaces\IMessageBoxViewModel.cs" />
@@ -205,7 +207,7 @@
     <Compile Include="Messages\RestartNeededMessage.cs" />
     <Compile Include="Messages\PauseAllMessage.cs" />
     <Compile Include="Messages\RestartAppMessage.cs" />
-    <Compile Include="ViewModels\NotificationsViewModel.cs" />
+    <Compile Include="ViewModels\ActivityViewModel.cs" />
     <Compile Include="SquirrelHelper.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Converters\BoolToVisibility.cs" />
@@ -254,7 +256,6 @@
     <Compile Include="ViewModels\AboutViewModel.cs" />
     <Compile Include="ViewModels\ExcludedFilesViewModel.cs" />
     <Compile Include="ViewModels\MessageBoxViewModel.cs" />
-    <Compile Include="ViewModels\NotificationViewModel.cs" />
     <Compile Include="ViewModels\UploadManagerViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />
@@ -279,6 +280,7 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="bigstash-windows-icon.ico" />
     <Resource Include="Resources\Entypo.ttf" />
     <Resource Include="Resources\Entypo-license.txt" />
     <Resource Include="Resources\WindowsIcons-license.txt" />
@@ -312,7 +314,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Views\NotificationsView.xaml">
+    <Page Include="Styles\CustomListBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ActivityView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -333,10 +339,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MessageBoxView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\NotificationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -376,9 +378,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bigstash_windows_icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
