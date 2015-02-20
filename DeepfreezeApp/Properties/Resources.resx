@@ -536,7 +536,13 @@
   <data name="MinuteText" xml:space="preserve">
     <value>minute</value>
   </data>
-  <data name="NotificationsHeader" xml:space="preserve">
-    <value>Notifications</value>
+  <data name="ActivityHeader" xml:space="preserve">
+    <value>Activity</value>
+  </data>
+  <data name="ErrorFetchingActivityGenericText" xml:space="preserve">
+    <value>There was an error while fetching your activity.</value>
+  </data>
+  <data name="NoActivityText" xml:space="preserve">
+    <value>You don't have any activity.</value>
   </data>
 </root>

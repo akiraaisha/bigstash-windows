@@ -88,6 +88,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activity.
+        /// </summary>
+        internal static string ActivityHeader {
+            get {
+                return ResourceManager.GetString("ActivityHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to application-specific data.
         /// </summary>
         internal static string AppDataDirExplanationText {
@@ -457,6 +466,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error while fetching your activity..
+        /// </summary>
+        internal static string ErrorFetchingActivityGenericText {
+            get {
+                return ResourceManager.GetString("ErrorFetchingActivityGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There was an error while initializing your uploads..
         /// </summary>
         internal static string ErrorInitializingClientUploadsListGenericText {
@@ -664,6 +682,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have any activity..
+        /// </summary>
+        internal static string NoActivityText {
+            get {
+                return ResourceManager.GetString("NoActivityText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your completed uploads list is empty..
         /// </summary>
         internal static string NoCompletedUploadsHeaderText {
@@ -687,15 +714,6 @@ namespace DeepfreezeApp.Properties {
         internal static string NoPendingUploadsHeaderText {
             get {
                 return ResourceManager.GetString("NoPendingUploadsHeaderText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Notifications.
-        /// </summary>
-        internal static string NotificationsHeader {
-            get {
-                return ResourceManager.GetString("NotificationsHeader", resourceCulture);
             }
         }
         
