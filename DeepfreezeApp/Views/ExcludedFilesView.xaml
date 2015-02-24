@@ -37,8 +37,11 @@
                        >
 
                     <TextBlock Text="{Binding Title}" 
-                               TextWrapping="WrapWithOverflow"
+                               TextWrapping="Wrap"
                                TextTrimming="CharacterEllipsis" 
+                               LineStackingStrategy="MaxHeight"
+                               MaxHeight="70"
+                               HorizontalAlignment="Stretch"
                                />
                 </Label>
 
