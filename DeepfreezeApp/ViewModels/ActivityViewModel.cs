@@ -115,8 +115,7 @@ namespace DeepfreezeApp
             // Keep the most recent creation date to have a checkpoint for new notifications.
             if (this.Notifications.Count > 0)
             {
-                var latestNotificationDate = this.Notifications.Max(x => x.CreationDate);
-                this.SetLastNotificationDate(latestNotificationDate);
+                this.SetLastNotificationDate();
             }
         }
 
@@ -313,11 +312,13 @@ namespace DeepfreezeApp
         /// in the application's settings.
         /// </summary>
         /// <param name="date"></param>
-        private void SetLastNotificationDate(DateTime date)
+        private void SetLastNotificationDate()
         {
-            if (date != null)
+            var latestNotificationDate = this.Notifications.Max(x => x.CreationDate);
+
+            if (latestNotificationDate != null)
             {
-                Properties.Settings.Default.LastNotificationDate = date;
+                Properties.Settings.Default.LastNotificationDate = latestNotificationDate;
                 Properties.Settings.Default.Save();
             }
         }
@@ -336,6 +337,8 @@ namespace DeepfreezeApp
             {
                 this.HasNewNotifications = false;
             }
+
+            this.SetLastNotificationDate();
         }
 
         /// <summary>
