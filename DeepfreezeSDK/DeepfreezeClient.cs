@@ -291,7 +291,7 @@ namespace DeepfreezeSDK
         {
             _log.Debug("Called GetArchiveAsync with parameter url = \"" + url + "\".");
 
-            var request = CreateHttpRequestWithSignature(GET, url, false);
+            var request = CreateHttpRequestWithSignature(GET, url);
             HttpResponseMessage response;
 
             try
@@ -624,10 +624,10 @@ namespace DeepfreezeSDK
         /// which returns an ordered (descending date) enumerable of user's BigStash Notification objects.
         /// </summary>
         /// <returns></returns>
-        public async Task<Tuple<ResponseMetadata, IEnumerable<Notification>>> GetNotificationsAsync(string url = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<ResponseMetadata, IEnumerable<Notification>>> GetNotificationsAsync(string url = null, string etagToMatch = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri + "?page=1")
-                                                    : CreateHttpRequestWithSignature(GET, url, false);
+            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri, true, etagToMatch)
+                : CreateHttpRequestWithSignature(GET, url, false);
 
             _log.Debug("Called GetNotificationsAsync with parameter url = \"" + url + "\".");
 
@@ -648,6 +648,11 @@ namespace DeepfreezeSDK
                     response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 
+                if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+                {
+                    return null;
+                }
+
                 content = await response.Content.ReadAsStringAsync();
 
                 JObject json = JObject.Parse(content);
@@ -752,7 +757,7 @@ namespace DeepfreezeSDK
         /// <param name="resource"></param>
         /// <param name="isRelative"></param>
         /// <returns>HttpRequestMessage</returns>
-        private HttpRequestMessage CreateHttpRequestWithSignature(string method, string resource, bool isRelative = true)
+        private HttpRequestMessage CreateHttpRequestWithSignature(string method, string resource, bool isRelative = true, string etagToMatch = null)
         {
             DateTimeOffset date = DateTime.Now;
 
@@ -784,6 +789,12 @@ namespace DeepfreezeSDK
 
             // set date header
             message.Headers.Date = date;
+
+            if (!String.IsNullOrEmpty(etagToMatch))
+            {
+                EntityTagHeaderValue etagheader = new EntityTagHeaderValue(etagToMatch);
+                message.Headers.IfNoneMatch.Add(etagheader);
+            }
 
             var signature = CreateHMACSHA256Signature(method, message.RequestUri, date, isRelative);
 
