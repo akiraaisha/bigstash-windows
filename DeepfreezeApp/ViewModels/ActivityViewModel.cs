@@ -219,7 +219,7 @@ namespace DeepfreezeApp
 
             try
             {
-                var notificationsTuple = await this._deepfreezeClient.GetNotificationsAsync(url).ConfigureAwait(false);
+                var notificationsTuple = await this._deepfreezeClient.GetNotificationsAsync(url, etagToMatch: this._eTagPage1).ConfigureAwait(false);
 
                 // if the result is null, then there was nothing to fetch
                 // Update the UI and return.
@@ -234,21 +234,9 @@ namespace DeepfreezeApp
 
                 // if page == 1 then we need to check for etag change
                 // if the page 1 etag is null then set it, since this is obviously the 1st time you fetched notifications
-                if (page == 1)
+                if (page == 1 && String.IsNullOrEmpty(this._eTagPage1))
                 {
-                    if (String.IsNullOrEmpty(this._eTagPage1))
-                    {
-                        this._eTagPage1 = responseMetadata.Etag;
-                    }
-                    // else check if page 1 etag has the same value with the one found in the response metadata
-                    else
-                    {
-                        // if so, just return
-                        if (this._eTagPage1 == responseMetadata.Etag)
-                        {
-                            return;
-                        }
-                    }
+                    this._eTagPage1 = responseMetadata.Etag;
                 }
 
                 // set the next page results uri
@@ -263,6 +251,11 @@ namespace DeepfreezeApp
                 // finally add it to the Notifications list.
                 foreach (var notification in notifications)
                 {
+                    if (this.Notifications.Contains(notification))
+                    {
+                        continue;
+                    }
+
                     this.SetUnreadStatusInNotification(notification);
 
                     this.Notifications.Add(notification);
@@ -287,6 +280,11 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Try to set IsNew for the given Notification argument 
+        /// if it's creation date is newer than the most recent known creation date.
+        /// </summary>
+        /// <param name="notification"></param>
         private void SetUnreadStatusInNotification(Notification notification)
         {
             DateTime mostRecentDate;
@@ -297,7 +295,7 @@ namespace DeepfreezeApp
             }
             else
             {
-                mostRecentDate = Properties.Settings.Default.LastNotificationDate.ToUniversalTime();
+                mostRecentDate = Properties.Settings.Default.LastNotificationDate;
             }
 
             if (mostRecentDate >= notification.CreationDate)
@@ -310,6 +308,11 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Save the most recent Notification creation date, given as an argument,
+        /// in the application's settings.
+        /// </summary>
+        /// <param name="date"></param>
         private void SetLastNotificationDate(DateTime date)
         {
             if (date != null)
@@ -319,6 +322,10 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Update the viewmodel property HasNewNotifications based on the IsNew property
+        /// of the items found in the viewmodel's Notifications list.
+        /// </summary>
         private void UpdateHasNewNotifications()
         {
             if (this.Notifications.Where(x => x.IsNew).Count() > 0)
@@ -331,6 +338,13 @@ namespace DeepfreezeApp
             }
         }
 
+        /// <summary>
+        /// Find a Notification in the Notifications list and update its properties
+        /// in a way to notify the UI for any changes taking place.
+        /// What this essentially does, is to remove the old notification object and insert
+        /// a new one with the updated values in the old one's position in the list.
+        /// </summary>
+        /// <param name="notification"></param>
         private void UpdateNotificationInCollection(Notification notification)
         {
             // find the index of the notification in the notifications list.
