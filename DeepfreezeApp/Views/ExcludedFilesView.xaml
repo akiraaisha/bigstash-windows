@@ -30,11 +30,17 @@
 
             <StackPanel>
 
-                <Label Content="{Binding Title}"
+                <Label 
                        Style="{StaticResource HeaderLabelStyle}"
                        HorizontalAlignment="Stretch"
                        Margin="0 10 0 5"
-                       />
+                       >
+
+                    <TextBlock Text="{Binding Title}" 
+                               TextWrapping="WrapWithOverflow"
+                               TextTrimming="CharacterEllipsis" 
+                               />
+                </Label>
 
                 <Label x:Name="TopMessageText"
                        Style="{StaticResource DescriptionHeaderStyle}"
