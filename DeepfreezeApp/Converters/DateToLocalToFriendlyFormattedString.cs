@@ -14,7 +14,7 @@ namespace DeepfreezeApp
         {
             var date = (DateTime)value;
             return Utilities.ConvertDateUTCToLocalTimeZone(date)
-                            .ToString("MMM dd, yyyy, hh:mm tt");
+                            .ToString("MMM dd, yyyy, h:mm tt");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
