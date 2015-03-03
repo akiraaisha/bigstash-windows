@@ -417,6 +417,11 @@ namespace DeepfreezeApp
 
                         if (!isDirectoryRestricted)
                         {
+                            if (directories.Contains(p))
+                            {
+                                continue;
+                            }
+
                             directories.Add(p);
                         }
                         else
@@ -426,7 +431,14 @@ namespace DeepfreezeApp
                     }
                         
                     else
+                    {
+                        if (files.Contains(p))
+                        {
+                            continue;
+                        }
+
                         files.Add(p);
+                    }
                 }
 
                 // If the initial selection includes just one folder,
@@ -434,23 +446,71 @@ namespace DeepfreezeApp
                 if (directories.Count == 1 && files.Count == 0)
                     this.ArchiveTitle = new DirectoryInfo(directories.First()).Name;
 
-                var subDirectories = new Dictionary<string,string>();
+                // The directories list may contain subdirectories of some of its elements.
+                // We need to remove them because we need to add them later on in the subDirectories dictionary
+                // so we can get the correct grandparent value.
+                var dirsToRemove = new List<string>();
+                foreach (var dir in directories)
+                {
+                    var dirInfo = new DirectoryInfo(dir);
+                    var subDirs = dirInfo.GetDirectories().Select(x => x.FullName);
 
-                // Get all subdirectories under the 1st selected directory, again ignoring any junction points.
+                    foreach (var sub in subDirs)
+                    {
+                        if (directories.Contains(sub) && !dirsToRemove.Contains(sub))
+                        {
+                            dirsToRemove.Add(sub);
+                        }
+                    }
+
+                    dirInfo = null;
+                    subDirs = null;
+                }
+
+                foreach(var dirToRemove in dirsToRemove)
+                {
+                    directories.Remove(dirToRemove);
+                }
+
+                dirsToRemove.Clear();
+                dirsToRemove = null;
+
+                var subDirectories = new Dictionary<string, string>();
+                // Okay now find all the subdirectories to include respecting restrictions.
                 foreach (var dir in directories)
                 {
                     var subsWithoutJunctions = await IgnoreJunctionsUnderPath(dir);
 
                     foreach(var sub in subsWithoutJunctions.OrderBy(x => x))
                     {
+                        if (subDirectories.Keys.Contains(sub))
+                        {
+                            continue;
+                        }
+
+                        // for each subdirectory to include we create a key with the dir's parent as a value.
+                        // we will need this to find the prefix to remove for the key names.
                         subDirectories.Add(sub, Directory.GetParent(dir).FullName + "\\");
                     }
+
+                    subsWithoutJunctions.Clear();
+                    subsWithoutJunctions = null;
                 }
 
                 // add all found subdirectories in the directories list
                 // which will be scanned for files at the top level for each directory.
                 if (subDirectories.Count > 0)
-                    directories.AddRange(subDirectories.Keys);
+                {
+                    foreach(var sub in subDirectories.Keys)
+                    {
+                        if (directories.Contains(sub))
+                        {
+                            continue;
+                        }
+
+                        directories.Add(sub);
+                    }
+                }
 
                 // REMARK
                 // We want to handle directories first. The main reason behind this is that in search results
@@ -529,6 +589,9 @@ namespace DeepfreezeApp
                 {
                     directories.Remove(subDir);
                 }
+
+                subDirectories.Clear();
+                subDirectories = null;
 
                 // do the same for each individually selected files.
                 foreach (var f in files)
