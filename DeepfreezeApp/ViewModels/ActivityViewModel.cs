@@ -338,7 +338,7 @@ namespace DeepfreezeApp
                 this.HasNewNotifications = false;
             }
 
-            this.SetLastNotificationDate();
+            //this.SetLastNotificationDate();
         }
 
         /// <summary>
