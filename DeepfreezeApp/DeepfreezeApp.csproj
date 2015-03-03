@@ -192,6 +192,7 @@
     <Compile Include="Converters\DateToLocalToFriendlyFormattedString.cs" />
     <Compile Include="Converters\HyperLinkConverter.cs" />
     <Compile Include="Converters\RemoveHrefTagFromStringConverter.cs" />
+    <Compile Include="Interfaces\ICreateArchiveMessage.cs" />
     <Compile Include="Interfaces\IFetchNotificationsMessage.cs" />
     <Compile Include="Interfaces\IActivityViewModel.cs" />
     <Compile Include="Interfaces\IAboutViewModel.cs" />
@@ -203,6 +204,7 @@
     <Compile Include="Messages\CheckForUpdatesMessage.cs" />
     <Compile Include="Interfaces\ICheckForUpdateMessage.cs" />
     <Compile Include="Interfaces\IRestartNeededMessage.cs" />
+    <Compile Include="Messages\CreateArchiveMessage.cs" />
     <Compile Include="Messages\FetchNotificationsMessage.cs" />
     <Compile Include="Messages\RestartNeededMessage.cs" />
     <Compile Include="Messages\PauseAllMessage.cs" />
