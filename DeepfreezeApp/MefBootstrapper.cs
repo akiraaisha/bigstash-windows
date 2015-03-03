@@ -156,7 +156,7 @@ namespace DeepfreezeApp
                 // Catch with args and forward a message with them
                 if (e.Args.Length > 0)
                 {
-                    this.CatchAndForwardArgs(e.Args[0]);
+                    this.CatchAndForwardArgs(e.Args);
                 }
 
                 base.OnStartup(sender, e);
@@ -220,7 +220,7 @@ namespace DeepfreezeApp
             // Catch with args and forward a message with them
             if (e.Args.Length > 0)
             {
-                this.CatchAndForwardArgs(e.Args[0]);
+                this.CatchAndForwardArgs(e.Args);
             }
         }
 
@@ -233,11 +233,11 @@ namespace DeepfreezeApp
             application.StartupNextInstance += OnStartupNextInstance;
         }
 
-        private void CatchAndForwardArgs(string arg)
+        private void CatchAndForwardArgs(string[] args)
         {
             var eventAggregator = IoC.Get<IEventAggregator>();
             var startUpArgsMessage = IoC.Get<IStartUpArgsMessage>();
-            startUpArgsMessage.StartUpArgument = arg;
+            startUpArgsMessage.StartUpArguments = args;
             eventAggregator.PublishOnUIThread(startUpArgsMessage);
         }
 
