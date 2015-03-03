@@ -50,8 +50,6 @@ namespace DeepfreezeApp
 
         private Dictionary<string, Enumerations.FileCategory> _excludedFiles = new Dictionary<string, Enumerations.FileCategory>(StringComparer.OrdinalIgnoreCase);
 
-        private string _baseDirectory;
-
         private string _totalFilesToArchiveText;
         private string _totalFilesToExcludeText;
 
