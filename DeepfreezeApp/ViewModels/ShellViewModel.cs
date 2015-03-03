@@ -21,7 +21,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Screen>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
+        IHandle<INotificationMessage>, IHandleWithTask<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
     {
         #region fields
 
@@ -346,23 +346,11 @@ namespace DeepfreezeApp
         /// Handle StartUpArgsMessage
         /// </summary>
         /// <param name="message"></param>
-        public void Handle(IStartUpArgsMessage message)
+        public async Task Handle(IStartUpArgsMessage message)
         {
             if (message != null)
             {
-                switch(message.StartUpArgument)
-                {
-                    case "minimized":
-                        
-                        _shellWindow.WindowState = WindowState.Minimized;
-                        _shellWindow.ShowInTaskbar = false;
-                        break;
-                    default:
-                        
-                        _shellWindow.WindowState = WindowState.Normal;
-                        _shellWindow.ShowInTaskbar = true;
-                        break;
-                }
+                await this.WorkOnStartUpArgsAsync(message.StartUpArguments).ConfigureAwait(false);
             }
         }
 
@@ -809,6 +797,119 @@ namespace DeepfreezeApp
             {
                 _log.Error("Settings migration failed. Default settings will be used if the next instance is an update.");
                 return null;
+            }
+        }
+
+        private async Task WorkOnStartUpArgsAsync(string[] startUpArgs)
+        {
+            if (startUpArgs.Length == 0)
+            {
+                return;
+            }
+
+            _log.Debug("StarUp arguments arrived.");
+
+            var args = startUpArgs.ToList();
+
+            // Check for minimized argument.
+            if (args.Contains("-m"))
+            {
+                _log.Debug("Got Argument: minimized");
+
+                _shellWindow.WindowState = WindowState.Minimized;
+                _shellWindow.ShowInTaskbar = false;
+            }
+            else
+            {
+                _shellWindow.WindowState = WindowState.Normal;
+                _shellWindow.ShowInTaskbar = true;
+            }
+
+            // Check for -u argument. If it's followed by --fromfile,
+            // then the 2nd next argument should be the path of a file
+            // containing all selected file paths. Else, the next argument
+            // should be string containing at least one path in its value,
+            // delimited by the character '|'.
+            if (args.Contains("-u"))
+            {
+                _log.Debug("Got Argument: -u");
+
+                var indexOfU = args.IndexOf("-u");
+
+                IList<string> paths;
+
+                // If the next argument is --fromfile, then the following path is the path of the file
+                // containing all paths from the user's selection.
+                if (args[indexOfU + 1] == "--fromfile")
+                {
+                    var selectionFile = args[indexOfU + 2];
+
+                    _log.Debug("Got Argument: --fromfile '" + selectionFile +"'");
+
+                    if (!File.Exists(selectionFile))
+                    {
+                        MessageBox.Show("Could not get the files you selected to include in the archive.");
+                        return;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var res = await Utilities.ReadPathsFromSelectionFileAsync(selectionFile).ConfigureAwait(false);
+                            paths = res.ToList();
+
+                            _log.Debug("Successfully read paths from file.");
+
+                            File.Delete(selectionFile);
+                            _log.Debug("Deleted file: '" + selectionFile + "'");
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    _log.Debug("Got Argument: -u (without --fromfile");
+
+                    try
+                    {
+                        var pathsArg = args[indexOfU + 1];
+
+                        if (String.IsNullOrEmpty(pathsArg))
+                        {
+                            throw new IndexOutOfRangeException("Paths argument was null or empty.");
+                        }
+
+                        paths = new List<string>();
+                        foreach (var path in pathsArg.Split('|'))
+                        {
+                            paths.Add(path);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
+                        if (e is IndexOutOfRangeException)
+                        {
+                            MessageBox.Show("You didn't select any files to archive.");
+                        }
+
+                        return;
+                    }
+                }
+
+                while(this.ArchiveVM == null || !this.ArchiveVM.IsActive)
+                {
+                    await Task.Delay(500).ConfigureAwait(false);
+                }
+
+                var createArchiveMessage = IoC.Get<ICreateArchiveMessage>();
+                createArchiveMessage.Paths = paths.AsEnumerable();
+                await this._eventAggregator.PublishOnUIThreadAsync(createArchiveMessage);
             }
         }
 
