@@ -291,7 +291,7 @@ namespace DeepfreezeSDK
         {
             _log.Debug("Called GetArchiveAsync with parameter url = \"" + url + "\".");
 
-            var request = CreateHttpRequestWithSignature(GET, url);
+            var request = CreateHttpRequestWithSignature(GET, url, false);
             HttpResponseMessage response;
 
             try
