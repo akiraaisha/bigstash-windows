@@ -98,7 +98,7 @@ namespace DeepfreezeApp
 
             if (this.RunOnStartup)
             {
-                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " minimized");
+                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " -m");
             }
             else
             {
@@ -139,7 +139,17 @@ namespace DeepfreezeApp
             Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             Assembly curAssembly = Assembly.GetExecutingAssembly();
 
-            this.RunOnStartup = (registryKey.GetValue(curAssembly.GetName().Name) != null);
+            var key = (string)registryKey.GetValue(curAssembly.GetName().Name);
+            this.RunOnStartup = (key != null);
+
+            // Check if the registry key points to the current assembly's location.
+            // We need to do this in order to update the key in cases it's an updated version,
+            // so the key needs to be updated.
+            if (this.RunOnStartup &&
+                !key.Contains(curAssembly.Location))
+            {
+                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " -m");
+            }
 
             if (Properties.Settings.Default.VerboseDebugLogging)
             {
