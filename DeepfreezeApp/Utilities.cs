@@ -318,6 +318,41 @@ namespace DeepfreezeApp
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Reads the lines of the selection file saved under %LOCALAPPDATA%\BigStash as selectionfile.txt,
+        /// which was created when the user used the Shell Context Menu Extension "Stash away".
+        /// This file contains all the paths the user selected, one at each line. So, simply reading the lines
+        /// shoud suffice.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<string>> ReadPathsFromSelectionFileAsync(string path)
+        {
+            IList<string> paths = new List<string>();
+
+            try
+            {
+                using (var sr = new StreamReader(path))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        var line = await sr.ReadLineAsync();
+
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            paths.Add(line);
+                        }
+                    }
+                }
+
+                return paths;
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.
