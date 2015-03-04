@@ -27,7 +27,6 @@ namespace DeepfreezeApp
 
         private bool _isOpen;
         private string _errorMessage;
-        private bool _runOnStartup;
 
         #endregion
 
@@ -61,8 +60,14 @@ namespace DeepfreezeApp
 
         public bool RunOnStartup
         {
-            get { return this._runOnStartup; }
-            set { this._runOnStartup = value; NotifyOfPropertyChange(() => this.RunOnStartup); }
+            get { return Properties.Settings.Default.RunOnStartup; }
+            set
+            {
+                Properties.Settings.Default.RunOnStartup = value;
+                Properties.Settings.Default.Save();
+                NotifyOfPropertyChange(() => this.RunOnStartup);
+                this.FlipRunOnStartup();
+            }
         }
 
         public bool MinimizeOnClose
@@ -84,31 +89,30 @@ namespace DeepfreezeApp
                 Properties.Settings.Default.VerboseDebugLogging = value;
                 Properties.Settings.Default.Save(); 
                 NotifyOfPropertyChange(() => this.VerboseDebugLogging);
-                FlipVerboseDebugLogging();
+                this.FlipVerboseDebugLogging();
             }
         }
-        #endregion
-
-        #region methods
-
-        public void RunOnStartupChanged()
-        {
-            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            Assembly curAssembly = Assembly.GetExecutingAssembly();
-
-            if (this.RunOnStartup)
-            {
-                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " -m");
-            }
-            else
-            {
-                registryKey.DeleteValue(curAssembly.GetName().Name, false);
-            }
-        }
-
         #endregion
 
         #region private_methods
+
+        private void FlipRunOnStartup()
+        {
+            using(var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                var curAssembly = Assembly.GetExecutingAssembly();
+                var installDirName = SquirrelHelper.GetRootAppDirectoryName();
+
+                if (this.RunOnStartup)
+                {
+                    registryKey.SetValue(installDirName, curAssembly.Location + " -m");
+                }
+                else
+                {
+                    registryKey.DeleteValue(installDirName, false);
+                }
+            }
+        }
 
         private void FlipVerboseDebugLogging()
         {
@@ -130,39 +134,50 @@ namespace DeepfreezeApp
             _log.Warn("Changed minimum logging level to " + debugMode + ".");
         }
 
+        private void TryUpdateRunOnStartupKey()
+        {
+            try
+            {
+                using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+                {
+                    Assembly curAssembly = Assembly.GetExecutingAssembly();
+
+                    var runOnStartupValue = (string)registryKey.GetValue(curAssembly.GetName().Name);
+
+                    if (String.IsNullOrEmpty(runOnStartupValue))
+                    {
+                        return;
+                    }
+
+                    // It seems the legacy DeepfreezeApp variable name under the Run key exists.
+                    // Remove it and write a new one.
+
+                    registryKey.DeleteValue(curAssembly.GetName().Name);
+
+                    this.RunOnStartup = true;
+                }
+            }
+            catch(Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
+                this.RunOnStartup = false;
+                this.FlipRunOnStartup();
+            }
+        }
+
         #endregion
 
         #region events
 
         protected override void OnActivate()
         {
-            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            Assembly curAssembly = Assembly.GetExecutingAssembly();
-
-            var key = (string)registryKey.GetValue(curAssembly.GetName().Name);
-            this.RunOnStartup = (key != null);
-
-            // Check if the registry key points to the current assembly's location.
-            // We need to do this in order to update the key in cases it's an updated version,
-            // so the key needs to be updated.
-            if (this.RunOnStartup &&
-                String.Compare(key, curAssembly.Location) < 0)
-            {
-                registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " -m");
-            }
+            this.TryUpdateRunOnStartupKey();
 
             if (Properties.Settings.Default.VerboseDebugLogging)
             {
                 this.FlipVerboseDebugLogging();
             }
-            
-            // After the first ever login, set MinimizeOnClose to true.
-            // Future login actions will simply ignore this.
-            //if (Properties.Settings.Default.IsFirstLogin)
-            //{
-            //    Properties.Settings.Default.IsFirstLogin = false;
-            //    this.MinimizeOnClose = true;
-            //}
 
             this.ActivateItem(this.UserVM);
 
