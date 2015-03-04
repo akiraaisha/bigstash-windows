@@ -191,8 +191,16 @@ namespace DeepfreezeApp
             using (var mgr = new UpdateManager(updateLocation, appName, FrameworkVersion.Net45))
             {
                 SquirrelAwareApp.HandleEvents(
-                    onInitialInstall: v => mgr.CreateShortcutForThisExe(),
-                    onAppUpdate: v => mgr.CreateShortcutForThisExe(),
+                    onInitialInstall: v => 
+                        {
+                            mgr.CreateShortcutForThisExe();
+                            CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
+                        },
+                    onAppUpdate: v => 
+                        {
+                            mgr.CreateShortcutForThisExe();
+                            CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
+                        },
                     onAppUninstall: v =>
                         {
                             mgr.RemoveShortcutForThisExe();
@@ -209,10 +217,21 @@ namespace DeepfreezeApp
         /// we need them to be ready upon installing. These include:
         /// Shell Extensions
         /// </summary>
-        private static void CreateCustomRegistryEntries()
+        private static void CreateOrUpdateCustomRegistryEntries(string rootAppDirectory)
         {
-            // TODO
-            // Add code to add shell extension registration.
+            System.Reflection.Assembly curAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+            var latestVerionPath = Directory.GetFiles(rootAppDirectory, "DeepfreezeApp.exe", SearchOption.TopDirectoryOnly)
+                .OrderByDescending(x => x)
+                .FirstOrDefault();
+
+            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
+            {
+                using(var bigstashKey = registryKey.CreateSubKey(curAssembly.FullName))
+                {
+                    bigstashKey.SetValue("LatestVersionInstallPath", latestVerionPath);
+                }
+            }
         }
 
         /// <summary>
@@ -223,15 +242,19 @@ namespace DeepfreezeApp
         /// </summary>
         private static void RemoveCustomRegistryEntries()
         {
-            // Remove run at startup entry
-            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             System.Reflection.Assembly curAssembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            // delete if it exists.
-            registryKey.DeleteValue(curAssembly.GetName().Name, false);
-
-            // TODO
-            // Add code to remove shell extension registration as well.
+            // Remove run at startup entry
+            using(var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                registryKey.DeleteValue(curAssembly.GetName().Name, false);
+            }
+            
+            // remove Software\<BigStash_Name> key.
+            using(var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
+            {
+                registryKey.DeleteSubKey(curAssembly.FullName);
+            }
         }
 
         /// <summary>
