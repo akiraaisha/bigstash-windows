@@ -29,7 +29,6 @@
                       Content="Run on Windows startup" 
                       Margin="5 5 0 0"
                       FontSize="14"
-                      cal:Message.Attach="RunOnStartupChanged"
                       />
             
             <CheckBox x:Name="MinimizeOnClose" 
