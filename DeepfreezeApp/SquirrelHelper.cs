@@ -227,10 +227,15 @@ namespace DeepfreezeApp
 
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
-                using(var bigstashKey = registryKey.CreateSubKey(curAssembly.FullName))
+                using (var bigstashKey = registryKey.CreateSubKey(curAssembly.GetName().Name))
                 {
                     bigstashKey.SetValue("LatestVersionInstallPath", latestVerionPath);
                 }
+            }
+
+            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Unistall", true))
+            {
+                registryKey.DeleteValue(curAssembly.GetName().Name, false);
             }
         }
 
@@ -253,7 +258,7 @@ namespace DeepfreezeApp
             // remove Software\<BigStash_Name> key.
             using(var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
-                registryKey.DeleteSubKey(curAssembly.FullName);
+                registryKey.DeleteSubKey(curAssembly.GetName().Name);
             }
         }
 
