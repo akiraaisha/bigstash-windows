@@ -146,7 +146,7 @@ namespace DeepfreezeApp
             // We need to do this in order to update the key in cases it's an updated version,
             // so the key needs to be updated.
             if (this.RunOnStartup &&
-                !key.Contains(curAssembly.Location))
+                String.Compare(key, curAssembly.Location) < 0)
             {
                 registryKey.SetValue(curAssembly.GetName().Name, curAssembly.Location + " -m");
             }
