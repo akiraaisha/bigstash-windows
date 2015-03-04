@@ -441,10 +441,14 @@ namespace DeepfreezeApp
                 var curAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
                 var startupValue = (string)registryKey.GetValue(curAssemblyName);
 
-                // If the name DeepfreezeApp exists then update its value to latestVersionPath.
+                // If the name DeepfreezeApp exists then delete that key
+                // since its how it was used in older versions (<= 1.4.1.5)
+                // and create a new one with root app directory as its name
+                // and latestVersionPath as its value.
                 if (!String.IsNullOrEmpty(startupValue))
                 {
-                    registryKey.SetValue(curAssemblyName, latestVerionPath);
+                    // delete the old value
+                    registryKey.DeleteValue(curAssemblyName, false);
 
                     // Also, update the relevant app setting.
                     Properties.Settings.Default.RunOnStartup = true;
@@ -455,6 +459,15 @@ namespace DeepfreezeApp
                 }
 
                 Properties.Settings.Default.Save();
+
+                // What happens if the above has already been done in a previous update?
+                // Then we need to just check the app setting and if it's true
+                // then update the value with latestVersionPath.
+
+                if (Properties.Settings.Default.RunOnStartup)
+                {
+                    registryKey.SetValue(installDirName, latestVerionPath);
+                }
             }
         }
 
@@ -466,9 +479,15 @@ namespace DeepfreezeApp
         /// </summary>
         private static void RemoveCustomRegistryEntries(string rootAppDirectory)
         {
+            // Get the name of the install path
+            var installDirName = new DirectoryInfo(rootAppDirectory).Name;
+
             // Remove run at startup entry
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
             {
+                registryKey.DeleteValue(installDirName, false);
+
+                // Also try removing the legacy key.
                 var curAssemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
                 registryKey.DeleteValue(curAssemblyName, false);
             }
@@ -476,7 +495,7 @@ namespace DeepfreezeApp
             // remove Software\<BigStash_Name> key.
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
-                registryKey.DeleteSubKey(new DirectoryInfo(rootAppDirectory).Name, false);
+                registryKey.DeleteSubKey(installDirName, false);
             }
         }
 
