@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutButtonTooltip" xml:space="preserve">
-    <value>About BigStash for Windows</value>
+    <value>About BigStash</value>
     <comment>Used for about button tooltip</comment>
   </data>
   <data name="AboutHeader" xml:space="preserve">

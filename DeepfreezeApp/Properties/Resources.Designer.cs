@@ -61,7 +61,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About BigStash for Windows.
+        ///   Looks up a localized string similar to About BigStash.
         /// </summary>
         internal static string AboutButtonTooltip {
             get {
