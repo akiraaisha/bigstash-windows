@@ -67,11 +67,11 @@ namespace DeepfreezeApp
         public bool IsBusy
         {
             get { return this._isBusy; }
-            set 
-            { 
-                this._isBusy = value; 
+            set
+            {
+                this._isBusy = value;
                 NotifyOfPropertyChange(() => IsBusy);
-                NotifyOfPropertyChange(() => ShowCheckForUpdate); 
+                NotifyOfPropertyChange(() => ShowCheckForUpdate);
             }
         }
 
@@ -84,9 +84,9 @@ namespace DeepfreezeApp
         public bool RestartNeeded
         {
             get { return this._restartNeeded; }
-            set 
-            { 
-                this._restartNeeded = value; 
+            set
+            {
+                this._restartNeeded = value;
                 NotifyOfPropertyChange(() => RestartNeeded);
                 NotifyOfPropertyChange(() => ShowCheckForUpdate);
             }
@@ -136,14 +136,14 @@ namespace DeepfreezeApp
         { get { return Properties.Resources.CheckForUpdateText; } }
 
         public string CheckForUpdateTooltip
-        { 
-            get 
+        {
+            get
             {
                 if (this.IsInternetConnected)
                     return Properties.Resources.CheckForUpdateEnabledTooltipText;
                 else
                     return Properties.Resources.CheckForUpdateDisabledTooltipText;
-            } 
+            }
         }
 
         public bool ShowCheckForUpdate
@@ -286,6 +286,34 @@ namespace DeepfreezeApp
                 var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
                 var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
 
+                // Check if older releases were fetched for installing.
+                // This is happens when the running instance has a more recent version
+                // than the one reported in the remote RELEASES file.
+                // If this is the case, then we remove the older entries from ReleasesToApply
+                // and continue with installing only if the list is not empty (it contains newer versions).
+                if (hasUpdates)
+                {
+                    var releasesToRemove = new List<Squirrel.ReleaseEntry>();
+
+                    foreach (var release in updateInfo.ReleasesToApply.ToList())
+                    {
+                        if (String.Compare(updateInfo.CurrentlyInstalledVersion.ToString(), release.Version.ToString()) >= 0)
+                        {
+                            releasesToRemove.Add(release);
+                        }
+                    }
+
+                    foreach (var releaseToRemove in releasesToRemove)
+                    {
+                        updateInfo.ReleasesToApply.Remove(releaseToRemove);
+                    }
+
+                    hasUpdates = updateInfo.ReleasesToApply.Count > 0;
+
+                    releasesToRemove.Clear();
+                    releasesToRemove = null;
+                }
+
                 if (!hasUpdates)
                 {
                     // no updates found, update the UI and return
@@ -299,11 +327,11 @@ namespace DeepfreezeApp
 
                 // Update found, continue with download
                 this.UpdateMessage = Properties.Resources.DowloadingUpdateText;
-                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply);
+                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply).ConfigureAwait(false);
 
                 // Update donwload finished, continue with install
                 this.UpdateMessage = Properties.Resources.InstallingUpdateText;
-                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
+                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo).ConfigureAwait(false);
 
                 Properties.Settings.Default.SettingsUpgradeRequired = true;
                 Properties.Settings.Default.Save();
