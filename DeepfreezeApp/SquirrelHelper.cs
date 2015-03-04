@@ -211,8 +211,7 @@ namespace DeepfreezeApp
                         RemoveCustomRegistryEntries(mgr.RootAppDirectory);
                         StopBigStashOnUninstall();
                         CallBatchDelete(mgr.RootAppDirectory);
-                    }
-                        );
+                    });
             }
         }
 
@@ -435,6 +434,28 @@ namespace DeepfreezeApp
                     }
                 }
             }
+
+            // Open HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                var curAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                var startupValue = (string)registryKey.GetValue(curAssemblyName);
+
+                // If the name DeepfreezeApp exists then update its value to latestVersionPath.
+                if (!String.IsNullOrEmpty(startupValue))
+                {
+                    registryKey.SetValue(curAssemblyName, latestVerionPath);
+
+                    // Also, update the relevant app setting.
+                    Properties.Settings.Default.RunOnStartup = true;
+                }
+                else
+                {
+                    Properties.Settings.Default.RunOnStartup = false;
+                }
+
+                Properties.Settings.Default.Save();
+            }
         }
 
         /// <summary>
@@ -445,18 +466,17 @@ namespace DeepfreezeApp
         /// </summary>
         private static void RemoveCustomRegistryEntries(string rootAppDirectory)
         {
-            System.Reflection.Assembly curAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-
             // Remove run at startup entry
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
             {
-                registryKey.DeleteValue(curAssembly.GetName().Name, false);
+                var curAssemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+                registryKey.DeleteValue(curAssemblyName, false);
             }
 
             // remove Software\<BigStash_Name> key.
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
-                registryKey.DeleteSubKey(new DirectoryInfo(rootAppDirectory).Name);
+                registryKey.DeleteSubKey(new DirectoryInfo(rootAppDirectory).Name, false);
             }
         }
 
