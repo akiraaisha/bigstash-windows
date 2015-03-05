@@ -1,12 +1,83 @@
 HKCU
 {
-	NoRemove CLSID
+	NoRemove Software
 	{
-		ForceRemove {070FB75B-3783-4FA1-9065-F967737DD790} = s 'BigStashContextMenuExt Class'
+		NoRemove Classes
 		{
-			InprocServer32 = s '%MODULE%'
+			NoRemove CLSID
 			{
-				val ThreadingModel = s 'Apartment'
+				ForceRemove {070FB75B-3783-4FA1-9065-F967737DD790} = s 'FileContextMenuExt Class'
+				{
+					InprocServer32 = s '%MODULE%'
+					{
+						val ThreadingModel = s 'Apartment'
+					}
+				}
+			}
+			NoRemove *
+			{
+				NoRemove shellex
+				{
+					NoRemove ContextMenuHandlers
+					{
+						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						{
+							val Position = s 'Top'
+						}
+					}
+				}
+			}
+			NoRemove lnkfile
+			{
+				NoRemove shellex
+				{
+					NoRemove ContextMenuHandlers
+					{
+						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						{
+							val Position = s 'Top'
+						}
+					}
+				}
+			}
+			NoRemove Directory
+			{
+				NoRemove shellex
+				{
+					NoRemove ContextMenuHandlers
+					{
+						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						{
+							val Position = s 'Top'
+						}
+					}
+				}
+			}
+			NoRemove Drive
+			{
+				NoRemove shellex
+				{
+					NoRemove ContextMenuHandlers
+					{
+						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						{
+							val Position = s 'Top'
+						}
+					}
+				}
+			}
+			NoRemove Folder
+			{
+				NoRemove shellex
+				{
+					NoRemove ContextMenuHandlers
+					{
+						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						{
+							val Position = s 'Top'
+						}
+					}
+				}
 			}
 		}
 	}
