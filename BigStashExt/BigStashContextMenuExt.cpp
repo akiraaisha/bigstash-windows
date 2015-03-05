@@ -3,6 +3,9 @@
 #include "stdafx.h"
 #include "BigStashContextMenuExt.h"
 
+#define IDM_STASH            0        // The command's identifier offset.  
+#define VERB_STASHA        "Stash"    // The command's ANSI verb string 
+#define VERB_STASHW        L"Stash"   // The command's Unicode verb string 
 
 // CBigStashContextMenuExt
 
