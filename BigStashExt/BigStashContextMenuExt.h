@@ -28,6 +28,8 @@ class ATL_NO_VTABLE CBigStashContextMenuExt :
 public:
 	CBigStashContextMenuExt()
 	{
+		m_hRegBmp = LoadBitmap(_AtlBaseModule.GetModuleInstance(),
+			MAKEINTRESOURCE(IDB_BITMAP1));
 	}
 
 DECLARE_REGISTRY_RESOURCEID(IDR_BIGSTASHCONTEXTMENUEXT)
