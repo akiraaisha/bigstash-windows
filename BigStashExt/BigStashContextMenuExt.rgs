@@ -1,4 +1,4 @@
-HKCR
+HKCU
 {
 	NoRemove CLSID
 	{
@@ -8,8 +8,6 @@ HKCR
 			{
 				val ThreadingModel = s 'Apartment'
 			}
-			TypeLib = s '{06FD2AA3-4C3F-4722-BE95-758317E5D86B}'
-			Version = s '1.0'
 		}
 	}
 }
