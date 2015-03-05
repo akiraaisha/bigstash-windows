@@ -9,10 +9,12 @@
 #define VERB_STASHA        "Stash"    // The command's ANSI verb string 
 #define VERB_STASHW        L"Stash"   // The command's Unicode verb string 
 
-// CBigStashContextMenuExt
+///////////////////////////////////////////////////////////////////////////// 
+// CBigStashContextMenuExt IShellExtInit methods. 
+//  
 
 // 
-//   FUNCTION: CFileContextMenuExt::Initialize(LPCITEMIDLIST, LPDATAOBJECT,  
+//   FUNCTION: CBigStashContextMenuExt::Initialize(LPCITEMIDLIST, LPDATAOBJECT,  
 //             HKEY) 
 // 
 //   PURPOSE: Initializes the context menu extension. 
@@ -68,8 +70,51 @@ IFACEMETHODIMP CBigStashContextMenuExt::Initialize(
 }
 
 
+///////////////////////////////////////////////////////////////////////////// 
+// CBigStashContextMenuExt IContextMenu methods. 
+//  
+
 // 
-//   FUNCTION: CFileContextMenuExt::OnStashClick(HWND) 
+//   FUNCTION: CBigStashContextMenuExt::QueryContextMenu(HMENU, UINT, UINT, UINT,  
+//             UINT) 
+// 
+//   PURPOSE: The Shell calls IContextMenu::QueryContextMenu to allow the  
+//            context menu handler to add its menu items to the menu. It  
+//            passes in the HMENU handle in the hmenu parameter. The  
+//            indexMenu parameter is set to the index to be used for the  
+//            first menu item that is to be added. 
+// 
+IFACEMETHODIMP CBigStashContextMenuExt::QueryContextMenu(
+	HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT uFlags)
+{
+	// If uFlags include CMF_DEFAULTONLY then we should not do anything.
+	if (CMF_DEFAULTONLY & uFlags)
+	{
+		return MAKE_HRESULT(SEVERITY_SUCCESS, 0, USHORT(0));
+	}
+
+	// If uFlags include CMF_VERBSONLY then we should not do anything. (shortcut target)
+	if (CMF_VERBSONLY  & uFlags)
+	{
+		return MAKE_HRESULT(SEVERITY_SUCCESS, 0, USHORT(0));
+	}
+
+	// Use either InsertMenu or InsertMenuItem to add menu items to the list.
+	InsertMenu(hMenu, indexMenu, MF_STRING | MF_BYPOSITION, idCmdFirst +
+		IDM_STASH, _T("&Stash away"));
+
+	// Set the bitmap for the register item.
+	if (NULL != m_hRegBmp)
+		SetMenuItemBitmaps(hMenu, indexMenu, MF_BITMAP | MF_BYPOSITION, m_hRegBmp, NULL);
+
+	// Return an HRESULT value with the severity set to SEVERITY_SUCCESS.
+	// Set the code value to the offset of the largest command identifier
+	// that was assigned, plus one (1).
+	return MAKE_HRESULT(SEVERITY_SUCCESS, 0, USHORT(IDM_STASH + 1));
+}
+
+// 
+//   FUNCTION: CBigStashContextMenuExt::OnStashClick(HWND) 
 // 
 //   PURPOSE: OnStashClick handles the "Stash" verb of the shell extension. 
 // 
