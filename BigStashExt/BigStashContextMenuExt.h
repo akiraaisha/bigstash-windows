@@ -2,7 +2,8 @@
 
 #pragma once
 #include "resource.h"       // main symbols
-
+#include <string>
+#include <vector>
 
 
 #include "BigStashExt_i.h"
@@ -49,6 +50,8 @@ END_COM_MAP()
 
 	void FinalRelease()
 	{
+		if (NULL != m_hRegBmp)
+			DeleteObject(m_hRegBmp);
 	}
 
 public:
@@ -61,6 +64,22 @@ public:
 	IFACEMETHODIMP InvokeCommand(LPCMINVOKECOMMANDINFO);
 	IFACEMETHODIMP QueryContextMenu(HMENU, UINT, UINT, UINT, UINT);
 
+protected:
+
+	// The name of the first selected file
+	TCHAR m_szFileName[MAX_PATH];
+
+	// The bitmap to show next to the menu entry
+	HBITMAP     m_hRegBmp;
+
+	// A vector of wstrings holding the paths of the selected files
+	std::vector<std::wstring> m_pathnames;
+
+	// The function that handles the "Stash away" Verb
+	void OnStashClick(HWND hWnd);
+
+	// The function that handles the application execution.
+	size_t ExecuteProcess(std::wstring fullPathToExe, std::wstring parameters, size_t secondsToWait);
 
 };
 
