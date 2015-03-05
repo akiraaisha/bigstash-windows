@@ -175,6 +175,107 @@ IFACEMETHODIMP CBigStashContextMenuExt::GetCommandString(
 
 
 // 
+//   FUNCTION: CBigStashContextMenuExt::InvokeCommand(LPCMINVOKECOMMANDINFO) 
+// 
+//   PURPOSE: This method is called when a user clicks a menu item to tell  
+//            the handler to run the associated command. The lpcmi parameter  
+//            points to a structure that contains the needed information. 
+// 
+IFACEMETHODIMP CBigStashContextMenuExt::InvokeCommand(LPCMINVOKECOMMANDINFO lpcmi)
+{
+	BOOL fEx = FALSE;
+	BOOL fUnicode = FALSE;
+
+	// Determines which structure is being passed in, CMINVOKECOMMANDINFO or  
+	// CMINVOKECOMMANDINFOEX based on the cbSize member of lpcmi. Although  
+	// the lpcmi parameter is declared in Shlobj.h as a CMINVOKECOMMANDINFO  
+	// structure, in practice it often points to a CMINVOKECOMMANDINFOEX  
+	// structure. This struct is an extended version of CMINVOKECOMMANDINFO  
+	// and has additional members that allow Unicode strings to be passed. 
+	if (lpcmi->cbSize == sizeof(CMINVOKECOMMANDINFOEX))
+	{
+		fEx = TRUE;
+		if ((lpcmi->fMask & CMIC_MASK_UNICODE))
+		{
+			fUnicode = TRUE;
+		}
+	}
+
+	// Determines whether the command is identified by its offset or verb. 
+	// There are two ways to identify commands: 
+	//   1) The command's verb string  
+	//   2) The command's identifier offset 
+	// If the high-order word of lpcmi->lpVerb (for the ANSI case) or  
+	// lpcmi->lpVerbW (for the Unicode case) is nonzero, lpVerb or lpVerbW  
+	// holds a verb string. If the high-order word is zero, the command  
+	// offset is in the low-order word of lpcmi->lpVerb. 
+
+	// For the ANSI case, if the high-order word is not zero, the command's
+	// verb string is in lpcmi->lpVerb.
+	if (!fUnicode && HIWORD(lpcmi->lpVerb))
+	{
+		// Is the verb supported by this context menu extension?
+		if (StrCmpIA(lpcmi->lpVerb, VERB_STASHA) == 0)
+		{
+			OnStashClick(lpcmi->hwnd);
+		}
+		else
+		{
+			// If the verb is not recognized by the context menu handler, it
+			// must return E_FAIL to allow it to be passed on to the other
+			// context menu handlers that might implement that verb.
+			return E_FAIL;
+		}
+	}
+
+	// For the Unicode case, if the high-order word is not zero, the
+	// command's verb string is in lpcmi->lpVerbW.
+	else if (fUnicode && HIWORD(((CMINVOKECOMMANDINFOEX*)lpcmi)->lpVerbW))
+	{
+		// Is the verb supported by this context menu extension?
+		if (StrCmpIW(((CMINVOKECOMMANDINFOEX*)lpcmi)->lpVerbW,
+			VERB_STASHW) == 0)
+		{
+			OnStashClick(lpcmi->hwnd);
+		}
+		else
+		{
+			// If the verb is not recognized by the context menu handler, it
+			// must return E_FAIL to allow it to be passed to the other
+			// context menu handlers that might implement that verb.
+			return E_FAIL;
+		}
+	}
+
+	// If the command cannot be identified through the verb string, then  
+	// check the identifier offset. 
+	else
+	{
+		// Is the command identifier offset supported by this context menu  
+		// extension? 
+		if (LOWORD(lpcmi->lpVerb) == IDM_STASH)
+		{
+			OnStashClick(lpcmi->hwnd);
+		}
+		else
+		{
+			// If the verb is not recognized by the context menu handler, it  
+			// must return E_FAIL to allow it to be passed on to the other  
+			// context menu handlers that might implement that verb. 
+			return E_FAIL;
+		}
+	}
+
+	return S_OK;
+}
+
+
+///////////////////////////////////////////////////////////////////////////// 
+// CBigStashContextMenuExt methods 
+// (exluding the ones from implemented interfaces.
+//
+
+// 
 //   FUNCTION: CBigStashContextMenuExt::OnStashClick(HWND) 
 // 
 //   PURPOSE: OnStashClick handles the "Stash" verb of the shell extension. 
@@ -239,9 +340,6 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////// 
-// Some helper methods
-//
 
 //
 //   FUNCTION CBigStashContextMenuExt::ExecuteProcess(std::wstring, std::wstring, size_t)
@@ -313,6 +411,11 @@ size_t CBigStashContextMenuExt::ExecuteProcess(std::wstring fullPathToExe, std::
 
 	return iReturnVal;
 }
+
+
+///////////////////////////////////////////////////////////////////////////// 
+// Some helper methods
+//
 
 std::string to_utf8(const wchar_t* buffer, int len)
 {
