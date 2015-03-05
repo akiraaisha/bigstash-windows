@@ -410,11 +410,15 @@ namespace DeepfreezeApp
             // open HKCU\Software
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software", true))
             {
-                // Create or Open HKCU\SOFTWARE\<installDirName>
-                using (var bigstashKey = registryKey.CreateSubKey(installDirName))
+                // Create or Open HKCU\SOFTWARE\BigStash
+                using (var bigstashKey = registryKey.CreateSubKey("BigStash"))
                 {
-                    // Set name/value pair to hold latest version executable's path.
-                    bigstashKey.SetValue("LatestVersionPath", latestVerionPath);
+                    // Create or Open HKCU\SOFTWARE\BigStash\<installDirName>
+                    using (var installKey = bigstashKey.CreateSubKey(installDirName))
+                    {
+                        // Set name/value pair to hold latest version executable's path.
+                        installKey.SetValue("LatestVersionPath", latestVerionPath);
+                    }
                 }
             }
 
@@ -492,8 +496,8 @@ namespace DeepfreezeApp
                 registryKey.DeleteValue(curAssemblyName, false);
             }
 
-            // remove Software\<BigStash_Name> key.
-            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
+            // remove Software\BigStash\<BigStash_Name> key.
+            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\BigStash", true))
             {
                 registryKey.DeleteSubKey(installDirName, false);
             }
