@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Thu Mar 05 15:57:22 2015
+/* at Thu Mar 05 16:49:11 2015
  */
 /* Compiler settings for BigStashExt.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 

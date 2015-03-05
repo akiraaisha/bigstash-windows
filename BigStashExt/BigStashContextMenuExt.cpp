@@ -8,6 +8,7 @@
 #define IDM_STASH            0        // The command's identifier offset.  
 #define VERB_STASHA        "Stash"    // The command's ANSI verb string 
 #define VERB_STASHW        L"Stash"   // The command's Unicode verb string 
+#define KEY_LATEST_VERSION_PATH L"LatestVersionPath"
 
 ///////////////////////////////////////////////////////////////////////////// 
 // CBigStashContextMenuExt IShellExtInit methods. 
@@ -373,7 +374,38 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 		si.cb = sizeof(si);
 		ZeroMemory(&pi, sizeof(pi));
 
+		// Let's find out the path of the executable we want to run.
+		CRegKey reg;
+		LONG    lRet;
+
+		lRet = reg.Open(HKEY_CURRENT_USER,
+			_T("Software\\BigStash\\BigStashWindows"),
+			KEY_READ);
+
+		if (ERROR_SUCCESS != lRet)
+		{
+			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Registry access denied.", 
+				_T("BigStashExt"), MB_ICONERROR);
+			return;
+		}
+
+		// The size of the value should fit in a buffer of size MAX_PATH = 260
+		// since this is the max allowed path length in Windows.
+		TCHAR valueName[MAX_PATH];
+		ULONG length = MAX_PATH;
+
+		lRet = reg.QueryStringValue(KEY_LATEST_VERSION_PATH, valueName, &length);
+
+		if (ERROR_SUCCESS != lRet)
+		{
+			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Registry string value not valid.", _T("BigStashExt"),
+				MB_ICONERROR);
+			return;
+		}
+		
+
 		// Call BigStash app here.
+		ExecuteProcess(valueName, L"-u --fromfile \"" + selectionFilePath + L"\"", 1);
 	}
 }
 
