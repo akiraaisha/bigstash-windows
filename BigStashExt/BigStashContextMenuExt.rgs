@@ -6,7 +6,7 @@ HKCU
 		{
 			NoRemove CLSID
 			{
-				ForceRemove {070FB75B-3783-4FA1-9065-F967737DD790} = s 'FileContextMenuExt Class'
+				ForceRemove {070FB75B-3783-4FA1-9065-F967737DD790} = s 'BigStashContextMenuExt Class'
 				{
 					InprocServer32 = s '%MODULE%'
 					{
@@ -20,7 +20,7 @@ HKCU
 				{
 					NoRemove ContextMenuHandlers
 					{
-						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						ForceRemove BigStashContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
 						{
 							val Position = s 'Top'
 						}
@@ -33,7 +33,7 @@ HKCU
 				{
 					NoRemove ContextMenuHandlers
 					{
-						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						ForceRemove BigStashContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
 						{
 							val Position = s 'Top'
 						}
@@ -46,7 +46,7 @@ HKCU
 				{
 					NoRemove ContextMenuHandlers
 					{
-						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						ForceRemove BigStashContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
 						{
 							val Position = s 'Top'
 						}
@@ -59,7 +59,7 @@ HKCU
 				{
 					NoRemove ContextMenuHandlers
 					{
-						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						ForceRemove BigStashContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
 						{
 							val Position = s 'Top'
 						}
@@ -72,7 +72,7 @@ HKCU
 				{
 					NoRemove ContextMenuHandlers
 					{
-						ForceRemove FileContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
+						ForceRemove BigStashContextMenuExt = s '{070FB75B-3783-4FA1-9065-F967737DD790}'
 						{
 							val Position = s 'Top'
 						}
