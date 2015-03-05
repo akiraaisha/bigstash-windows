@@ -137,6 +137,77 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 // Some helper methods
 //
 
+//
+//   FUNCTION CBigStashContextMenuExt::ExecuteProcess(std::wstring, std::wstring, size_t)
+//
+//   PURPOSE: ExecuteProcess executes the executable file located at the first wstring parameter,
+//            with parameters passed as the second wstring parameter.
+//			  size_t parameter indicates the time to wait on the called process until it's signaled.
+//
+size_t CBigStashContextMenuExt::ExecuteProcess(std::wstring fullPathToExe, std::wstring parameters, size_t secondsToWait)
+{
+	size_t iMyCounter = 0, iReturnVal = 0, iPos = 0;
+	DWORD dwExitCode = 0;
+	std::wstring sTempStr = L"";
+
+	/* - NOTE - You should check here to see if the exe even exists */
+
+	/* Add a space to the beginning of the Parameters */
+	if (parameters.size() != 0)
+	{
+		if (parameters[0] != L' ')
+		{
+			parameters.insert(0, L" ");
+		}
+	}
+
+	/* The first parameter needs to be the exe itself */
+	sTempStr = fullPathToExe;
+	iPos = sTempStr.find_last_of(L"\\");
+	sTempStr.erase(0, iPos + 1);
+	parameters = sTempStr.append(parameters);
+
+	/* CreateProcessW can modify Parameters thus we allocate needed memory */
+	wchar_t * pwszParam = new wchar_t[parameters.size() + 1];
+	if (pwszParam == 0)
+	{
+		return 1;
+	}
+	const wchar_t* pchrTemp = parameters.c_str();
+	wcscpy_s(pwszParam, parameters.size() + 1, pchrTemp);
+
+	/* CreateProcess API initialization */
+	STARTUPINFOW siStartupInfo;
+	PROCESS_INFORMATION piProcessInfo;
+	memset(&siStartupInfo, 0, sizeof(siStartupInfo));
+	memset(&piProcessInfo, 0, sizeof(piProcessInfo));
+	siStartupInfo.cb = sizeof(siStartupInfo);
+
+	if (CreateProcessW(const_cast<LPCWSTR>(fullPathToExe.c_str()),
+		pwszParam, 0, 0, false,
+		CREATE_DEFAULT_ERROR_MODE, 0, 0,
+		&siStartupInfo, &piProcessInfo) != false)
+	{
+		/* Watch the process. */
+		dwExitCode = WaitForSingleObject(piProcessInfo.hProcess, (secondsToWait * 1000));
+	}
+	else
+	{
+		/* CreateProcess failed */
+		iReturnVal = GetLastError();
+	}
+
+	/* Free memory */
+	delete[]pwszParam;
+	pwszParam = 0;
+
+	/* Release handles */
+	CloseHandle(piProcessInfo.hProcess);
+	CloseHandle(piProcessInfo.hThread);
+
+	return iReturnVal;
+}
+
 std::string to_utf8(const wchar_t* buffer, int len)
 {
 	int nChars = ::WideCharToMultiByte(
