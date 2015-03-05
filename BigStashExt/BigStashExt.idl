@@ -8,11 +8,25 @@ import "oaidl.idl";
 import "ocidl.idl";
 
 [
+	object,
+	uuid(D51FA475-DE16-4D5A-B733-FB239F2F503C),
+	pointer_default(unique)
+]
+interface IBigStashContextMenuExt : IUnknown{
+};
+[
 	uuid(06FD2AA3-4C3F-4722-BE95-758317E5D86B),
 	version(1.0),
 ]
 library BigStashExtLib
 {
 	importlib("stdole2.tlb");
+	[
+		uuid(070FB75B-3783-4FA1-9065-F967737DD790)		
+	]
+	coclass BigStashContextMenuExt
+	{
+		[default] interface IBigStashContextMenuExt;
+	};
 };
 

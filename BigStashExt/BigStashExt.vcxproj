@@ -113,6 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BigStashContextMenuExt.cpp" />
     <ClCompile Include="BigStashExt.cpp" />
     <ClCompile Include="BigStashExt_i.c">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -136,6 +137,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigStashContextMenuExt.h" />
     <ClInclude Include="BigStashExt_i.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="Resource.h" />
@@ -149,6 +151,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BigStashContextMenuExt.rgs" />
     <None Include="BigStashExt.def" />
   </ItemGroup>
   <ItemGroup>

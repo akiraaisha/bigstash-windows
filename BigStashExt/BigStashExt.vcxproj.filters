@@ -31,6 +31,9 @@
     <ClCompile Include="BigStashExt_i.c">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="BigStashContextMenuExt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -48,6 +51,9 @@
     <ClInclude Include="BigStashExt_i.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="BigStashContextMenuExt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BigStashExt.rc">
@@ -60,6 +66,9 @@
   <ItemGroup>
     <None Include="BigStashExt.def">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="BigStashContextMenuExt.rgs">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
