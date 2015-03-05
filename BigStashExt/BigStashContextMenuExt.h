@@ -20,7 +20,9 @@ using namespace ATL;
 
 class ATL_NO_VTABLE CBigStashContextMenuExt :
 	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<CBigStashContextMenuExt, &CLSID_BigStashContextMenuExt>
+	public CComCoClass<CBigStashContextMenuExt, &CLSID_BigStashContextMenuExt>,
+	public IShellExtInit,
+	public IContextMenu
 {
 public:
 	CBigStashContextMenuExt()
@@ -32,7 +34,8 @@ DECLARE_REGISTRY_RESOURCEID(IDR_BIGSTASHCONTEXTMENUEXT)
 DECLARE_NOT_AGGREGATABLE(CBigStashContextMenuExt)
 
 BEGIN_COM_MAP(CBigStashContextMenuExt)
-
+	COM_INTERFACE_ENTRY(IShellExtInit)
+	COM_INTERFACE_ENTRY(IContextMenu)
 END_COM_MAP()
 
 
@@ -50,6 +53,13 @@ END_COM_MAP()
 
 public:
 
+	// IShellExtInit
+	IFACEMETHODIMP Initialize(LPCITEMIDLIST, LPDATAOBJECT, HKEY);
+
+	// IContextMenu
+	IFACEMETHODIMP GetCommandString(UINT_PTR, UINT, UINT*, LPSTR, UINT);
+	IFACEMETHODIMP InvokeCommand(LPCMINVOKECOMMANDINFO);
+	IFACEMETHODIMP QueryContextMenu(HMENU, UINT, UINT, UINT, UINT);
 
 
 };
