@@ -66,9 +66,6 @@ public:
 
 protected:
 
-	// The name of the first selected file
-	TCHAR m_szFileName[MAX_PATH];
-
 	// The bitmap to show next to the menu entry
 	HBITMAP     m_hRegBmp;
 
