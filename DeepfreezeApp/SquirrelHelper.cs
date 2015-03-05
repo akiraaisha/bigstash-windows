@@ -199,16 +199,19 @@ namespace DeepfreezeApp
                     {
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
+                        RegisterShellExtension();
                     },
                     onAppUpdate: v =>
                     {
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory, v.ToString());
+                        RegisterShellExtension();
                     },
                     onAppUninstall: v =>
                     {
                         mgr.RemoveShortcutForThisExe();
                         RemoveCustomRegistryEntries(mgr.RootAppDirectory);
+                        UnregisterShellExtension();
                         StopBigStashOnUninstall();
                         CallBatchDelete(mgr.RootAppDirectory);
                     });
@@ -500,6 +503,46 @@ namespace DeepfreezeApp
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\BigStash", true))
             {
                 registryKey.DeleteSubKey(installDirName, false);
+            }
+        }
+
+        private static void RegisterShellExtension()
+        {
+            string dllName = "BigStashExt.dll";
+
+            if (Environment.Is64BitOperatingSystem)
+            {
+                dllName = "BigStashExt64.dll";
+            }
+
+            var p = Process.Start("regsvr32.exe", "/s " + dllName);
+
+            p.WaitForExit();
+
+            if (p.ExitCode != 0)
+            {
+                _log.Error(Utilities.GetCallerName() + " error while registering shell extension '" + dllName + "'.");
+                return;
+            }
+        }
+
+        private static void UnregisterShellExtension()
+        {
+            string dllName = "BigStashExt.dll";
+
+            if (Environment.Is64BitOperatingSystem)
+            {
+                dllName = "BigStashExt64.dll";
+            }
+
+            var p = Process.Start("regsvr32.exe", "/u /s " + dllName);
+
+            p.WaitForExit();
+
+            if (p.ExitCode != 0)
+            {
+                _log.Error(Utilities.GetCallerName() + " error while unregistering shell extension '" + dllName + "'.");
+                return;
             }
         }
 
