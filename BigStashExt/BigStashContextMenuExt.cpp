@@ -113,6 +113,67 @@ IFACEMETHODIMP CBigStashContextMenuExt::QueryContextMenu(
 	return MAKE_HRESULT(SEVERITY_SUCCESS, 0, USHORT(IDM_STASH + 1));
 }
 
+
+// 
+//   FUNCTION: CBigStashContextMenuExt::GetCommandString(UINT, UINT, LPUINT,  
+//             LPSTR, UINT) 
+// 
+//   PURPOSE: If a user highlights one of the items added by a context menu  
+//            handler, the handler's IContextMenu::GetCommandString method is  
+//            called to request a Help text string that will be displayed on  
+//            the Windows Explorer status bar. This method can also be called  
+//            to request the verb string that is assigned to a command.  
+//            Either ANSI or Unicode verb strings can be requested. 
+// 
+IFACEMETHODIMP CBigStashContextMenuExt::GetCommandString(
+	UINT_PTR idCommand, UINT uFlags, LPUINT lpReserved, LPSTR pszName,
+	UINT uMaxNameLen)
+{
+	HRESULT hr = E_INVALIDARG;
+
+	// For the command "&Shell Extension Test" (IDM_STASH)
+	if (idCommand == IDM_STASH)
+	{
+		switch (uFlags)
+		{
+		case GCS_HELPTEXTA:
+			hr = StringCchCopyNA(pszName,
+				lstrlenA(pszName) / sizeof(pszName[0]),
+				"Stash away with BigStash",
+				uMaxNameLen);
+			break;
+
+		case GCS_HELPTEXTW:
+			hr = StringCchCopyNW((LPWSTR)pszName,
+				lstrlenW((LPWSTR)pszName) / sizeof(pszName[0]),
+				L"Stash away with BigStash",
+				uMaxNameLen);
+			break;
+
+		case GCS_VERBA:
+			hr = StringCchCopyNA(pszName,
+				lstrlenA(pszName) / sizeof(pszName[0]),
+				VERB_STASHA, uMaxNameLen);
+			break;
+
+		case GCS_VERBW:
+			hr = StringCchCopyNW((LPWSTR)pszName,
+				lstrlenW((LPWSTR)pszName) / sizeof(pszName[0]),
+				VERB_STASHW, uMaxNameLen);
+			break;
+
+		default:
+			hr = S_OK;
+		}
+	}
+
+	// If the command (idCommand) is not supported by this context menu
+	// extension handler, returns E_INVALIDARG.
+
+	return hr;
+}
+
+
 // 
 //   FUNCTION: CBigStashContextMenuExt::OnStashClick(HWND) 
 // 
