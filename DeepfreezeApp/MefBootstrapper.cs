@@ -80,7 +80,7 @@ namespace DeepfreezeApp
             if (!(app == null || app.IsFirstInstance))
             {
                 app.Shutdown();
-            }    
+            }
             else
             {
                 // Else go on with normal startup.
@@ -104,13 +104,13 @@ namespace DeepfreezeApp
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
-//#if DEBUG
-//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
-//                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
-//                Properties.Settings.Default.VerboseDebugLogging = true;
-//#endif
+                //#if DEBUG
+                //                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                //                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+                //                Properties.Settings.Default.VerboseDebugLogging = true;
+                //#endif
 
-                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
                 this.SetVersionForUserAgent(currentVersion);
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
@@ -152,7 +152,7 @@ namespace DeepfreezeApp
                     Properties.Settings.Default.BigStashUpdateMessageShown = true;
                     Properties.Settings.Default.Save();
                 }
-                
+
                 // Catch with args and forward a message with them
                 if (e.Args.Length > 0)
                 {
@@ -262,7 +262,7 @@ namespace DeepfreezeApp
         private void SetApplicationPathsProperties()
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            
+
             // %APPDATA\BigStash\
             Properties.Settings.Default.ApplicationDataFolder =
                 Path.Combine(
@@ -326,7 +326,7 @@ namespace DeepfreezeApp
 
                 Microsoft.Win32.RegistryKey uninstallKeyParentFolder = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
                 IList<string> uninstallSubKeyNames = uninstallKeyParentFolder.GetSubKeyNames().ToList();
-                
+
                 foreach (string uninstallSubKeyName in uninstallSubKeyNames)
                 {
                     Microsoft.Win32.RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
@@ -351,7 +351,7 @@ namespace DeepfreezeApp
                     }
                 }
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
@@ -520,7 +520,7 @@ namespace DeepfreezeApp
                 Properties.Settings.Default.SettingsUpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
