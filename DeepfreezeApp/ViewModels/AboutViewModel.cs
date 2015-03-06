@@ -293,11 +293,12 @@ namespace DeepfreezeApp
                 // and continue with installing only if the list is not empty (it contains newer versions).
                 if (hasUpdates)
                 {
+                    var installedVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
                     var releasesToRemove = new List<Squirrel.ReleaseEntry>();
 
                     foreach (var release in updateInfo.ReleasesToApply.ToList())
                     {
-                        if (String.Compare(updateInfo.CurrentlyInstalledVersion.ToString(), release.Version.ToString()) >= 0)
+                        if (release.Version <= installedVersion)
                         {
                             releasesToRemove.Add(release);
                         }
