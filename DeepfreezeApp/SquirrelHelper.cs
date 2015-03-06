@@ -197,18 +197,24 @@ namespace DeepfreezeApp
                 SquirrelAwareApp.HandleEvents(
                     onInitialInstall: v =>
                     {
+                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Installation in progress.\n\n");
+
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
                         RegisterShellExtension(mgr.RootAppDirectory);
                     },
                     onAppUpdate: v =>
                     {
+                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Update in progress.\n\n");
+
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory, v.ToString());
                         RegisterShellExtension(mgr.RootAppDirectory);
                     },
                     onAppUninstall: v =>
                     {
+                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Uninstall in progress.\n\n");
+
                         mgr.RemoveShortcutForThisExe();
                         RemoveCustomRegistryEntries(mgr.RootAppDirectory);
                         UnregisterShellExtension(mgr.RootAppDirectory);
@@ -534,9 +540,13 @@ namespace DeepfreezeApp
                 return;
             }
 
+            _log.Info(Utilities.GetCallerName() + ": Found dll to unregister at path '" + dllName + "'.");
+
             var p = Process.Start("regsvr32.exe", "/s " + dllName);
 
             p.WaitForExit();
+
+            _log.Info(Utilities.GetCallerName() + ": Dll registration exited with code " + p.ExitCode + ".");
 
             if (p.ExitCode != 0)
             {
@@ -560,9 +570,13 @@ namespace DeepfreezeApp
                 return;
             }
 
+            _log.Info(Utilities.GetCallerName() + ": Found dll to unregister at path '" + dllName + "'.");
+
             var p = Process.Start("regsvr32.exe", "/u /s " + dllName);
 
             p.WaitForExit();
+
+            _log.Info(Utilities.GetCallerName() + ": Dll unregistration exited with code " + p.ExitCode + ".");
 
             if (p.ExitCode != 0)
             {
