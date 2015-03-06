@@ -197,15 +197,15 @@ namespace DeepfreezeApp
                 SquirrelAwareApp.HandleEvents(
                     onInitialInstall: v =>
                     {
-                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Installation in progress.\n\n");
+                        _log.Warn(Utilities.GetCallerName() + ": Installation in progress.");
 
-                        mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
                         RegisterShellExtension(mgr.RootAppDirectory);
+                        mgr.CreateShortcutForThisExe();
                     },
                     onAppUpdate: v =>
                     {
-                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Update in progress.\n\n");
+                        _log.Warn(Utilities.GetCallerName() + ": Update in progress.");
 
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory, v.ToString());
@@ -213,11 +213,11 @@ namespace DeepfreezeApp
                     },
                     onAppUninstall: v =>
                     {
-                        _log.Info("\n\n" + Utilities.GetCallerName() + ": Uninstall in progress.\n\n");
+                        _log.Warn(Utilities.GetCallerName() + ": Uninstall in progress.");
 
-                        mgr.RemoveShortcutForThisExe();
-                        RemoveCustomRegistryEntries(mgr.RootAppDirectory);
                         UnregisterShellExtension(mgr.RootAppDirectory);
+                        RemoveCustomRegistryEntries(mgr.RootAppDirectory);
+                        mgr.RemoveShortcutForThisExe();
                         StopBigStashOnUninstall();
                         CallBatchDelete(mgr.RootAppDirectory);
                     });
@@ -408,6 +408,8 @@ namespace DeepfreezeApp
         /// </summary>
         private static void CreateOrUpdateCustomRegistryEntries(string rootAppDirectory, string newVersion = null)
         {
+            _log.Warn(Utilities.GetCallerName() + " entered.");
+
             // Get the name of the install path
             var installDirName = new DirectoryInfo(rootAppDirectory).Name;
 
@@ -492,6 +494,8 @@ namespace DeepfreezeApp
         /// </summary>
         private static void RemoveCustomRegistryEntries(string rootAppDirectory)
         {
+            _log.Warn(Utilities.GetCallerName() + " entered.");
+
             // Get the name of the install path
             var installDirName = new DirectoryInfo(rootAppDirectory).Name;
 
@@ -508,8 +512,10 @@ namespace DeepfreezeApp
             // Open HKCU\Software.
             using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
+                bool delBigStashKey = false;
+
                 // Open HKCU\Software\BigStash.
-                using(var bigstashKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("BigStash", true))
+                using (var bigstashKey = registryKey.OpenSubKey("BigStash", true))
                 {
                     // Remove Software\BigStash\<installDirName> key.
                     bigstashKey.DeleteSubKey(installDirName, false);
@@ -519,14 +525,21 @@ namespace DeepfreezeApp
                     // then delete it.
                     if (bigstashKey.SubKeyCount == 0)
                     {
-                        registryKey.DeleteSubKey(bigstashKey.Name, false);
+                        delBigStashKey = true;
                     }
+                }
+
+                if (delBigStashKey)
+                {
+                    registryKey.DeleteSubKey("BigStash", false);
                 }
             }
         }
 
         private static void RegisterShellExtension(string rootAppDirectory)
         {
+            _log.Warn(Utilities.GetCallerName() + " entered.");
+
             string dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (Environment.Is64BitOperatingSystem)
@@ -557,6 +570,8 @@ namespace DeepfreezeApp
 
         private static void UnregisterShellExtension(string rootAppDirectory)
         {
+            _log.Warn(Utilities.GetCallerName() + " entered.");
+
             string dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (Environment.Is64BitOperatingSystem)
