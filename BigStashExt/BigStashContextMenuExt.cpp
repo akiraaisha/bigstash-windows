@@ -102,7 +102,7 @@ IFACEMETHODIMP CBigStashContextMenuExt::QueryContextMenu(
 
 	// Use either InsertMenu or InsertMenuItem to add menu items to the list.
 	InsertMenu(hMenu, indexMenu, MF_STRING | MF_BYPOSITION, idCmdFirst +
-		IDM_STASH, _T("&Stash away"));
+		IDM_STASH, _T("&Stash"));
 
 	// Set the bitmap for the register item.
 	if (NULL != m_hRegBmp)
@@ -403,6 +403,13 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 			return;
 		}
 		
+		if (!PathFileExists(valueName))
+		{
+			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Executable file does not exist.", _T("BigStashExt"),
+				MB_ICONERROR);
+			DllUnregisterServer();
+			return;
+		}
 
 		// Call BigStash app here.
 		ExecuteProcess(valueName, L"-u --fromfile \"" + selectionFilePath + L"\"", 1);
