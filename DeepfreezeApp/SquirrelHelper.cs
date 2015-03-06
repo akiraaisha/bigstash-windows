@@ -445,7 +445,7 @@ namespace DeepfreezeApp
                     if (!String.IsNullOrEmpty(newVersion))
                     {
                         // Update the display version.
-                        bigstashUninstallKey.SetValue("DisplayVersion", latestVerionPath);
+                        bigstashUninstallKey.SetValue("DisplayVersion", newVersion);
                     }
                 }
             }
