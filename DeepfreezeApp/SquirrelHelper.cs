@@ -499,10 +499,23 @@ namespace DeepfreezeApp
                 registryKey.DeleteValue(curAssemblyName, false);
             }
 
-            // remove Software\BigStash\<BigStash_Name> key.
-            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\BigStash", true))
+            // Open HKCU\Software.
+            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE", true))
             {
-                registryKey.DeleteSubKey(installDirName, false);
+                // Open HKCU\Software\BigStash.
+                using(var bigstashKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("BigStash", true))
+                {
+                    // Remove Software\BigStash\<installDirName> key.
+                    bigstashKey.DeleteSubKey(installDirName, false);
+
+                    // If HKCU\Software\BigStash doesn't have any sub keys
+                    // (that is no BigStash app, stable or beta, is installed
+                    // then delete it.
+                    if (bigstashKey.SubKeyCount == 0)
+                    {
+                        registryKey.DeleteSubKey(bigstashKey.Name, false);
+                    }
+                }
             }
         }
 
