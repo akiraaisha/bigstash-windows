@@ -199,19 +199,19 @@ namespace DeepfreezeApp
                     {
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory);
-                        RegisterShellExtension();
+                        RegisterShellExtension(mgr.RootAppDirectory);
                     },
                     onAppUpdate: v =>
                     {
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory, v.ToString());
-                        RegisterShellExtension();
+                        RegisterShellExtension(mgr.RootAppDirectory);
                     },
                     onAppUninstall: v =>
                     {
                         mgr.RemoveShortcutForThisExe();
                         RemoveCustomRegistryEntries(mgr.RootAppDirectory);
-                        UnregisterShellExtension();
+                        UnregisterShellExtension(mgr.RootAppDirectory);
                         StopBigStashOnUninstall();
                         CallBatchDelete(mgr.RootAppDirectory);
                     });
@@ -506,13 +506,19 @@ namespace DeepfreezeApp
             }
         }
 
-        private static void RegisterShellExtension()
+        private static void RegisterShellExtension(string rootAppDirectory)
         {
-            string dllName = "BigStashExt.dll";
+            string dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (Environment.Is64BitOperatingSystem)
             {
-                dllName = "BigStashExt64.dll";
+                dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt64.dll", SearchOption.AllDirectories).FirstOrDefault();
+            }
+
+            if (String.IsNullOrEmpty(dllName))
+            {
+                _log.Error(Utilities.GetCallerName() + " error while trying to locate the shell context menu extension dll.");
+                return;
             }
 
             var p = Process.Start("regsvr32.exe", "/s " + dllName);
@@ -526,13 +532,19 @@ namespace DeepfreezeApp
             }
         }
 
-        private static void UnregisterShellExtension()
+        private static void UnregisterShellExtension(string rootAppDirectory)
         {
-            string dllName = "BigStashExt.dll";
+            string dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (Environment.Is64BitOperatingSystem)
             {
-                dllName = "BigStashExt64.dll";
+                dllName = Directory.GetFiles(rootAppDirectory, "BigStashExt64.dll", SearchOption.AllDirectories).FirstOrDefault();
+            }
+
+            if (String.IsNullOrEmpty(dllName))
+            {
+                _log.Error(Utilities.GetCallerName() + " error while trying to locate the shell context menu extension dll.");
+                return;
             }
 
             var p = Process.Start("regsvr32.exe", "/u /s " + dllName);
