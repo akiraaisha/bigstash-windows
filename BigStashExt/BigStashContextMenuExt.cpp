@@ -100,13 +100,17 @@ IFACEMETHODIMP CBigStashContextMenuExt::QueryContextMenu(
 		return MAKE_HRESULT(SEVERITY_SUCCESS, 0, USHORT(0));
 	}
 
+	InsertMenu(hMenu, indexMenu, MF_SEPARATOR | MF_BYPOSITION, NULL, NULL);
+
 	// Use either InsertMenu or InsertMenuItem to add menu items to the list.
-	InsertMenu(hMenu, indexMenu, MF_STRING | MF_BYPOSITION, idCmdFirst +
+	InsertMenu(hMenu, indexMenu + 1, MF_STRING | MF_BYPOSITION, idCmdFirst +
 		IDM_STASH, _T("&Stash"));
 
 	// Set the bitmap for the register item.
 	if (NULL != m_hRegBmp)
-		SetMenuItemBitmaps(hMenu, indexMenu, MF_BITMAP | MF_BYPOSITION, m_hRegBmp, NULL);
+		SetMenuItemBitmaps(hMenu, indexMenu + 1, MF_BITMAP | MF_BYPOSITION, m_hRegBmp, NULL);
+
+	InsertMenu(hMenu, indexMenu + 2, MF_SEPARATOR | MF_BYPOSITION, NULL, NULL);
 
 	// Return an HRESULT value with the severity set to SEVERITY_SUCCESS.
 	// Set the code value to the offset of the largest command identifier
@@ -384,8 +388,9 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 
 		if (ERROR_SUCCESS != lRet)
 		{
-			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Registry access denied.", 
+			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Registry access denied or the application is not installed.",
 				_T("BigStashExt"), MB_ICONERROR);
+			DllUnregisterServer();
 			return;
 		}
 
@@ -400,6 +405,7 @@ void CBigStashContextMenuExt::OnStashClick(HWND hWnd)
 		{
 			MessageBox(hWnd, L"Could not locate the BigStash application.\n\nError: Registry string value not valid.", _T("BigStashExt"),
 				MB_ICONERROR);
+			DllUnregisterServer();
 			return;
 		}
 		
