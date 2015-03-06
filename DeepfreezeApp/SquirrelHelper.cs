@@ -36,7 +36,7 @@ namespace DeepfreezeApp
 #endif
         }
 
-        public static string GetCurrentlyInstalledVersion()
+        public static Version GetCurrentlyInstalledVersion()
         {
             bool isDebug = false;
             var updateUrl = GetUpdateLocation();
@@ -46,26 +46,35 @@ namespace DeepfreezeApp
             //updateURL = Properties.Settings.Default.LocalUpdateURL;
 #endif
 
+            if (isDebug)
+            {
+                return new Version(0, 0, 0, 0);
+            }
+
             using (var mgr = new Squirrel.UpdateManager(updateUrl, Properties.Settings.Default.ApplicationName, Squirrel.FrameworkVersion.Net45))
             {
                 var version = mgr.CurrentlyInstalledVersion();
-
-                if (version != null)
-                {
-                    return mgr.CurrentlyInstalledVersion().ToString();
-                }
-                else
-                {
-                    if (isDebug)
-                    {
-                        return DEBUGVERSION;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
+                return version;
             }
+
+        }
+
+        public static string GetCurrentlyInstalledVersionString()
+        {
+            bool isDebug = false;
+
+#if DEBUG
+            isDebug = true;
+#endif
+
+            if (isDebug)
+            {
+                return DEBUGVERSION;
+            }
+
+            var versionString = GetCurrentlyInstalledVersion().ToString();
+
+            return versionString;
         }
 
         #region update_methods
