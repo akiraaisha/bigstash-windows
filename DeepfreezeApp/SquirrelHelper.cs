@@ -481,7 +481,7 @@ namespace DeepfreezeApp
 
                 if (Properties.Settings.Default.RunOnStartup)
                 {
-                    registryKey.SetValue(installDirName, latestVerionPath);
+                    registryKey.SetValue(installDirName, latestVerionPath + " -m");
                 }
             }
         }
