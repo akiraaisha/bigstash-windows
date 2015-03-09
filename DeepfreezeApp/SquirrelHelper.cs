@@ -605,7 +605,37 @@ namespace DeepfreezeApp
             if (p.ExitCode != 0)
             {
                 _log.Error(Utilities.GetCallerName() + " error while unregistering shell extension '" + dllName + "'.");
-                return;
+            }
+
+            try
+            {
+                // Try to delete the extension dll file.
+                File.Delete(dllName);
+            }
+            catch (UnauthorizedAccessException uae)
+            {
+                _log.Error(Utilities.GetCallerName() + " error while deleting shell extension dll file '" + dllName + "'.", uae);
+            }
+
+            // Either way, try to rename the app version directory because future installations,
+            // while in the same windows session, of any app version,
+            // will try to delete the directory, failing to do so (if the dll is still in use by explorer.exe)
+            if (File.Exists(dllName))
+            {
+                var dllFile = new FileInfo(dllName);
+                try
+                {
+                    // Try renaming the dir by executing a batch file after the uninstall finishes.
+                    // The renamed folder has the original name plus the current datetime in utc and '.old' suffix.
+                    CallRenameInUseDirToOld(dllFile.DirectoryName, dllFile.Directory.Name + DateTime.UtcNow.ToString(".yyyy_MM_dd_hh_mm_ss") + ".old");
+                    return;
+                }
+                catch (Exception e)
+                {
+                    // If we still can't do anything about it, well let it rest.
+                    _log.Error(Utilities.GetCallerName() + " error while renaming directory '" + dllFile.Directory.Name + "'.", e);
+                    return;
+                }
             }
         }
 
@@ -622,6 +652,49 @@ namespace DeepfreezeApp
             {
                 return mgr.RootAppDirectory;
             }
+        }
+
+        /// <summary>
+        /// Call a batch file to rename the app version directory after the uninstall exits.
+        /// </summary>
+        /// <param name="rootAppDirectory"></param>
+        public static void CallRenameInUseDirToOld(string path, string newName)
+        {
+            var pid = Process.GetCurrentProcess().Id;
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("setlocal");
+            sb.AppendLine("set /a retry=3");
+            sb.AppendLine(":loop");
+            sb.AppendLine("if %retry% ==0 (goto :loopexited) else (");
+            sb.AppendLine("    tasklist | find \"" + pid + "\" >nul");
+            sb.AppendLine("    if not errorlevel 1 (");
+            sb.AppendLine("        timeout /t 2 >nul");
+            sb.AppendLine("        set /a retry=%retry%-1");
+            sb.AppendLine("        goto :loop");
+            sb.AppendLine("    )");
+            sb.AppendLine(")");
+            sb.AppendLine(":loopexited");
+            sb.Append("ren ");
+            sb.Append(path);
+            sb.Append(" ");
+            sb.AppendLine(newName);
+            sb.AppendLine("call :deleteSelf&exit /b");
+            sb.AppendLine(":deleteSelf");
+            sb.AppendLine("start /b \"\" cmd /c del \"%~f0\"&exit /b");
+
+            var tempPath = Path.GetTempPath();
+            var tempSavePath = Path.Combine(tempPath, "bigstash_squirrel_renamer.bat");
+
+            File.WriteAllText(tempSavePath, sb.ToString(), Encoding.ASCII);
+
+            var p = new Process();
+            p.StartInfo.WorkingDirectory = tempPath;
+            p.StartInfo.FileName = tempSavePath;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+            p.Start();
         }
 
         #endregion
