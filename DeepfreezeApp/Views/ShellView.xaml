@@ -153,7 +153,7 @@
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
                         IconSource="..\bigstash-windows-icon.ico"
-                        ToolTipText="BigStash for Windows"
+                        ToolTipText="BigStash"
                         MenuActivation="RightClick"
                         cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
                         >
