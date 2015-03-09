@@ -338,7 +338,14 @@ namespace DeepfreezeApp
         {
             if (message != null)
             {
-                _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, BalloonIcon.Info);
+                var icon = message.NotificationStatus == Enumerations.NotificationStatus.Error
+                    ? BalloonIcon.Error
+                    : BalloonIcon.Info;
+
+                if (!this._shellWindow.IsActive)
+                {
+                    _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, icon);
+                }
             }
         }
 
