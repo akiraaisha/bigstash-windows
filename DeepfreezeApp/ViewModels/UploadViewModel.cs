@@ -545,6 +545,7 @@ namespace DeepfreezeApp
                 this._deepfreezeClient.IsInternetConnected)
             {
                 this.AutoResumeAfterError();
+                await this.NotifyOnError();
             }
         }
 
@@ -1715,6 +1716,16 @@ namespace DeepfreezeApp
             }
         }
 
+        private async Task NotifyOnError()
+        {
+            var notification = IoC.Get<INotificationMessage>();
+
+            notification.Message = this.Archive.Key + ": " + Properties.Resources.ErrorUploadingGenericText;
+            notification.NotificationStatus = Enumerations.NotificationStatus.Error;
+
+            await this._eventAggregator.PublishOnUIThreadAsync(notification);
+        }
+
         #endregion
 
         #region message_handlers
@@ -1842,10 +1853,12 @@ namespace DeepfreezeApp
                         if (isCompleted)
                         {
                             notification.Message = "Archive " + this.Archive.Key + " " + Properties.Resources.CompletedNotificationText;
+                            notification.NotificationStatus = Enumerations.NotificationStatus.Success;
                         }
                         else
                         {
                             notification.Message = Properties.Resources.StatusErrorNotificationText + " " + this.Archive.Key + ".";
+                            notification.NotificationStatus = Enumerations.NotificationStatus.Error;
                         }
 
                         this._eventAggregator.PublishOnBackgroundThread(notification);
