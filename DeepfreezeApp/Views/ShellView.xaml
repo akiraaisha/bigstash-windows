@@ -155,7 +155,7 @@
                         IconSource="..\bigstash-windows-icon.ico"
                         ToolTipText="BigStash"
                         MenuActivation="RightClick"
-                        cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
+                        cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]; [Event TrayBalloonTipClicked] = [Action ShowShellWindow()]"
                         >
 
             <tb:TaskbarIcon.ContextMenu>
