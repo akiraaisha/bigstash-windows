@@ -48,7 +48,6 @@ namespace DeepfreezeApp
         private string _busyMessage;
         private string _errorMessage;
         private bool _trayExitClicked = false;
-        private bool _minimizeBallonTipShown = false;
 
         private DispatcherTimer _connectionTimer;
         private bool _isInternetConnected = true;
@@ -598,9 +597,10 @@ namespace DeepfreezeApp
                     // if no user is currently connected, show a BallonTip
                     // informing the user about the application minimizing instead of exiting.
                     // Do this only one time in each application run.
-                    if (!this._minimizeBallonTipShown)
+                    if (!Properties.Settings.Default.MinimizeBallonTipShown)
                     {
-                        this._minimizeBallonTipShown = true;
+                        Properties.Settings.Default.MinimizeBallonTipShown = true;
+                        Properties.Settings.Default.Save();
                         _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
                     }
 
