@@ -336,5 +336,17 @@ namespace DeepfreezeApp.Properties {
                 this["RunOnStartup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MinimizeBallonTipShown {
+            get {
+                return ((bool)(this["MinimizeBallonTipShown"]));
+            }
+            set {
+                this["MinimizeBallonTipShown"] = value;
+            }
+        }
     }
 }
