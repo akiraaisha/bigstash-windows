@@ -1,0 +1,71 @@
+1.4.1.5
+Fixed: Automatic resume retries should not occur if there isn't any active Internet connection available.
+
+1.4.1.4
+Added: When an error occurs while uploading, the application tries to automatically resume after some time.
+
+1.4.1.3
+Minor changes for exception handling.
+
+1.4.1.2
+Fixed: Wrong progress report when uploading large files.
+
+1.4.1.1
+Fixed: Small files upload speeds are slow.
+Added: The application is able to handle multiple file uploads for each pending upload.
+Fixed: Take care of application data corruption.
+Fixed: Application data corruption made pending uploads disappear from the pending list, when they should appear so the user knows what went wrong and manually remove them.
+Added: Archive ID is shown on the same row as the Archive title and on the far right corner.
+Fixed: Archive title not trimming when it's size is larger than the window width.
+Fixed: Progress report improvements.
+Fixed: Total progress percentage is shown with 2 decimal points.
+Added: When the mouse hovers over the progress bar, a tooltip appears showing more information about the archive's upload progress.
+Added: Show more file names when uploading them in parallel.
+
+1.4.0
+Use a new installer application which is faster, quiter and simpler than previous versions.
+Other changes include:
+Fixed: Uploads remain in the Pending area until the files are successfully archived.
+Fixed: Improved Upload status refresh.
+Fixed: An error may occur when removing many completed uploads by clicking the 'Clear all' button.
+
+1.3.1
+Prepare migration to the new more efficient installer.
+
+1.3.0
+Added: UI changes to separate pending and completed uploads.
+Added: 'Clear all' button for completed uploads.
+Added: Preferences option to enable verbose logging.
+Fixed: Sometimes an exception is thrown when the application closes while there are uploads in progress.
+Fixed: Retry failed requests because of transient errors.
+Fixed: Significant performance improvements and especially upload speeds for large files.
+
+1.2.0
+Added: Many UI improvements.
+Added: Check for updates functionality.
+Added: Exclude unsupported files while selecting files for a new archive and export a list of all excluded files.
+Fixed: Error handling improvements.
+Fixed: When there isn't any active Internet connection available, some actions should be disabled.
+Fixed: Allow the user to create zero sized archives with at least one file.
+Added: Automatically remove uploads which where previously deleted by the user through the BigStash Dashboard website page.
+Fixed: Bug fixes and performance improvements.
+
+1.1.3
+Added: Clicking the tray icon bring the application in front.
+Fixed: Automatic resume notifications appear even if there isn't any uploads to resume.
+Fixed: Available BigStash storage size checks.
+
+1.1.2
+Added: Preferences option to minimize in the tray area when closing the application window.
+Fixed: Suspending the computer while an upload is active causes the upload to fail.
+Added: Monitor Internet connectivity changes and act accordingly.
+Fixed: Sometimes an exception is thrown when the application closes.
+
+1.1.1
+Fixed: Large file uploads resuming from the wrong checkpoint.
+Added: Clicking the application title inside the Preferences screen opens the BigStash website.
+Added: Clicking the archive title opens the archive's website page.
+Fixed: Wrong progress reporting.
+
+1.0.1
+The first public release of BigStash for Windows.
