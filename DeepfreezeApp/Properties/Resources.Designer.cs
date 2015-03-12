@@ -538,6 +538,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occured while trying to load the release notes..
+        /// </summary>
+        internal static string ErrorReadingReleaseNotesFileGenericText {
+            get {
+                return ResourceManager.GetString("ErrorReadingReleaseNotesFileGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There was an error while checking your upload&apos;s progress..
         /// </summary>
         internal static string ErrorRefreshingProgressGenericText {
@@ -804,6 +813,15 @@ namespace DeepfreezeApp.Properties {
         internal static string RefreshButtonEnabledTooltipText {
             get {
                 return ResourceManager.GetString("RefreshButtonEnabledTooltipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It appears the release notes text file is missing from your installation..
+        /// </summary>
+        internal static string ReleaseNotesFileNotExistsText {
+            get {
+                return ResourceManager.GetString("ReleaseNotesFileNotExistsText", resourceCulture);
             }
         }
         
