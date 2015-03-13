@@ -46,6 +46,11 @@ namespace DeepfreezeApp
         private int _tabSelectedIndex = 0;
         private int _licensesSelectedIndex = -1;
 
+        // get the .exe location
+        private static readonly string _basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        private static readonly string _docsPath = _basePath + "\\docs";
+        private static readonly string _licensesPath = _docsPath + "\\licenses";
+
         #endregion
 
         #region constructors
@@ -227,7 +232,7 @@ namespace DeepfreezeApp
 
         public string ReleaseNotesText
         {
-            get { return this.ReadTextFile("docs\\ReleaseNotes.txt"); }
+            get { return this.ReadTextFile(_docsPath + "\\ReleaseNotes.txt"); }
         }
 
         public string LicenseText
@@ -498,7 +503,7 @@ namespace DeepfreezeApp
                                        "WPF Instance Aware Application.txt"
                                      };
 
-            foreach(var path in Directory.GetFiles("docs\\licenses"))
+            foreach (var path in Directory.GetFiles(_licensesPath))
             {
                 // if the file is not a known license, skip it.
                 if (!knownLicenses.Contains(Path.GetFileName(path)))
