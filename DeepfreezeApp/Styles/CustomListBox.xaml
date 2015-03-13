@@ -66,9 +66,9 @@
                                  Value="True">
                             <Setter TargetName="Border"
                                     Property="Background"
-                                    Value="{DynamicResource AccentColorBrush}" />
+                                    Value="{DynamicResource GrayBrush9}" />
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource AccentSelectedColorBrush}" />
+                                    Value="Black" />
                         </Trigger>
                         <Trigger Property="IsMouseOver"
                                  Value="True">
@@ -92,7 +92,7 @@
                                     Property="Background"
                                     Value="{DynamicResource GrayBrush7}" />
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource AccentSelectedColorBrush}" />
+                                    Value="Black" />
                         </MultiTrigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -103,7 +103,7 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName="Border"
                                     Property="Background"
-                                    Value="{DynamicResource AccentColorBrush2}" />
+                                    Value="{DynamicResource GrayBrush8}" />
                         </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
