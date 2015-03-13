@@ -214,6 +214,7 @@ namespace DeepfreezeApp
         public void ToggleAboutFlyout()
         {
             this.IsAboutFlyoutOpen = !this.IsAboutFlyoutOpen;
+            this.AboutVM.TabSelectedIndex = 0;
 
             if (this.IsAboutFlyoutOpen)
             {
