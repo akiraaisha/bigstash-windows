@@ -545,10 +545,10 @@
   <data name="NoActivityText" xml:space="preserve">
     <value>You don't have any activity.</value>
   </data>
-  <data name="ErrorReadingReleaseNotesFileGenericText" xml:space="preserve">
-    <value>An error occured while trying to load the release notes.</value>
+  <data name="ErrorReadingTextFileGenericText" xml:space="preserve">
+    <value>An error occured while trying to load the necessary text file.</value>
   </data>
-  <data name="ReleaseNotesFileNotExistsText" xml:space="preserve">
-    <value>It appears the release notes text file is missing from your installation.</value>
+  <data name="FileDoesNotExistText" xml:space="preserve">
+    <value>It appears the necessary file is missing from your installation.</value>
   </data>
 </root>

@@ -538,11 +538,11 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occured while trying to load the release notes..
+        ///   Looks up a localized string similar to An error occured while trying to load the necessary text file..
         /// </summary>
-        internal static string ErrorReadingReleaseNotesFileGenericText {
+        internal static string ErrorReadingTextFileGenericText {
             get {
-                return ResourceManager.GetString("ErrorReadingReleaseNotesFileGenericText", resourceCulture);
+                return ResourceManager.GetString("ErrorReadingTextFileGenericText", resourceCulture);
             }
         }
         
@@ -615,6 +615,15 @@ namespace DeepfreezeApp.Properties {
         internal static string FetchUploadTakingTooLongText {
             get {
                 return ResourceManager.GetString("FetchUploadTakingTooLongText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It appears the necessary file is missing from your installation..
+        /// </summary>
+        internal static string FileDoesNotExistText {
+            get {
+                return ResourceManager.GetString("FileDoesNotExistText", resourceCulture);
             }
         }
         
@@ -813,15 +822,6 @@ namespace DeepfreezeApp.Properties {
         internal static string RefreshButtonEnabledTooltipText {
             get {
                 return ResourceManager.GetString("RefreshButtonEnabledTooltipText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to It appears the release notes text file is missing from your installation..
-        /// </summary>
-        internal static string ReleaseNotesFileNotExistsText {
-            get {
-                return ResourceManager.GetString("ReleaseNotesFileNotExistsText", resourceCulture);
             }
         }
         
