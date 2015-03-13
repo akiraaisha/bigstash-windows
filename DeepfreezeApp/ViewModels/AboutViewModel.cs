@@ -514,7 +514,7 @@ namespace DeepfreezeApp
                 licenseTasks.Add(task);
             }
 
-            await Task.WhenAll(licenseTasks).ConfigureAwait(false);
+            await Task.WhenAll(licenseTasks);
 
             this.Licenses.AddRange(licenses.OrderBy(x => x.Key));
             this.LicensesSelectedIndex = 0;
