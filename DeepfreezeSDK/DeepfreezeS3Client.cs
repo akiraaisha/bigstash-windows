@@ -55,6 +55,7 @@ namespace DeepfreezeSDK
                 _s3Config = new AmazonS3Config();
                 _s3Config.RegionEndpoint = Amazon.RegionEndpoint.USWest2;
                 _s3Config.ProgressUpdateInterval = 2 * 100 * 1024; // fire progress update event every 500 KB.
+                AWSConfigs.CorrectForClockSkew = true; // enable clock skew correction since it defaults to false (should be true though (???))
                 s3Client = new AmazonS3Client(accessKeyID, secretAccessKey, sessionToken, _s3Config);
             }
             catch (Exception) { throw; }
