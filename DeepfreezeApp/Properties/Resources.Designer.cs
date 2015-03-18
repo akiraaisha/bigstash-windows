@@ -664,6 +664,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Help.
+        /// </summary>
+        internal static string HelpHeader {
+            get {
+                return ResourceManager.GetString("HelpHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to the BigStash support page..
+        /// </summary>
+        internal static string HelpHeaderTooltip {
+            get {
+                return ResourceManager.GetString("HelpHeaderTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Installing the update....
         /// </summary>
         internal static string InstallingUpdateText {

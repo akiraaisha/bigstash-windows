@@ -551,4 +551,10 @@
   <data name="FileDoesNotExistText" xml:space="preserve">
     <value>It appears the necessary file is missing from your installation.</value>
   </data>
+  <data name="HelpHeader" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="HelpHeaderTooltip" xml:space="preserve">
+    <value>Go to the BigStash support page.</value>
+  </data>
 </root>
