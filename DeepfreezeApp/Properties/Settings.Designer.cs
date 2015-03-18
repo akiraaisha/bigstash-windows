@@ -348,5 +348,14 @@ namespace DeepfreezeApp.Properties {
                 this["MinimizeBallonTipShown"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.bigstash.co/support/")]
+        public string BigStashSupportURL {
+            get {
+                return ((string)(this["BigStashSupportURL"]));
+            }
+        }
     }
 }
