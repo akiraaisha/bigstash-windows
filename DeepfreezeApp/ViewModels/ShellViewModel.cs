@@ -504,7 +504,15 @@ namespace DeepfreezeApp
 
                         this._deepfreezeClient.Settings.ActiveUser = user;
                         // Save preferences file here again to sync with online data (quota, display name etc.).
-                        LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8);
+                        var writeSuccess = LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8, true);
+
+                        if (!writeSuccess)
+                        {
+                            await this._windowManager.ShowMessageViewModelAsync("There was an error while trying to save your settings. " + 
+                                "Please make sure that you have enough free space on your hard drive.\n\n" + 
+                                "You may have to reconnect your BigStash account the next time you run the BigStash application.", "Error saving settings", 
+                                MessageBoxButton.OK);
+                        }
 
                         InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();

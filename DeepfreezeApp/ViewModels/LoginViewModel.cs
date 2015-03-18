@@ -13,6 +13,7 @@ using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.Windows.Input;
+using System.Windows;
 
 namespace DeepfreezeApp
 {
@@ -234,8 +235,16 @@ namespace DeepfreezeApp
                 _log.Info("Fetched User is valid, saving to \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
                 // Save preferences file.
-                await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.ASCII))
-                    .ConfigureAwait(false);
+                var writeSuccess = LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8, true);
+
+                if (!writeSuccess)
+                {
+                    var windowManager = IoC.Get<IWindowManager>();
+                    await windowManager.ShowMessageViewModelAsync("There was an error while trying to save your settings. " +
+                        "Please make sure that you have enough free space on your hard drive.\n\n" +
+                        "You may have to reconnect your BigStash account the next time you run the BigStash application.", "Error saving settings", 
+                        MessageBoxButton.OK);
+                }
 
                 this.ClearErrors();
 

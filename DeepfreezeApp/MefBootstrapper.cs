@@ -184,7 +184,7 @@ namespace DeepfreezeApp
                     this.ResetDebugServerBaseAddress(client);
 
                     // Save preferences file.
-                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII);
+                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.UTF8, true);
                 }
                 else
                 {
