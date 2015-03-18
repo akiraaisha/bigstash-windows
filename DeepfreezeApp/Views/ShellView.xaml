@@ -97,6 +97,9 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="{Binding PreferencesHeader}" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
+                        <MenuItem Header="{Binding HelpHeader}" 
+                                  ToolTip="{Binding HelpHeaderTooltipText}"
+                                  cal:Message.Attach="[Event Click] = [Action OpenHelp()]" />
                         <MenuItem Header="{Binding AboutHeader}" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
                     </ContextMenu>
                 </Button.ContextMenu>

@@ -193,6 +193,12 @@ namespace DeepfreezeApp
         public string UpdateFoundButtonTooltipText
         { get { return Properties.Resources.UpdateFoundButtonTooltipText; } }
 
+        public string HelpHeader
+        { get { return Properties.Resources.HelpHeader; } }
+
+        public string HelpHeaderTooltipText
+        { get { return Properties.Resources.HelpHeaderTooltip; } }
+
         #endregion
 
         #region action methods
@@ -270,6 +276,11 @@ namespace DeepfreezeApp
 
             if (!IsPreferencesFlyoutOpen)
                 this.TogglePreferencesFlyout();
+        }
+
+        public void OpenHelp()
+        {
+            Process.Start(Properties.Settings.Default.BigStashSupportURL);
         }
 
         public void ExitApplication()
