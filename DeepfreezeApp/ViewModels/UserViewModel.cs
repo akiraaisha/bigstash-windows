@@ -179,7 +179,7 @@ namespace DeepfreezeApp
             // Delete the active authorization BigStash token.
             try
             {
-                await this._deepfreezeClient.DeleteConnectedTokenAsync();
+                await this._deepfreezeClient.DeleteTokenAsync(this._deepfreezeClient.Settings.ActiveToken);
             }
             catch(Exception e)
             {
@@ -193,7 +193,7 @@ namespace DeepfreezeApp
 
                 // Finally publish a message to notify for the login change.
                 // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
-                this._eventAggregator.PublishOnBackgroundThread(IoC.Get<ILogoutMessage>());
+                this._eventAggregator.PublishOnUIThread(IoC.Get<ILogoutMessage>());
             }
         }
 
