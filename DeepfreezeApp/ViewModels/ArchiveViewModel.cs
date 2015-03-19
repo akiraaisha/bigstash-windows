@@ -688,16 +688,22 @@ namespace DeepfreezeApp
                 if (!this._isUserCancel)
                     this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
 
-                if (e is UnauthorizedAccessException)
+                if (e is UnauthorizedAccessException ||
+                    e is DirectoryNotFoundException ||
+                    e is FileNotFoundException)
+                {
                     this.ErrorSelectingFiles += " " + e.Message;
+                }
+                else
+                {
+                    if (e.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
+                        this.ErrorSelectingFiles = e.Message;
 
-                if (e.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
-                    this.ErrorSelectingFiles = e.Message;
-
-                // if the selection includes no files and a restricted folder WASN'T in the selection
-                // then show the no files to upload error message.
-                if (this._archiveInfo.Count == 0 && !this._isUserCancel)
-                    this.ErrorSelectingFiles = e.Message;
+                    // if the selection includes no files and a restricted folder WASN'T in the selection
+                    // then show the no files to upload error message.
+                    if (this._archiveInfo.Count == 0 && !this._isUserCancel)
+                        this.ErrorSelectingFiles = e.Message;
+                }
 
                 this.IsReset = true;
 
