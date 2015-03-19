@@ -251,6 +251,10 @@ namespace DeepfreezeApp
 
         public void ShowOptionsContextMenu(object sender)
         {
+            InstatiatePreferencesViewModel();
+            InstatiateNotificationsViewModel();
+            InstatiateAboutViewModel();
+            
             var button = sender as System.Windows.Controls.Button;
             button.ContextMenu.PlacementTarget = button;
             button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
@@ -713,7 +717,11 @@ namespace DeepfreezeApp
             {
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
             }
-            this.ActivateItem(PreferencesVM);
+
+            if (!this.PreferencesVM.IsActive)
+            {
+                this.ActivateItem(PreferencesVM);
+            }
         }
 
         /// <summary>
@@ -725,7 +733,11 @@ namespace DeepfreezeApp
             {
                 AboutVM = IoC.Get<IAboutViewModel>() as AboutViewModel;
             }
-            this.ActivateItem(AboutVM);
+
+            if (!this.AboutVM.IsActive)
+            {
+                this.ActivateItem(AboutVM);
+            }
         }
 
         /// <summary>
@@ -749,7 +761,11 @@ namespace DeepfreezeApp
             {
                 this.ActivityVM = IoC.Get<IActivityViewModel>() as ActivityViewModel;
             }
-            this.ActivateItem(this.ActivityVM);
+
+            if (!this.ActivityVM.IsActive)
+            {
+                this.ActivateItem(ActivityVM);
+            }
         }
 
         /// <summary>
