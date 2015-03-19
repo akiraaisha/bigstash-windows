@@ -548,7 +548,14 @@ namespace DeepfreezeApp
 
             this._eventAggregator.Subscribe(this);
 
-            await this.LoadLicensesAsync().ConfigureAwait(false);
+            try
+            {
+                await this.LoadLicensesAsync().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
 
         protected override void OnDeactivate(bool close)
