@@ -189,11 +189,6 @@ namespace DeepfreezeApp
                     // Save preferences file.
                     LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.UTF8, true);
                 }
-                else
-                {
-                    _log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".");
-                    File.Delete(Properties.Settings.Default.SettingsFilePath);
-                }
 
                 if (Properties.Settings.Default.SettingsUpgradeRequired)
                 {
