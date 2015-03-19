@@ -99,47 +99,6 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Return all active Deepfreeze authorization Tokens for the authorized user.
-        /// </summary>
-        /// <returns>Token</returns>
-        public async Task<List<Token>> GetTokensAsync()
-        {
-            var request = CreateHttpRequestWithSignature(GET, _tokenUri);
-            HttpResponseMessage response;
-
-            try
-            {
-                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
-                {
-                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
-                }
-
-                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                JObject json = JObject.Parse(content);
-
-                if ((int)json["count"] > 0)
-                {
-                    var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
-                    return tokens;
-                }
-                else
-                {
-                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
-                }
-            }
-            catch (Exception e)
-            {
-                // If the caught exception is a BigStashException, then return it immediately
-                // in order to be propagated to the higher caller as is, without wrapping it in
-                // a new BigStashException instance.
-                if (e is BigStashException)
-                    throw;
-
-                throw this.BigStashExceptionHandler(e);
-            }
-        }
-
-        /// <summary>
         /// Create a new Deepfreeze API token using user credentials.
         /// </summary>
         /// <param name="authorizationString"></param>
