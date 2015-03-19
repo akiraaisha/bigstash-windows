@@ -223,6 +223,10 @@ namespace DeepfreezeApp
         public void ToggleAboutFlyout()
         {
             this.IsAboutFlyoutOpen = !this.IsAboutFlyoutOpen;
+            if (this.AboutVM == null)
+            {
+                this.InstatiateAboutViewModel();
+            }
             this.AboutVM.TabSelectedIndex = 0;
 
             if (this.IsAboutFlyoutOpen)
