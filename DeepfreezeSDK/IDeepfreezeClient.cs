@@ -32,6 +32,13 @@ namespace DeepfreezeSDK
         Task<Token> CreateTokenAsync(string authorizationString);
 
         /// <summary>
+        /// Send a DELETE 'token.url' request which deletes BigStash authorization token
+        /// currently in use.
+        /// </summary>
+        /// <returns>bool</returns>
+        Task<bool> DeleteConnectedTokenAsync();
+
+        /// <summary>
         /// Get the BigStash User.
         /// </summary>
         /// <returns></returns>

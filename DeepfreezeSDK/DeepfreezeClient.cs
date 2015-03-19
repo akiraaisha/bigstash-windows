@@ -154,6 +154,40 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
+        /// Send a DELETE 'token.url' request which deletes BigStash authorization token
+        /// currently in use.
+        /// </summary>
+        /// <returns>bool</returns>
+        public async Task<bool> DeleteConnectedTokenAsync()
+        {
+            _log.Debug("Called DeleteCurrentTokenAsync to delete token at \"" + 
+                this.Settings.ActiveToken.Url + "\".");
+
+            var request = CreateHttpRequestWithSignature(DELETE, this.Settings.ActiveToken.Url, false);
+            HttpResponseMessage response;
+
+            try
+            {
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
+                {
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
+            }
+        }
+
+        /// <summary>
         /// Get the user info sending a GET request.
         /// </summary>
         /// <returns></returns>
