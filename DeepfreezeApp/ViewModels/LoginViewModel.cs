@@ -249,7 +249,7 @@ namespace DeepfreezeApp
                 this.ClearErrors();
 
                 // Publish LoginSuccess Message
-                this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
+                await this._eventAggregator.PublishOnUIThreadAsync(IoC.Get<ILoginSuccessMessage>());
             }
             catch (Exception e) 
             {
