@@ -346,7 +346,7 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(ILogoutMessage message)
         {
-            this.Disconnect();
+            this.Disconnect(shouldDeletePreferences: true);
         }
 
         /// <summary>
@@ -446,10 +446,6 @@ namespace DeepfreezeApp
         /// </summary>
         protected override async void OnActivate()
         {
-            base.OnActivate();
-
-            bool shouldDeleteToken = false;
-
             try
             {
                 // first try to read local preferences file
@@ -584,7 +580,7 @@ namespace DeepfreezeApp
                         case System.Net.HttpStatusCode.Forbidden:
                             HasError = false;
                             this.ErrorMessage = null;
-                            shouldDeleteToken = true;
+                            this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
                             break;
                     }
                 }
@@ -595,30 +591,7 @@ namespace DeepfreezeApp
                 this.BusyMessage = null;
             }
 
-            // If the current token is marked for deletion. After it gets deleted, 
-            // the client is disconnected, and the user needs to reconnect.
-            if (shouldDeleteToken)
-            {
-                this.IsBusy = true;
-                this.BusyMessage = "Clearing invalid connection data...";
-
-                try
-                {
-                    await this._deepfreezeClient.DeleteConnectedTokenAsync().ConfigureAwait(false);
-                }
-                catch(Exception e)
-                {
-                    // if the token fails to delete, just log it.
-                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
-                }
-                finally
-                {
-                    this.IsBusy = false;
-                    this.BusyMessage = null;
-                }
-
-                this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
-            }
+            base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
@@ -810,19 +783,27 @@ namespace DeepfreezeApp
         /// a new LoginViewModel so the user can try connecting again.
         /// </summary>
         /// <param name="errorMessage"></param>
-        private void Disconnect(string errorMessage = null)
+        private void Disconnect(string errorMessage = null, bool shouldDeletePreferences = false)
         {
             // Close the preferences flyout.
             if (this.IsPreferencesFlyoutOpen)
                 TogglePreferencesFlyout();
 
-            _log.Info("Disconnecting user, deleting \"" + Properties.Settings.Default.SettingsFilePath + "\".");
-
             // When logging out, we delete the the local preferences file and reset
             // DeepfreezeClient's settings to null, so no user is logged in.
             this._deepfreezeClient.Settings.ActiveUser = null;
             this._deepfreezeClient.Settings.ActiveToken = null;
-            File.Delete(Properties.Settings.Default.SettingsFilePath);
+
+            if (shouldDeletePreferences)
+            {
+                _log.Info("Disconnecting user and deleting preferences file.");
+                File.Delete(Properties.Settings.Default.SettingsFilePath);
+            }
+            else
+            {
+                _log.Info("Disconnecting user. Preferences file won't get deleted.");
+            }
+            
 
             NotifyOfPropertyChange(() => IsLoggedIn);
 
