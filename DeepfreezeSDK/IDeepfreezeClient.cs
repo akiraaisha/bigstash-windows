@@ -36,7 +36,7 @@ namespace DeepfreezeSDK
         /// currently in use.
         /// </summary>
         /// <returns>bool</returns>
-        Task<bool> DeleteConnectedTokenAsync();
+        Task<bool> DeleteTokenAsync(Token token = null);
 
         /// <summary>
         /// Get the BigStash User.

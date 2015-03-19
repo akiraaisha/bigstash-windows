@@ -158,12 +158,17 @@ namespace DeepfreezeSDK
         /// currently in use.
         /// </summary>
         /// <returns>bool</returns>
-        public async Task<bool> DeleteConnectedTokenAsync()
+        public async Task<bool> DeleteTokenAsync(Token token = null)
         {
+            if (token == null)
+            {
+                return true;
+            }
+
             _log.Debug("Called DeleteCurrentTokenAsync to delete token at \"" + 
                 this.Settings.ActiveToken.Url + "\".");
 
-            var request = CreateHttpRequestWithSignature(DELETE, this.Settings.ActiveToken.Url, false);
+            var request = CreateHttpRequestWithSignature(DELETE, token.Url, false);
             HttpResponseMessage response;
 
             try
