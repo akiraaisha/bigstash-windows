@@ -149,7 +149,10 @@ namespace DeepfreezeApp
             {
                 if (!value && this.IsActivityFlyoutOpen)
                 {
-                    this.ActivityVM.SetAllNotificationsAsRead();
+                    if (this.ActivityVM != null)
+                    {
+                        this.ActivityVM.SetAllNotificationsAsRead();
+                    }
                     // this.ActivityVM.ForgetBeyondPageOneResults();
                 }
 
