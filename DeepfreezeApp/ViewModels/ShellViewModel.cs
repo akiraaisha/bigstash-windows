@@ -446,6 +446,10 @@ namespace DeepfreezeApp
         /// </summary>
         protected override async void OnActivate()
         {
+            base.OnActivate();
+
+            bool shouldDeleteToken = false;
+
             try
             {
                 // first try to read local preferences file
@@ -574,11 +578,13 @@ namespace DeepfreezeApp
 
                     switch (bgex.StatusCode)
                     {
+                        // If the current token use returns unauthorized or forbidden
+                        // then mark it for deletion.
                         case System.Net.HttpStatusCode.Unauthorized:
                         case System.Net.HttpStatusCode.Forbidden:
                             HasError = false;
                             this.ErrorMessage = null;
-                            this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
+                            shouldDeleteToken = true;
                             break;
                     }
                 }
@@ -586,8 +592,32 @@ namespace DeepfreezeApp
             finally 
             { 
                 IsBusy = false;
+                this.BusyMessage = null;
+            }
 
-                base.OnActivate();
+            // If the current token is marked for deletion. After it gets deleted, 
+            // the client is disconnected, and the user needs to reconnect.
+            if (shouldDeleteToken)
+            {
+                this.IsBusy = true;
+                this.BusyMessage = "Clearing invalid connection data...";
+
+                try
+                {
+                    await this._deepfreezeClient.DeleteConnectedTokenAsync().ConfigureAwait(false);
+                }
+                catch(Exception e)
+                {
+                    // if the token fails to delete, just log it.
+                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                }
+                finally
+                {
+                    this.IsBusy = false;
+                    this.BusyMessage = null;
+                }
+
+                this.Disconnect(Properties.Resources.PreviousSessionNoLongerValidText);
             }
         }
 
