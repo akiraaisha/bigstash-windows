@@ -226,7 +226,7 @@ namespace DeepfreezeApp
 
             try
             {
-                var notificationsTuple = await this._deepfreezeClient.GetNotificationsAsync(url, etagToMatch: this._eTagPage1).ConfigureAwait(false);
+                var notificationsTuple = await this._deepfreezeClient.GetNotificationsAsync(url, etagToMatch: this._eTagPage1);
 
                 // if the result is null, then there was nothing to fetch
                 // Update the UI and return.
@@ -258,7 +258,7 @@ namespace DeepfreezeApp
                 // finally add it to the Notifications list.
                 foreach (var notification in notifications)
                 {
-                    if (this.Notifications.Contains(notification))
+                    if (this.Notifications.Select(x => x.Id).Contains(notification.Id))
                     {
                         continue;
                     }
