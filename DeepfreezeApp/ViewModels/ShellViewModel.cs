@@ -997,7 +997,8 @@ namespace DeepfreezeApp
                 return;
             }
 
-            if (this.UploadManagerVM == null)
+            if (this.UploadManagerVM == null ||
+                !this.UploadManagerVM.IsActive)
             {
                 return;
             }
