@@ -129,6 +129,8 @@ namespace DeepfreezeApp
                 _log.Debug("DEBUG MODE ON");
 #endif
 
+                CheckAndEnableVerboseDebugLogging();
+
                 // Set Application local app data folder and file paths
                 // in Application.Properties for use in this application instance.
                 SetApplicationPathsProperties();
@@ -521,6 +523,21 @@ namespace DeepfreezeApp
             catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
+        }
+
+        private void CheckAndEnableVerboseDebugLogging()
+        {
+            string debugMode = String.Empty;
+
+            if (Properties.Settings.Default.VerboseDebugLogging)
+            {
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                debugMode = log4net.Core.Level.Debug.DisplayName;
+
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+
+                _log.Warn("Changed minimum logging level to " + debugMode + ".");
             }
         }
 
