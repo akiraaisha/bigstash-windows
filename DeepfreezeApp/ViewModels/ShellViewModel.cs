@@ -486,7 +486,8 @@ namespace DeepfreezeApp
                     if (!(String.IsNullOrEmpty(content) ||
                           String.IsNullOrWhiteSpace(content)))
                     {
-                        this._deepfreezeClient.Settings.ApiEndpoint = content;
+                        this._deepfreezeClient.Settings.ApiEndpoint = content
+                            .TrimEnd(Environment.NewLine.ToCharArray());
                     }
                     else
                     {
