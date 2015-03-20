@@ -52,6 +52,7 @@ namespace DeepfreezeApp
         private DispatcherTimer _connectionTimer;
         private bool _isInternetConnected = true;
         private bool _restartNeeded = false;
+        private string _trayToolTipText = default(string);
 
         #endregion
 
@@ -201,6 +202,16 @@ namespace DeepfreezeApp
 
         public string HelpHeaderTooltipText
         { get { return Properties.Resources.HelpHeaderTooltip; } }
+
+        public string TrayToolTipText
+        {
+            get { return this._trayToolTipText; }
+            set
+            {
+                this._trayToolTipText = value;
+                NotifyOfPropertyChange(() => this.TrayToolTipText);
+            }
+        }
 
         #endregion
 
@@ -662,6 +673,8 @@ namespace DeepfreezeApp
             bool connectionStatusChanged = this.IsInternetConnected != isConnected;
             this.IsInternetConnected = isConnected;
 
+            UpdateTrayIconToolTipWithCurrentStatus();
+
             if (connectionStatusChanged)
             {
                 var internetConnectivityMessage = IoC.Get<IInternetConnectivityMessage>();
@@ -973,6 +986,41 @@ namespace DeepfreezeApp
                 var createArchiveMessage = IoC.Get<ICreateArchiveMessage>();
                 createArchiveMessage.Paths = paths.AsEnumerable();
                 await this._eventAggregator.PublishOnUIThreadAsync(createArchiveMessage);
+            }
+        }
+
+        private void UpdateTrayIconToolTipWithCurrentStatus()
+        {
+            if (!this.IsInternetConnected)
+            {
+                this.TrayToolTipText = "Connecting";
+                return;
+            }
+
+            if (this.UploadManagerVM.PendingUploads.Count > 0)
+            {
+                var uploadingCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Uploading)
+                    .Count();
+
+                var pausedCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Paused)
+                    .Count();
+
+                var errorCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Error)
+                    .Count();
+
+                var sb = new StringBuilder();
+                sb.Append(String.Format("Uploading: {0} - ", uploadingCount));
+                sb.Append(String.Format("Paused: {0} - ", pausedCount));
+                sb.Append(String.Format("Errors: {0}", errorCount));
+
+                this.TrayToolTipText = sb.ToString();
+            }
+            else
+            {
+                this.TrayToolTipText = null;
             }
         }
 
