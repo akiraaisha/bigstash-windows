@@ -156,7 +156,6 @@
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
                         IconSource="..\bigstash-windows-icon.ico"
-                        ToolTipText="BigStash"
                         MenuActivation="RightClick"
                         cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]; [Event TrayBalloonTipClicked] = [Action ShowShellWindow()]"
                         >
@@ -172,6 +171,28 @@
                               />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
+            
+            <tb:TaskbarIcon.TrayToolTip>
+                <Border Background="#FFFFFFFF"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Padding="5,1,6,2"
+                        >
+                    <StackPanel>
+                        <TextBlock Foreground="#FF575757"
+                                   TextOptions.TextFormattingMode="Display"
+                                   Text="BigStash"
+                                   />
+                        <TextBlock Foreground="#FF575757"
+                                   TextOptions.TextFormattingMode="Display"
+                                   FontStyle="Italic"
+                                   Text="{Binding Data.TrayToolTipText, Source={StaticResource BindingProxy}}"
+                                   Visibility="{Binding Data.TrayToolTipText, Source={StaticResource BindingProxy}, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}">
+                        </TextBlock>
+                    </StackPanel>
+                    
+                </Border>
+            </tb:TaskbarIcon.TrayToolTip>
 
         </tb:TaskbarIcon>
 
