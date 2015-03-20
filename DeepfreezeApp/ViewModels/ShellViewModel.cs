@@ -242,10 +242,14 @@ namespace DeepfreezeApp
                 this.IsAboutFlyoutOpen = false;
                 this.IsPreferencesFlyoutOpen = false;
 
-                // Send a message to fetch the latest notifications
-                var fetchNotificationsMessage = IoC.Get<IFetchNotificationsMessage>();
-                fetchNotificationsMessage.PagedResult = 1;
-                this._eventAggregator.PublishOnUIThreadAsync(fetchNotificationsMessage);
+                // When not busy (already fetching notifications),
+                // send a message to fetch the latest notifications
+                if (!this.ActivityVM.IsBusy)
+                {
+                    var fetchNotificationsMessage = IoC.Get<IFetchNotificationsMessage>();
+                    fetchNotificationsMessage.PagedResult = 1;
+                    this._eventAggregator.PublishOnUIThreadAsync(fetchNotificationsMessage);
+                }
             }
             else
             {
