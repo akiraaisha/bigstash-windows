@@ -135,6 +135,14 @@ namespace DeepfreezeApp
                 return;
             }
 
+            // When the notifications list is empty,
+            // but the scroll handler somehow enters here
+            // then just return.
+            if (this.Notifications.Count == 0)
+            {
+                return;
+            }
+
             var scrollviewer = ((System.Windows.Controls.ListBox)sender).GetDescendantByType<System.Windows.Controls.ScrollViewer>();
 
             if (scrollviewer == null)
