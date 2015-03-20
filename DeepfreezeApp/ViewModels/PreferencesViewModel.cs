@@ -174,7 +174,8 @@ namespace DeepfreezeApp
         {
             this.TryUpdateRunOnStartupKey();
 
-            if (Properties.Settings.Default.VerboseDebugLogging)
+            if (Properties.Settings.Default.VerboseDebugLogging &&
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level == log4net.Core.Level.Info)
             {
                 this.FlipVerboseDebugLogging();
             }
