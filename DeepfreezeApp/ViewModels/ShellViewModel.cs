@@ -997,6 +997,11 @@ namespace DeepfreezeApp
                 return;
             }
 
+            if (this.UploadManagerVM == null)
+            {
+                return;
+            }
+
             if (this.UploadManagerVM.PendingUploads.Count > 0)
             {
                 var uploadingCount = this.UploadManagerVM.PendingUploads
