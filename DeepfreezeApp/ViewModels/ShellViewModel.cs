@@ -444,7 +444,7 @@ namespace DeepfreezeApp
         protected override void OnViewLoaded(object view)
         {
             var v = view as MetroWindow;
-            v.Title = Properties.Settings.Default.ApplicationName;
+            v.Title = Properties.Settings.Default.ApplicationFullName;
 
             if (v != null)
             {
