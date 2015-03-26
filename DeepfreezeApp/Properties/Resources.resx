@@ -177,7 +177,7 @@
     <value>Open Log</value>
   </data>
   <data name="DebugHelpText" xml:space="preserve">
-    <value>If you're experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "BigStashLog.txt".</value>
+    <value>If you're experiencing problems with the BigStash application, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "BigStashLog.txt".</value>
   </data>
   <data name="DeleteButtonContent" xml:space="preserve">
     <value>Delete</value>
@@ -207,7 +207,7 @@
     <value> Free / </value>
   </data>
   <data name="MinimizedMessageText" xml:space="preserve">
-    <value>BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
+    <value>BigStash will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
   </data>
   <data name="NoInternetConnectionMessage" xml:space="preserve">
     <value>No internet connection found. Please ensure you are connected to a network with Internet access.</value>
@@ -298,7 +298,7 @@
     <value>was successfully uploaded.</value>
   </data>
   <data name="UpToDateText" xml:space="preserve">
-    <value>BigStash for Windows is up to date.</value>
+    <value>BigStash is up to date.</value>
   </data>
   <data name="UsedText" xml:space="preserve">
     <value> Used / </value>
@@ -363,11 +363,11 @@
     <comment>Used for displaying a user friendly message if there's an error while creating a new archive (after sending the relevant DF API request).</comment>
   </data>
   <data name="ErrorDownloadingUpdateGenericText" xml:space="preserve">
-    <value>The new version of BigStash for Windows cannot be downloaded at this time.</value>
+    <value>The new version of BigStash cannot be downloaded at this time.</value>
     <comment>Used for displaying a user friendly message if the client's update cannot be downloaded (maybe the host server is unavailable or the update file is missing).</comment>
   </data>
   <data name="ErrorInvalidDeploymentExceptionGenericText" xml:space="preserve">
-    <value>Cannot check for a new version of BigStash for Windows. Please reinstall the application.</value>
+    <value>Cannot check for a new version of BigStash. Please reinstall the application.</value>
     <comment>Used for displaying a user friendly message if the client installation is not a valid network installation (i.e. the user somehow installed not a valid production setup application) and the check for update fails.</comment>
   </data>
   <data name="ErrorInvalidOperationCheckingForUpdateGenericText" xml:space="preserve">

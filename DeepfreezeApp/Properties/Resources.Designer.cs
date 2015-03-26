@@ -295,7 +295,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with the BigStash application, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
@@ -457,7 +457,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The new version of BigStash for Windows cannot be downloaded at this time..
+        ///   Looks up a localized string similar to The new version of BigStash cannot be downloaded at this time..
         /// </summary>
         internal static string ErrorDownloadingUpdateGenericText {
             get {
@@ -502,7 +502,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot check for a new version of BigStash for Windows. Please reinstall the application..
+        ///   Looks up a localized string similar to Cannot check for a new version of BigStash. Please reinstall the application..
         /// </summary>
         internal static string ErrorInvalidDeploymentExceptionGenericText {
             get {
@@ -691,7 +691,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        ///   Looks up a localized string similar to BigStash will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
         /// </summary>
         internal static string MinimizedMessageText {
             get {
@@ -1168,7 +1168,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BigStash for Windows is up to date..
+        ///   Looks up a localized string similar to BigStash is up to date..
         /// </summary>
         internal static string UpToDateText {
             get {

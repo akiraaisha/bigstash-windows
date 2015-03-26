@@ -116,11 +116,11 @@ namespace DeepfreezeApp
                 var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
                 this.SetVersionForUserAgent(currentVersion);
 
-                _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
+                _log.Info("Starting up a new instance of BigStash " + currentVersion + ".");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
                 _log.Info("*********                                  **********");
-                _log.Info("*********       BigStash for Windows       **********");
+                _log.Info("*********             BigStash             **********");
                 _log.Info("*********                                  **********");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
@@ -311,7 +311,7 @@ namespace DeepfreezeApp
 
         /// <summary>
         /// Set the deepfreeze icon in Control Panel's Programs and Features entry 
-        /// for the BigStash for Windows application.
+        /// for the BigStash application.
         /// </summary>
         private static void SetAddRemoveProgramsIcon()
         {
@@ -332,7 +332,7 @@ namespace DeepfreezeApp
                     Microsoft.Win32.RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
                     object diplayNameValue = subKey.GetValue("DisplayName");
 
-                    // if subKey points to the correct BigStash for Windows entry
+                    // if subKey points to the correct BigStash entry
                     // then update its DisplayIcon key value.
                     if (diplayNameValue != null &&
                         diplayNameValue.ToString() == Properties.Settings.Default.ApplicationFullName)
