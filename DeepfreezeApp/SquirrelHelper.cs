@@ -241,7 +241,7 @@ namespace DeepfreezeApp
         {
             try
             {
-                var migrator = new InSquirrelAppMigrator(Properties.Settings.Default.ApplicationFullName);
+                var migrator = new InSquirrelAppMigrator("BigStash for Windows");
                 await migrator.Execute();
             }
             catch (Exception e)
