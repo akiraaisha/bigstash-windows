@@ -202,7 +202,7 @@ namespace DeepfreezeApp
 
                 _log.Info("Connecting user with email \"" + this.UsernameInput + "\".");
 
-                var authorizationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
+                var authorizationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
                 var token = await _deepfreezeClient.CreateTokenAsync(authorizationString);
 
                 if (token == null)
