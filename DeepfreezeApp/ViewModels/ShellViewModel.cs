@@ -203,6 +203,9 @@ namespace DeepfreezeApp
         public string HelpHeaderTooltipText
         { get { return Properties.Resources.HelpHeaderTooltip; } }
 
+        public string ApplicationTitle
+        { get { return Properties.Settings.Default.ApplicationFullName; } }
+
         public string TrayToolTipText
         {
             get { return this._trayToolTipText; }
@@ -444,7 +447,7 @@ namespace DeepfreezeApp
         protected override void OnViewLoaded(object view)
         {
             var v = view as MetroWindow;
-            v.Title = Properties.Settings.Default.ApplicationFullName;
+            v.Title = this.ApplicationTitle;
 
             if (v != null)
             {
