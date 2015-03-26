@@ -113,7 +113,7 @@ namespace DeepfreezeApp
                 if (!String.IsNullOrEmpty(Properties.Settings.Default.AWSEndpointDefinition))
                     ConfigurationManager.AppSettings["AWSEndpointDefinition"] = Properties.Settings.Default.AWSEndpointDefinition;
 #endif
-                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
                 this.SetVersionForUserAgent(currentVersion);
 
                 _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
