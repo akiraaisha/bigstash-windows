@@ -51,7 +51,11 @@ namespace DeepfreezeSDK
         {
             try
             {
-                AWSConfigs.CorrectForClockSkew = true; // enable clock skew correction since it defaults to false (should be true though (???))
+                // enable clock skew correction since it defaults to false (should always be true though)
+                if (!AWSConfigs.CorrectForClockSkew)
+                {
+                    AWSConfigs.CorrectForClockSkew = true;
+                }
 
                 // set the standard us region endpoint.
                 _s3Config = new AmazonS3Config();
