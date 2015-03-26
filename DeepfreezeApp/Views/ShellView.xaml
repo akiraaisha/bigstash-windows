@@ -181,7 +181,7 @@
                     <StackPanel>
                         <TextBlock Foreground="#FF575757"
                                    TextOptions.TextFormattingMode="Display"
-                                   Text="BigStash"
+                                   Text="{Binding Data.ApplicationTitle, Source={StaticResource BindingProxy}}"
                                    />
                         <TextBlock Foreground="#FF575757"
                                    TextOptions.TextFormattingMode="Display"
