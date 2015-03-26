@@ -116,7 +116,7 @@ namespace DeepfreezeApp
                 var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
                 this.SetVersionForUserAgent(currentVersion);
 
-                _log.Info("Starting up a new instance of BigStash " + currentVersion + ".");
+                _log.Info("Starting up a new instance of " + Properties.Settings.Default.ApplicationFullName + " " + currentVersion + ".");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
                 _log.Info("*********                                  **********");
