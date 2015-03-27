@@ -22,6 +22,7 @@ Added: Disconnecting deletes the BigStash authorized token for the application i
 Fixed: Application name is now 'BigStash' from 'BigStash for Windows'. This change is manifested everywhere the was an appearance of the application name.
 Fixed: When viewing the excluded files dialog, upon creating a new archive, the dialog's title is now trimmed if it doesn't fit in the dialog's width.
 Fixed: Some cases when the files uploaded included the original drive letter in their name.
+Other: Reduce the total application installation size to almost 50% to less than 5 MB.
 Other: Several minor bug fixes, performance and stability improvements.
 
 1.4.1.5
