@@ -104,6 +104,24 @@ namespace DeepfreezeModel
             [StringValue("Restricted directory")]
             RestrictedDirectory
         }
+
+        public enum NotificationStatus
+        {
+            [StringValue("success")]
+            Success,
+            [StringValue("info")]
+            Info,
+            [StringValue("error")]
+            Error,
+            [StringValue("staged")]
+            Staged,
+            [StringValue("requested")]
+            Requested,
+            [StringValue("started")]
+            Started,
+            [StringValue("finished")]
+            Finished
+        }
     }
 
     /// <summary>

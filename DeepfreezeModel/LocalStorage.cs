@@ -18,7 +18,7 @@ namespace DeepfreezeModel
         /// <param name="path"></param>
         /// <param name="json"></param>
         /// <returns>bool</returns>
-        public static bool WriteJson(string path, object json, Encoding encoding)
+        public static bool WriteJson(string path, object json, Encoding encoding, bool handleExceptions = false)
         {
             lock (_syncLock)
             {
@@ -64,8 +64,17 @@ namespace DeepfreezeModel
                     return true;
 
                 }
-                catch (Exception e)
-                { throw e; }
+                catch (Exception)
+                {
+                    if (handleExceptions)
+                    {
+                        return false;
+                    }
+                    else
+                    { 
+                        throw; 
+                    }
+                }
             }
         }
     }

@@ -276,6 +276,83 @@ namespace DeepfreezeApp
             return exponential;
         }
 
+        public static DateTime ConvertDateUTCToLocalTimeZone(DateTime date)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(date, TimeZoneInfo.Local);
+        }
+
+        public static string RemoveHrefFromString(string verb)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(verb);
+
+            // replace the ending of href tags since that's easy.
+            sb.Replace("</a>", "");
+
+            // Strip the verb from all href tags.
+            // Get the <a and </a> index.
+
+            while (true)
+            {
+                var temp = sb.ToString();
+                var startIndex = temp.IndexOf("<a href=");
+                var endIndex = -1;
+
+                if (startIndex > 0)
+                {
+                    endIndex = temp.IndexOf(">", startIndex);
+                }
+
+                verb = null;
+
+                if (startIndex < endIndex)
+                {
+                    sb.Remove(startIndex, endIndex - startIndex + 1);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Reads the lines of the selection file saved under %LOCALAPPDATA%\BigStash as selectionfile.txt,
+        /// which was created when the user used the Shell Context Menu Extension "Stash away".
+        /// This file contains all the paths the user selected, one at each line. So, simply reading the lines
+        /// shoud suffice.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<string>> ReadPathsFromSelectionFileAsync(string path)
+        {
+            IList<string> paths = new List<string>();
+
+            try
+            {
+                using (var sr = new StreamReader(path))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        var line = await sr.ReadLineAsync();
+
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            paths.Add(line);
+                        }
+                    }
+                }
+
+                return paths;
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
         #region shell32_code
         ///// <summary>
         ///// Check if path is a shortcut, either a .lnk file or a .appref-ms.

@@ -13,6 +13,7 @@ using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
 using DeepfreezeModel;
 using System.Windows.Input;
+using System.Windows;
 
 namespace DeepfreezeApp
 {
@@ -201,7 +202,7 @@ namespace DeepfreezeApp
 
                 _log.Info("Connecting user with email \"" + this.UsernameInput + "\".");
 
-                var authorizationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
+                var authorizationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", UsernameInput, PasswordInput)));
                 var token = await _deepfreezeClient.CreateTokenAsync(authorizationString);
 
                 if (token == null)
@@ -234,13 +235,21 @@ namespace DeepfreezeApp
                 _log.Info("Fetched User is valid, saving to \"" + Properties.Settings.Default.SettingsFilePath + "\".");
 
                 // Save preferences file.
-                await Task.Run(() => LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.ASCII))
-                    .ConfigureAwait(false);
+                var writeSuccess = LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8, true);
+
+                if (!writeSuccess)
+                {
+                    var windowManager = IoC.Get<IWindowManager>();
+                    await windowManager.ShowMessageViewModelAsync("There was an error while trying to save your settings. " +
+                        "Please make sure that you have enough free space on your hard drive.\n\n" +
+                        "You may have to reconnect your BigStash account the next time you run the BigStash application.", "Error saving settings", 
+                        MessageBoxButton.OK);
+                }
 
                 this.ClearErrors();
 
                 // Publish LoginSuccess Message
-                this._eventAggregator.PublishOnCurrentThread(IoC.Get<ILoginSuccessMessage>());
+                await this._eventAggregator.PublishOnUIThreadAsync(IoC.Get<ILoginSuccessMessage>());
             }
             catch (Exception e) 
             {

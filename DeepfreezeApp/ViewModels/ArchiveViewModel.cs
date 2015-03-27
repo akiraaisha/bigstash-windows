@@ -21,7 +21,8 @@ using System.Threading;
 namespace DeepfreezeApp
 {
     [Export(typeof(IArchiveViewModel))]
-    public class ArchiveViewModel : Screen, IArchiveViewModel, IHandle<IInternetConnectivityMessage>
+    public class ArchiveViewModel : Screen, IArchiveViewModel, IHandle<IInternetConnectivityMessage>,
+        IHandleWithTask<ICreateArchiveMessage>
     {
         #region fields
 
@@ -49,14 +50,19 @@ namespace DeepfreezeApp
 
         private Dictionary<string, Enumerations.FileCategory> _excludedFiles = new Dictionary<string, Enumerations.FileCategory>(StringComparer.OrdinalIgnoreCase);
 
-        private string _baseDirectory;
-
         private string _totalFilesToArchiveText;
         private string _totalFilesToExcludeText;
 
         private string _excludedFilesText;
 
         private bool _isUserCancel = false;
+
+        private enum SelectionMode
+        {
+            Folder,
+            DragDrop,
+            ShellContextMenu
+        }
 
         #endregion
 
@@ -194,11 +200,6 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task ChooseFolder()
         {
-            // Clear list with archive files info.
-            this._archiveInfo.Clear();
-            // Clear errors
-            ErrorSelectingFiles = null;
-
             // Show the FolderBrowserDialog.
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             dialog.ShowNewFolderButton = false;
@@ -206,62 +207,12 @@ namespace DeepfreezeApp
             var result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
-                IsReset = false;
-                IsBusy = true;
-                BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
+                var dir = dialog.SelectedPath;
 
-                try
-                {
-                    var dir = dialog.SelectedPath;
+                var paths = new List<string>();
+                paths.Add(dir);
 
-                    // get the base directory of the selection.
-                    // if the path starts with 2 backslashes then it's a network location.
-                    if (dir.StartsWith(@"\\"))
-                    {
-                        int lastIndexOfBackSlash = dir.LastIndexOf('\\');
-                        string selectedDirName = dir.Substring(lastIndexOfBackSlash);
-                        this._baseDirectory = dir.Replace(selectedDirName, "") + "\\";
-                    }
-                    else
-                    {
-                        this._baseDirectory = Path.GetDirectoryName(dir) + "\\";
-                    }
-
-                    _log.Info("Selected directory \"" + dir + "\".");
-
-                    var paths = new List<string>();
-                    paths.Add(dir);
-
-                    this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
-
-                    this.SetTotalsTexts();
-
-                    HasChosenFiles = true;
-                }
-                catch (Exception e)
-                {
-                    _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"", e);
-
-                    if (!this._isUserCancel)
-                        this.ErrorSelectingFiles = Properties.Resources.ErrorChoosingFolderGenericText;
-
-                    if (e is UnauthorizedAccessException)
-                        this.ErrorSelectingFiles += " " + e.Message;
-
-                    if (e.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
-                        this.ErrorSelectingFiles = e.Message;
-
-                    // if the selection includes no files and a restricted folder WASN'T in the selection
-                    // then show the no files to upload error message.
-                    if (this._archiveInfo.Count == 0 && !this._isUserCancel)
-                        this.ErrorSelectingFiles = e.Message;
-
-                    this.IsReset = true;
-
-                    if (this._isUserCancel)
-                        this.Reset();
-                }
-                finally { IsBusy = false; }
+                await this.PrepareArchivePathsAndSizeAsync(paths, SelectionMode.Folder).ConfigureAwait(false);
             }
         }
 
@@ -287,82 +238,21 @@ namespace DeepfreezeApp
         /// <returns></returns>
         public async Task HandleDrop(DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                // Clear list with paths.
-                this._archiveInfo.Clear();
-                // Clear errors
-                ErrorSelectingFiles = null;
-
-                var paths = new List<string>();
-                // get paths from drop action.
-                paths.AddRange((string[])e.Data.GetData(DataFormats.FileDrop));
-
-                if (paths.Count() > 0)
-                {
-                    IsReset = false;
-                    IsBusy = true;
-                    BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
-
-                    string parentDirOfSelection = paths.FirstOrDefault();
-
-                    // get the base directory of the selection.
-                    // if the path starts with 2 backslashes then it's a network location.
-                    if (parentDirOfSelection.StartsWith(@"\\"))
-                    {
-                        int lastIndexOfBackSlash = parentDirOfSelection.LastIndexOf('\\');
-                        string selectedDirName = parentDirOfSelection.Substring(lastIndexOfBackSlash);
-                        this._baseDirectory = parentDirOfSelection.Replace(selectedDirName, "") + "\\";
-                    }
-                    else
-                    {
-                        var parentDirName = Path.GetDirectoryName(parentDirOfSelection);
-                        if (String.IsNullOrEmpty(parentDirName))
-                        {
-                            this._baseDirectory = Path.GetPathRoot(parentDirOfSelection);
-                        }
-                        else
-                        {
-                            this._baseDirectory = Path.GetDirectoryName(paths.FirstOrDefault()) + "\\";
-                        }
-                    }
-                    
-                    _log.Info("Drag and dropped files from directory \"" + this._baseDirectory + "\".");
-
-                    try
-                    {
-                        this._archiveSize = await this.PrepareArchivePathsAndSize(paths);
-
-                        this.SetTotalsTexts();
-
-                        HasChosenFiles = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.Error(Utilities.GetCallerName() + " threw " + ex.GetType().ToString() + " with message \"" + ex.Message + "\"", ex);
-
-                        if (!this._isUserCancel)
-                            this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
-
-                        if (ex is UnauthorizedAccessException)
-                            this.ErrorSelectingFiles += " " + ex.Message;
-
-                        if (ex.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
-                            this.ErrorSelectingFiles = ex.Message;
-
-                        // if the selection includes no files and a restricted folder WASN'T in the selection
-                        // then show the no files to upload error message.
-                        if (this._archiveInfo.Count == 0 && !this._isUserCancel)
-                            this.ErrorSelectingFiles = ex.Message;
-
-                        this.IsReset = true;
-
-                        if (this._isUserCancel)
-                            this.Reset();
-                    }
-                    finally { IsBusy = false; }
-                }
+                return;
             }
+
+            var paths = new List<string>();
+            // get paths from drop action.
+            paths.AddRange((string[])e.Data.GetData(DataFormats.FileDrop));
+
+            if (paths.Count == 0)
+            {
+                return;
+            }
+
+            await this.PrepareArchivePathsAndSizeAsync(paths, SelectionMode.DragDrop).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -436,19 +326,19 @@ namespace DeepfreezeApp
         /// </summary>
         public void Reset()
         {
-            IsBusy = false;
-            HasChosenFiles = false;
-            ArchiveTitle = null;
-            ArchiveSizeText = null;
+            this.IsBusy = false;
+            this.HasChosenFiles = false;
+            this.ArchiveTitle = null;
+            this.ArchiveSizeText = null;
             this._archiveSize = 0;
-            ErrorSelectingFiles = null;
-            ErrorCreatingArchive = null;
+            this.ErrorSelectingFiles = null;
+            this.ErrorCreatingArchive = null;
             this._archiveInfo.Clear();
             this._excludedFiles.Clear();
             this.HasInvalidFiles = false;
             this.TotalFilesToExcludeText = null;
             this._isUserCancel = false;
-            IsReset = true;
+            this.IsReset = true;
         }
 
         public async void ExportInvalidFilesList()
@@ -494,8 +384,17 @@ namespace DeepfreezeApp
         /// </summary>
         /// <param name="paths"></param>
         /// <returns></returns>
-        private async Task<long> PrepareArchivePathsAndSize(IEnumerable<string> paths)
+        private async Task PrepareArchivePathsAndSizeAsync(IEnumerable<string> paths, SelectionMode selectionMode)
         {
+            // Clear list with archive files info.
+            this._archiveInfo.Clear();
+            // Clear errors
+            ErrorSelectingFiles = null;
+
+            IsReset = false;
+            IsBusy = true;
+            BusyMessageText = Properties.Resources.CalculatingTotalArchiveSizeText;
+
             try
             {
                 long size = 0;
@@ -518,6 +417,11 @@ namespace DeepfreezeApp
 
                         if (!isDirectoryRestricted)
                         {
+                            if (directories.Contains(p))
+                            {
+                                continue;
+                            }
+
                             directories.Add(p);
                         }
                         else
@@ -527,24 +431,99 @@ namespace DeepfreezeApp
                     }
                         
                     else
+                    {
+                        if (files.Contains(p))
+                        {
+                            continue;
+                        }
+
                         files.Add(p);
+                    }
                 }
 
-                var subDirectories = new List<string>();
+                // If the initial selection includes just one folder,
+                // then set the archive's title to its name. (step 1)
+                if (directories.Count == 1 && files.Count == 0)
+                    this.ArchiveTitle = new DirectoryInfo(directories.First()).Name;
 
-                // Get all subdirectories under the 1st selected directory, again ignoring any junction points.
+                // The directories list may contain subdirectories of some of its elements.
+                // We need to remove them because we need to add them later on in the subDirectories dictionary
+                // so we can get the correct grandparent value.
+                var dirsToRemove = new List<string>();
+                foreach (var dir in directories)
+                {
+                    var dirInfo = new DirectoryInfo(dir);
+                    var subDirs = dirInfo.GetDirectories().Select(x => x.FullName);
+
+                    foreach (var sub in subDirs)
+                    {
+                        if (directories.Contains(sub) && !dirsToRemove.Contains(sub))
+                        {
+                            dirsToRemove.Add(sub);
+                        }
+                    }
+
+                    dirInfo = null;
+                    subDirs = null;
+                }
+
+                foreach(var dirToRemove in dirsToRemove)
+                {
+                    directories.Remove(dirToRemove);
+                }
+
+                dirsToRemove.Clear();
+                dirsToRemove = null;
+
+                var subDirectories = new Dictionary<string, string>();
+                // Okay now find all the subdirectories to include respecting restrictions.
                 foreach (var dir in directories)
                 {
                     var subsWithoutJunctions = await IgnoreJunctionsUnderPath(dir);
-                    subDirectories.AddRange(subsWithoutJunctions.OrderBy(x => x));
+
+                    foreach(var sub in subsWithoutJunctions.OrderBy(x => x))
+                    {
+                        if (subDirectories.Keys.Contains(sub))
+                        {
+                            continue;
+                        }
+
+                        // for each subdirectory to include we create a key with the dir's parent as a value.
+                        // we will need this to find the prefix to remove for the key names.
+                        subDirectories.Add(sub, Directory.GetParent(dir).FullName + "\\");
+                    }
+
+                    subsWithoutJunctions.Clear();
+                    subsWithoutJunctions = null;
                 }
 
                 // add all found subdirectories in the directories list
                 // which will be scanned for files at the top level for each directory.
                 if (subDirectories.Count > 0)
-                    directories.AddRange(subDirectories);
+                {
+                    foreach(var sub in subDirectories.Keys)
+                    {
+                        if (directories.Contains(sub))
+                        {
+                            continue;
+                        }
 
+                        directories.Add(sub);
+                    }
+                }
+
+                // REMARK
+                // We want to handle directories first. The main reason behind this is that in search results
+                // one file may be contained more than one time. If a descendant directory of this file is contained
+                // in the results, then we want the file to be included with a key name indicating this hierarchy.
+                // The "clean" selection of the file from the search results, will have to be ignored.
+                //
+                // Example: C:\test\test.txt
+                // Searching for 'test' will return two results, the test folder and the test.txt file.
+                // Selecting both, will add the same path two times. But the folder result will get included
+                // first in the _archiveInfo list, and when the code tries to add the 'clean
                 // for all directories selected for archiving, add all files in _archiveFileInfo.
+
                 foreach (var dir in directories)
                 {
                     // Fetch all files in directory, only those on the top level.
@@ -556,6 +535,11 @@ namespace DeepfreezeApp
                         {
                             foreach (var f in dirFiles)
                             {
+                                if (this._archiveInfo.Select(x => x.FilePath).Contains(f))
+                                {
+                                    continue;
+                                }
+
                                 var fileCategory = Utilities.CheckFileApiRestrictions(f);
 
                                 if (fileCategory != Enumerations.FileCategory.Normal)
@@ -569,15 +553,19 @@ namespace DeepfreezeApp
 
                                 // Check that the archive size does not exceed the maximum allowed file size.
                                 // S3 supports multipart uploads with up to 10000 parts and 5 TB max size.
-                                // Since DF supports part size of 10 MB, archive size must not exceed 10 MB * 10000
+                                // Since DF supports part size of 5 MB, archive size must not exceed 5 MB * 10000
                                 if (info.Length > MAX_ALLOWED_FILE_SIZE)
                                     throw new Exception("The file " + f + " exceeds the maximum allowed archive size of " +
                                         LongToSizeString.ConvertToString((double)MAX_ALLOWED_FILE_SIZE) + ".");
 
+                                var baseToRemove = (!subDirectories.Keys.Contains(dir))
+                                    ? Directory.GetParent(dir).FullName + "\\"
+                                    : subDirectories[dir];
+
                                 var archiveFileInfo = new ArchiveFileInfo()
                                 {
                                     FileName = info.Name,
-                                    KeyName = f.Replace(this._baseDirectory, "").Replace('\\', '/'),
+                                    KeyName = f.Replace(baseToRemove, "").Replace('\\', '/'),
                                     FilePath = f,
                                     Size = info.Length,
                                     LastModified = info.LastWriteTimeUtc,
@@ -597,14 +585,22 @@ namespace DeepfreezeApp
                 // Remove the subdirectories from the directories list, so only the initially selected
                 // directory(ies) is left. We need to keep clean the directories list, so the code below
                 // suggesting an upload name gets the corrent amount of initially selected directories.
-                foreach(string subDir in subDirectories)
+                foreach(string subDir in subDirectories.Values)
                 {
                     directories.Remove(subDir);
                 }
 
+                subDirectories.Clear();
+                subDirectories = null;
+
                 // do the same for each individually selected files.
                 foreach (var f in files)
                 {
+                    if (this._archiveInfo.Select(x => x.FilePath).Contains(f))
+                    {
+                        continue;
+                    }
+
                     var fileCategory = Utilities.CheckFileApiRestrictions(f);
 
                     if (fileCategory != Enumerations.FileCategory.Normal)
@@ -667,22 +663,59 @@ namespace DeepfreezeApp
                         throw new Exception(Properties.Resources.ErrorNotEnoughSpaceGenericText);
                 }
 
-                // suggest an archive title
-                if (directories.Count == 1 && files.Count == 0)
-                    this.ArchiveTitle = new DirectoryInfo(directories.First()).Name;
-                else if (this._archiveInfo.Count == 1)
-                    this.ArchiveTitle = this._archiveInfo.First().FileName;
-                else
-                    this.ArchiveTitle = "upload-" + String.Format("{0:yyyy-MM-dd}", DateTime.Now);
+                // suggest an archive title step 2
+                // if the title wasn't set in the previous step, suggest one.
+                if (String.IsNullOrEmpty(this.ArchiveTitle))
+                {
+                    if (this._archiveInfo.Count == 1)
+                        this.ArchiveTitle = this._archiveInfo.First().FileName;
+                    else
+                        this.ArchiveTitle = "upload-" + String.Format("{0:yyyy-MM-dd}", DateTime.Now);
+                }
 
-                return size;
+                this._archiveSize = size;
+
+                this.SetTotalsTexts();
+
+                this.HasChosenFiles = true;
+                
+                return;
             }
             catch (Exception e)
             {
-                this._excludedFiles.Clear();
-                throw e;
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\"", e);
+
+                if (!this._isUserCancel)
+                    this.ErrorSelectingFiles = Properties.Resources.ErrorAddingFilesGenericText;
+
+                if (e is UnauthorizedAccessException ||
+                    e is DirectoryNotFoundException ||
+                    e is FileNotFoundException)
+                {
+                    this.ErrorSelectingFiles += " " + e.Message;
+                }
+                else
+                {
+                    if (e.Message == Properties.Resources.ErrorNotEnoughSpaceGenericText)
+                        this.ErrorSelectingFiles = e.Message;
+
+                    // if the selection includes no files and a restricted folder WASN'T in the selection
+                    // then show the no files to upload error message.
+                    if (this._archiveInfo.Count == 0 && !this._isUserCancel)
+                        this.ErrorSelectingFiles = e.Message;
+                }
+
+                this.IsReset = true;
+
+                if (this._isUserCancel)
+                    this.Reset();
+            }
+            finally 
+            { 
+                IsBusy = false; 
             }
         }
+
 
         private async Task<IList<string>> IgnoreJunctionsUnderPath(string root)
         {
@@ -888,6 +921,23 @@ namespace DeepfreezeApp
                 NotifyOfPropertyChange(() => this.UploadButtonTooltipText);
                 NotifyOfPropertyChange(() => this.CanUpload);
             }
+        }
+
+        public async Task Handle(ICreateArchiveMessage message)
+        {
+            if (message == null)
+            { 
+                return; 
+            }
+
+            if (message.Paths.Count() == 0)
+            {
+                return;
+            }
+
+            this.Reset();
+
+            await this.PrepareArchivePathsAndSizeAsync(message.Paths, SelectionMode.ShellContextMenu).ConfigureAwait(false);
         }
 
         #endregion

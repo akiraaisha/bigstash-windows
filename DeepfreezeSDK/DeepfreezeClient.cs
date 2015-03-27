@@ -15,11 +15,6 @@ using DeepfreezeModel;
 using DeepfreezeSDK.Exceptions;
 using DeepfreezeSDK.Retry;
 
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.Runtime;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using log4net;
@@ -45,6 +40,7 @@ namespace DeepfreezeSDK
         private readonly string _userUri = "user/";
         private readonly string _uploadsUri = "uploads/";
         private readonly string _archivesUri = "archives/";
+        private readonly string _notificationsUri = "notifications/";
 
         private readonly int FASTRETRY = 1;
         private readonly int LONGRETRY = 4;
@@ -103,47 +99,6 @@ namespace DeepfreezeSDK
         }
 
         /// <summary>
-        /// Return all active Deepfreeze authorization Tokens for the authorized user.
-        /// </summary>
-        /// <returns>Token</returns>
-        public async Task<List<Token>> GetTokensAsync()
-        {
-            var request = CreateHttpRequestWithSignature(GET, _tokenUri);
-            HttpResponseMessage response;
-
-            try
-            {
-                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
-                {
-                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
-                }
-
-                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                JObject json = JObject.Parse(content);
-
-                if ((int)json["count"] > 0)
-                {
-                    var tokens = JsonConvert.DeserializeObject<List<Token>>(json["results"].ToString());
-                    return tokens;
-                }
-                else
-                {
-                    throw new Exceptions.BigStashException("Server replied with success but response was empty.");
-                }
-            }
-            catch (Exception e)
-            {
-                // If the caught exception is a BigStashException, then return it immediately
-                // in order to be propagated to the higher caller as is, without wrapping it in
-                // a new BigStashException instance.
-                if (e is BigStashException)
-                    throw;
-
-                throw this.BigStashExceptionHandler(e);
-            }
-        }
-
-        /// <summary>
         /// Create a new Deepfreeze API token using user credentials.
         /// </summary>
         /// <param name="authorizationString"></param>
@@ -185,6 +140,45 @@ namespace DeepfreezeSDK
                 {
                     throw new BigStashException("Server replied with success but response was empty.");
                 }
+            }
+            catch (Exception e)
+            {
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
+            }
+        }
+
+        /// <summary>
+        /// Send a DELETE 'token.url' request which deletes BigStash authorization token
+        /// currently in use.
+        /// </summary>
+        /// <returns>bool</returns>
+        public async Task<bool> DeleteTokenAsync(Token token = null)
+        {
+            if (token == null)
+            {
+                return true;
+            }
+
+            _log.Debug("Called DeleteCurrentTokenAsync to delete token at \"" + 
+                this.Settings.ActiveToken.Url + "\".");
+
+            var request = CreateHttpRequestWithSignature(DELETE, token.Url, false);
+            HttpResponseMessage response;
+
+            try
+            {
+                using (var httpClient = this.CreateHttpClientWithRetryLogic(FASTRETRY))
+                {
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                }
+
+                return true;
             }
             catch (Exception e)
             {
@@ -623,6 +617,79 @@ namespace DeepfreezeSDK
             }
         }
 
+        /// <summary>
+        /// Send a GET "notifications/" request with an optional page parameter 
+        /// which returns an ordered (descending date) enumerable of user's BigStash Notification objects.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Tuple<ResponseMetadata, IEnumerable<Notification>>> GetNotificationsAsync(string url = null, string etagToMatch = null, bool tryForever = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var request = String.IsNullOrEmpty(url) ? CreateHttpRequestWithSignature(GET, _notificationsUri, true, etagToMatch)
+                : CreateHttpRequestWithSignature(GET, url, false);
+
+            _log.Debug("Called GetNotificationsAsync with parameter url = \"" + url + "\".");
+
+            HttpResponseMessage response;
+            string content = String.Empty;
+
+            try
+            {
+                var retries = LONGRETRY;
+
+                if (tryForever)
+                {
+                    retries = Int16.MaxValue;
+                }
+
+                using(var httpClient = this.CreateHttpClientWithRetryLogic(retries))
+                {
+                    response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+                {
+                    return null;
+                }
+
+                content = await response.Content.ReadAsStringAsync();
+
+                JObject json = JObject.Parse(content);
+
+                if ((int)json["count"] > 0)
+                {
+                    var notifications = JsonConvert.DeserializeObject<IEnumerable<Notification>>(json["results"].ToString());
+
+                    var responseMetadata = new ResponseMetadata()
+                    {
+                        Count = (int)json["count"],
+                        NextPageUri = (string)json["next"],
+                        PreviousPageUri = (string)json["previous"],
+                        Etag = response.Headers.ETag.Tag
+                    };
+
+                    content = null;
+                    json = null;
+                    response = null;
+
+                    return new Tuple<ResponseMetadata, IEnumerable<Notification>>(responseMetadata, notifications.OrderByDescending(x => x.CreationDate));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch(Exception e)
+            {
+                // If the caught exception is a BigStashException, then return it immediately
+                // in order to be propagated to the higher caller as is, without wrapping it in
+                // a new BigStashException instance.
+                if (e is BigStashException)
+                    throw;
+
+                throw this.BigStashExceptionHandler(e);
+            }
+        }
+
         #endregion
 
         #region private methods
@@ -688,7 +755,7 @@ namespace DeepfreezeSDK
         /// <param name="resource"></param>
         /// <param name="isRelative"></param>
         /// <returns>HttpRequestMessage</returns>
-        private HttpRequestMessage CreateHttpRequestWithSignature(string method, string resource, bool isRelative = true)
+        private HttpRequestMessage CreateHttpRequestWithSignature(string method, string resource, bool isRelative = true, string etagToMatch = null)
         {
             DateTimeOffset date = DateTime.Now;
 
@@ -721,6 +788,12 @@ namespace DeepfreezeSDK
             // set date header
             message.Headers.Date = date;
 
+            if (!String.IsNullOrEmpty(etagToMatch))
+            {
+                EntityTagHeaderValue etagheader = new EntityTagHeaderValue(etagToMatch);
+                message.Headers.IfNoneMatch.Add(etagheader);
+            }
+
             var signature = CreateHMACSHA256Signature(method, message.RequestUri, date, isRelative);
 
             // add authorization header
@@ -746,7 +819,7 @@ namespace DeepfreezeSDK
 
             sb.AppendFormat("(request-line): {0} ", method.ToLower());
 
-            sb.Append(String.Join("", requestUri.Segments));
+            sb.Append(requestUri.PathAndQuery);
             sb.Append("\n");
 
             sb.AppendFormat("host: {0}\n", requestUri.Authority);

@@ -81,7 +81,18 @@
                 VerticalAlignment="Center"
                 Style="{DynamicResource SquareButtonStyleCI}"
                 Margin="0 10 0 0"
+                IsEnabled="{Binding IsBusyDisconnecting, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                 />
+
+            <controls:ProgressRing Grid.Row="2"
+                                   Grid.Column="1" 
+                                   Height="20"
+                                   Width="20" 
+                                   Margin="5 10 0 0"
+                                   IsActive="{Binding IsBusyDisconnecting}"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   />
         </Grid>
         
         <StackPanel Orientation="Horizontal"

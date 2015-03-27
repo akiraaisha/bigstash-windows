@@ -384,8 +384,7 @@ namespace DeepfreezeApp
 
                 Enumerations.Status status = Enumerations.GetStatusFromString(localUpload.Status);
 
-                if (status == Enumerations.Status.Completed ||
-                    status == Enumerations.Status.Uploaded)
+                if (status == Enumerations.Status.Completed)
                 {
                     this.CompletedUploads.Add(u);
                 }

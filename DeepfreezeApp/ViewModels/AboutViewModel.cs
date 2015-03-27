@@ -14,6 +14,7 @@ using System.Windows;
 using Caliburn.Micro;
 using DeepfreezeSDK;
 using Custom.Windows;
+using System.Windows.Controls;
 
 
 namespace DeepfreezeApp
@@ -38,6 +39,17 @@ namespace DeepfreezeApp
         DispatcherTimer _updateTimer;
         private static readonly TimeSpan INITIAL_FAST_CHECK_TIMESPAN = new TimeSpan(0, 1, 0);
         private static readonly TimeSpan DAILY_CHECK_TIMESPAN = new TimeSpan(1, 0, 0, 0);
+
+        private string _licenseText = default(string);
+        private string _packageName = default(string);
+        private BindableCollection<KeyValuePair<string, string>> _licenses = new BindableCollection<KeyValuePair<string, string>>();
+        private int _tabSelectedIndex = 0;
+        private int _licensesSelectedIndex = -1;
+
+        // get the .exe location
+        private static readonly string _basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        private static readonly string _docsPath = _basePath + "\\docs";
+        private static readonly string _licensesPath = _docsPath + "\\licenses";
 
         #endregion
 
@@ -67,11 +79,11 @@ namespace DeepfreezeApp
         public bool IsBusy
         {
             get { return this._isBusy; }
-            set 
-            { 
-                this._isBusy = value; 
+            set
+            {
+                this._isBusy = value;
                 NotifyOfPropertyChange(() => IsBusy);
-                NotifyOfPropertyChange(() => ShowCheckForUpdate); 
+                NotifyOfPropertyChange(() => ShowCheckForUpdate);
             }
         }
 
@@ -84,9 +96,9 @@ namespace DeepfreezeApp
         public bool RestartNeeded
         {
             get { return this._restartNeeded; }
-            set 
-            { 
-                this._restartNeeded = value; 
+            set
+            {
+                this._restartNeeded = value;
                 NotifyOfPropertyChange(() => RestartNeeded);
                 NotifyOfPropertyChange(() => ShowCheckForUpdate);
             }
@@ -136,14 +148,14 @@ namespace DeepfreezeApp
         { get { return Properties.Resources.CheckForUpdateText; } }
 
         public string CheckForUpdateTooltip
-        { 
-            get 
+        {
+            get
             {
                 if (this.IsInternetConnected)
                     return Properties.Resources.CheckForUpdateEnabledTooltipText;
                 else
                     return Properties.Resources.CheckForUpdateDisabledTooltipText;
-            } 
+            }
         }
 
         public bool ShowCheckForUpdate
@@ -218,6 +230,61 @@ namespace DeepfreezeApp
         public string UpdateFoundText
         { get { return Properties.Resources.UpdateFoundText; } }
 
+        public string ReleaseNotesText
+        {
+            get { return this.ReadTextFile(_docsPath + "\\ReleaseNotes.txt"); }
+        }
+
+        public string LicenseText
+        {
+            get { return this._licenseText; }
+            set
+            {
+                this._licenseText = value;
+                NotifyOfPropertyChange(() => this.LicenseText);
+            }
+        }
+
+        public string PackageName
+        {
+            get { return this._packageName; }
+            set
+            {
+                this._packageName = value;
+                NotifyOfPropertyChange(() => this.PackageName);
+            }
+        }
+
+        public BindableCollection<KeyValuePair<string, string>> Licenses
+        {
+            get { return this._licenses; }
+            set
+            {
+                this._licenses = value;
+                NotifyOfPropertyChange(() => this.Licenses);
+            }
+        }
+
+        public int LicensesSelectedIndex
+        {
+            get { return this._licensesSelectedIndex; }
+            set
+            {
+                this._licensesSelectedIndex = value;
+                NotifyOfPropertyChange(() => this.LicensesSelectedIndex);
+            }
+        }
+
+        public int TabSelectedIndex
+        {
+            get { return this._tabSelectedIndex; }
+            set
+            {
+                this._tabSelectedIndex = value;
+                NotifyOfPropertyChange(() => this.TabSelectedIndex);
+            }
+        }
+
         #endregion
 
         #region methods
@@ -286,6 +353,35 @@ namespace DeepfreezeApp
                 var updateInfo = await SquirrelHelper.CheckForUpdateAsync();
                 var hasUpdates = updateInfo.ReleasesToApply.Count > 0;
 
+                // Check if older releases were fetched for installing.
+                // This is happens when the running instance has a more recent version
+                // than the one reported in the remote RELEASES file.
+                // If this is the case, then we remove the older entries from ReleasesToApply
+                // and continue with installing only if the list is not empty (it contains newer versions).
+                if (hasUpdates)
+                {
+                    var installedVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+                    var releasesToRemove = new List<Squirrel.ReleaseEntry>();
+
+                    foreach (var release in updateInfo.ReleasesToApply.ToList())
+                    {
+                        if (release.Version <= installedVersion)
+                        {
+                            releasesToRemove.Add(release);
+                        }
+                    }
+
+                    foreach (var releaseToRemove in releasesToRemove)
+                    {
+                        updateInfo.ReleasesToApply.Remove(releaseToRemove);
+                    }
+
+                    hasUpdates = updateInfo.ReleasesToApply.Count > 0;
+
+                    releasesToRemove.Clear();
+                    releasesToRemove = null;
+                }
+
                 if (!hasUpdates)
                 {
                     // no updates found, update the UI and return
@@ -299,11 +395,11 @@ namespace DeepfreezeApp
 
                 // Update found, continue with download
                 this.UpdateMessage = Properties.Resources.DowloadingUpdateText;
-                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply);
+                await SquirrelHelper.DownloadReleasesAsync(updateInfo.ReleasesToApply).ConfigureAwait(false);
 
                 // Update donwload finished, continue with install
                 this.UpdateMessage = Properties.Resources.InstallingUpdateText;
-                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo);
+                var applyResult = await SquirrelHelper.ApplyReleasesAsync(updateInfo).ConfigureAwait(false);
 
                 Properties.Settings.Default.SettingsUpgradeRequired = true;
                 Properties.Settings.Default.Save();
@@ -362,6 +458,75 @@ namespace DeepfreezeApp
 
         #endregion
 
+        #region private_methods
+
+        /// <summary>
+        /// Reads a text file found at the specified path parameter and returns its text as a string.
+        /// </summary>
+        private string ReadTextFile(string path)
+        {
+            try
+            {
+                return File.ReadAllText(path);
+            }
+            catch (Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " error, thrown " + e.GetType().ToString() + " with message \"" + e.Message + "\".", e);
+
+                if (e is FileNotFoundException)
+                {
+                    return Properties.Resources.FileDoesNotExistText;
+                }
+                else
+                {
+                    return Properties.Resources.ErrorReadingTextFileGenericText;
+                }
+            }
+        }
+
+        private async Task LoadLicensesAsync()
+        {
+            IDictionary<string, string> licenses = new Dictionary<string, string>();
+            IList<Task> licenseTasks = new List<Task>();
+
+            // keep a list of known licenses used by the game and filter
+            // the local text files, thus ignoring other files that may
+            // exist inside the docs\licenses folder.
+            string[] knownLicenses = { "AWS SDK for .NET.txt",
+                                       "Caliburn.Micro.txt",
+                                       "ClickOnce to Squirrel Migrator.txt",
+                                       "HardCodet WPF NotifyIcon.txt",
+                                       "JSON.NET.txt",
+                                       "log4net.txt",
+                                       "MahApps.Metro.txt",
+                                       "Squirrel.txt",
+                                       "WPF Instance Aware Application.txt"
+                                     };
+
+            foreach (var path in Directory.GetFiles(_licensesPath))
+            {
+                // if the file is not a known license, skip it.
+                if (!knownLicenses.Contains(Path.GetFileName(path)))
+                {
+                    continue;
+                }
+
+                var task = Task.Run(() => 
+                {
+                    licenses.Add(new KeyValuePair<string, string>(Path.GetFileNameWithoutExtension(path), this.ReadTextFile(path)));
+                });
+
+                licenseTasks.Add(task);
+            }
+
+            await Task.WhenAll(licenseTasks);
+
+            this.Licenses.AddRange(licenses.OrderBy(x => x.Key));
+            this.LicensesSelectedIndex = 0;
+        }
+
+        #endregion
+
         #region events
 
         private async void UpdateTick(object sender, object e)
@@ -377,11 +542,20 @@ namespace DeepfreezeApp
             }
         }
 
-        protected override void OnActivate()
+        protected override async void OnActivate()
         {
             base.OnActivate();
 
             this._eventAggregator.Subscribe(this);
+
+            try
+            {
+                await this.LoadLicensesAsync().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
         }
 
         protected override void OnDeactivate(bool close)

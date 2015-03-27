@@ -10,6 +10,6 @@ namespace DeepfreezeApp.Messages
     [Export(typeof(IStartUpArgsMessage))]
     public class StartUpArgsMessage : IStartUpArgsMessage
     {
-        public string StartUpArgument { get; set; }
+        public string[] StartUpArguments { get; set; }
     }
 }

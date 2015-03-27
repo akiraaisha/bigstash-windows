@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              VerticalAlignment="Stretch"
-             MinWidth="400"
+             Width="400"
              >
 
     <UserControl.Resources>
@@ -24,158 +24,261 @@
                 <local:InvertBool />
                 <local:BoolToVisibility />
             </local:ValueConverterGroup>
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
         </ResourceDictionary>
+        
     </UserControl.Resources>
 
-    <DockPanel Margin="10 0 10 0"
-                       VerticalAlignment="Stretch">
+    <Grid Margin="10 0 10 0">
+        <TabControl Style="{DynamicResource SimpleMetroTabControl}"
+                    SelectedIndex="{Binding TabSelectedIndex}">
 
-        <StackPanel DockPanel.Dock="Top" 
-                            HorizontalAlignment="Center"
+            <TabItem Header="BigStash"
+                    Style="{DynamicResource SimpleMetroTabItem}">
+
+                <DockPanel VerticalAlignment="Stretch">
+                    <StackPanel DockPanel.Dock="Top" 
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0 10 0 10"
+                        >
+
+                        <Label x:Name="ApplicationNameHeader" 
+                        Style="{DynamicResource HeaderLabelStyle}" 
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Cursor="Hand"
+                        cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenDeepfreezePage()]"
+                        />
+
+                        <TextBlock HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Margin="0 10 0 10"
+                            Text="{Binding DebugButtonContent}"
+                            Cursor="Hand"
+                            Foreground="Blue"
+                            cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ExportLog()]"
+                            ToolTipService.ShowDuration="30000"
+                            FontSize="14"
                             >
+                            <TextBlock.ToolTip>
+                                <TextBlock Text="{Binding DebugHelpText}"
+                                    TextWrapping="Wrap"
+                                    Width="400"
+                                    />
+                            </TextBlock.ToolTip>
 
-            <Label x:Name="ApplicationNameHeader" 
-                           Style="{DynamicResource HeaderLabelStyle}" 
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           Cursor="Hand"
-                           cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenDeepfreezePage()]"
-                           />
+                </TextBlock>
 
-            <TextBlock HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Text="{Binding DebugButtonContent}"
-                               Cursor="Hand"
-                               Foreground="Blue"
-                               cal:Message.Attach="[Event MouseLeftButtonUp] = [Action ExportLog()]"
-                               ToolTipService.ShowDuration="30000"
-                               FontSize="14"
-                               >
-                <TextBlock.ToolTip>
-                    <TextBlock Text="{Binding DebugHelpText}"
-                                       TextWrapping="Wrap"
-                                       Width="400"
-                                       />
-                </TextBlock.ToolTip>
-
-                    </TextBlock>
-
-            <StackPanel Margin="0 10 0 10">
-
-                <Rectangle Width="15"
-                                   Height="15"
-                                   Visibility="{Binding IsUpToDate, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Rectangle.Fill>
-                        <VisualBrush Stretch="Uniform"
-                                             Visual="{StaticResource appbar_check}" />
-                    </Rectangle.Fill>
-                </Rectangle>
-
-                <controls:ProgressRing Height="20"
-                                               Width="20" 
-                                               IsActive="{Binding IsBusy}"
-                                               Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
-                                               />
-
-                <!--Button for downloading updates after having checked and found at least one.-->
-                <!--<Button Height="35" 
-                                Width="35"
-                                ToolTip="{Binding UpdateFoundText}" 
-                                FontFamily="Segoe UI Symbol"
-                                FontSize="16"
-                                Style="{DynamicResource MetroCircleButtonStyle}"
-                                cal:Message.Attach="RestartApplication"
-                                Visibility="{Binding UpdateFound, Converter={StaticResource BoolToVisibilityConverter}}"
-                                >
+                        <StackPanel Margin="0 10 0 10">
 
                             <Rectangle Width="15"
-                                       Height="15">
+                                Height="15"
+                                Visibility="{Binding IsUpToDate, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Rectangle.Fill>
                                     <VisualBrush Stretch="Uniform"
-                                                 Visual="{StaticResource appbar_download}" />
+                                            Visual="{StaticResource appbar_check}" />
                                 </Rectangle.Fill>
                             </Rectangle>
 
-                        </Button>-->
+                            <controls:ProgressRing Height="20"
+                                            Width="20" 
+                                            IsActive="{Binding IsBusy}"
+                                            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            />
 
-                <Button Height="35" 
-                                Width="35"
-                                ToolTip="{Binding RestartNeededText}" 
-                                FontFamily="Segoe UI Symbol"
-                                FontSize="16"
-                                Style="{DynamicResource MetroCircleButtonStyle}"
-                                cal:Message.Attach="RestartApplicationAfterUpdate"
-                                Visibility="{Binding RestartNeeded, Converter={StaticResource BoolToVisibilityConverter}}"
-                                >
+                            <!--Button for downloading updates after having checked and found at least one.-->
+                            <!--<Button Height="35" 
+                            Width="35"
+                            ToolTip="{Binding UpdateFoundText}" 
+                            FontFamily="Segoe UI Symbol"
+                            FontSize="16"
+                            Style="{DynamicResource MetroCircleButtonStyle}"
+                            cal:Message.Attach="RestartApplication"
+                            Visibility="{Binding UpdateFound, Converter={StaticResource BoolToVisibilityConverter}}"
+                            >
 
-                    <Rectangle Width="15"
-                                       Height="15">
-                        <Rectangle.Fill>
-                            <VisualBrush Stretch="Uniform"
-                                                 Visual="{StaticResource appbar_refresh}" />
-                        </Rectangle.Fill>
-                    </Rectangle>
+                        <Rectangle Width="15"
+                                    Height="15">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Uniform"
+                                                Visual="{StaticResource appbar_download}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
 
-                </Button>
+                    </Button>-->
 
-            </StackPanel>
+                            <Button Height="35" 
+                            Width="35"
+                            ToolTip="{Binding RestartNeededText}" 
+                            FontFamily="Segoe UI Symbol"
+                            FontSize="16"
+                            Style="{DynamicResource MetroCircleButtonStyle}"
+                            cal:Message.Attach="RestartApplicationAfterUpdate"
+                            Visibility="{Binding RestartNeeded, Converter={StaticResource BoolToVisibilityConverter}}"
+                            >
 
-            <TextBlock x:Name="VersionText"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               FontSize="14"
-                               />
+                                <Rectangle Width="15"
+                                    Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Uniform"
+                                                Visual="{StaticResource appbar_refresh}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
 
-            <TextBlock Text="{Binding UpdateMessage}"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               FontSize="14"
-                               Visibility="{Binding UpdateMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
-                               />
+                            </Button>
 
-            <TextBlock HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Text="{Binding CheckForUpdateText}"
-                               Cursor="{Binding CheckForUpdateCursor}"
-                               Foreground="{Binding CheckForUpdateForeground}"
-                               cal:Message.Attach="[Event MouseLeftButtonUp] = [Action CheckForUpdate()]"
-                               ToolTipService.ShowDuration="30000"
-                               ToolTipService.ShowOnDisabled="True"
-                               FontSize="14"
-                               Visibility="{Binding ShowCheckForUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
-                               >
-                <TextBlock.ToolTip>
-                    <TextBlock Text="{Binding CheckForUpdateTooltip}"
-                                       />
-                </TextBlock.ToolTip>
+                        </StackPanel>
 
-                    </TextBlock>
+                        <TextBlock x:Name="VersionText"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            />
 
-            <TextBlock x:Name="ErrorMessage"
-                                Foreground="Red"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
+                        <TextBlock Text="{Binding UpdateMessage}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            Visibility="{Binding UpdateMessage, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}"
+                            />
+
+                        <TextBlock HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Text="{Binding CheckForUpdateText}"
+                            Cursor="{Binding CheckForUpdateCursor}"
+                            Foreground="{Binding CheckForUpdateForeground}"
+                            cal:Message.Attach="[Event MouseLeftButtonUp] = [Action CheckForUpdate()]"
+                            ToolTipService.ShowDuration="30000"
+                            ToolTipService.ShowOnDisabled="True"
+                            FontSize="14"
+                            Visibility="{Binding ShowCheckForUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
+                            >
+                            <TextBlock.ToolTip>
+                                <TextBlock Text="{Binding CheckForUpdateTooltip}"
+                                    />
+                            </TextBlock.ToolTip>
+
+                </TextBlock>
+
+                        <TextBlock x:Name="ErrorMessage"
+                            Foreground="Red"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            />
+
+                        <!--<CheckBox x:Name="DoAutomaticUpdates" 
+                        Margin="0 10 0 0"
+                        FontSize="14"
+                        >
+                    <CheckBox.Content>
+                        <TextBlock TextWrapping="Wrap" 
+                                Text="{Binding CheckForUpdateAutomaticText}"
+                                VerticalAlignment="Bottom"
                                 />
+                    </CheckBox.Content>
+                </CheckBox>-->
 
-            <!--<CheckBox x:Name="DoAutomaticUpdates" 
-                          Margin="0 10 0 0"
-                          FontSize="14"
-                          >
-                        <CheckBox.Content>
-                            <TextBlock TextWrapping="Wrap" 
-                                   Text="{Binding CheckForUpdateAutomaticText}"
-                                   VerticalAlignment="Bottom"
-                                   />
-                        </CheckBox.Content>
-                    </CheckBox>-->
+                    </StackPanel>
+                </DockPanel>
 
-        </StackPanel>
+            </TabItem>
 
-    </DockPanel>
+            <TabItem Header="Release Notes"
+                     Style="{DynamicResource SimpleMetroTabItem}">
 
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                              VerticalScrollBarVisibility="Auto"
+                              Margin="5 10 0 10"
+                              Padding="0 0 5 0"
+                              Name="ReleaseNotesScroller"
+                              >
+                    <TextBlock Text="{Binding ReleaseNotesText}" 
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               TextWrapping="WrapWithOverflow"
+                               MinHeight="50"
+                               MinWidth="50"
+                               Width="{Binding ElementName=ReleaseNotesScroller, Path=ViewportWidth}"
+                               FontSize="14"
+                               />
+                </ScrollViewer>
+
+            </TabItem>
+
+            <TabItem Header="Licenses"
+                 Style="{DynamicResource SimpleMetroTabItem}">
+
+                <Grid Margin="0 10 0 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <ListBox Grid.Column="0"
+                             Grid.RowSpan="2"
+                             x:Name="Licenses"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                             Style="{DynamicResource VirtualisedCustomListBox}"
+                             SelectedIndex="{Binding LicensesSelectedIndex}"
+                             >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" 
+                                           TextWrapping="WrapWithOverflow"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Padding="0 5 10 5"
+                                           Margin="0 3 5 3"
+                                           FontSize="12"
+                                           MaxWidth="100"
+                                           >
+                                    
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                    <Border Grid.RowSpan="2"
+                            Grid.Column="1"
+                            BorderBrush="WhiteSmoke"
+                            BorderThickness="1"
+                            VerticalAlignment="Stretch"
+                            />
+
+                    <ScrollViewer Grid.RowSpan="2" 
+                                  Grid.Column="2" 
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Name="LicenseScroller"
+                                  Padding="0 0 5 0"
+                                  Margin="5 0 0 0"
+                                  HorizontalAlignment="Stretch"
+                                  >
+                        <TextBlock Text="{Binding ElementName=Licenses, Path=SelectedItem.Value}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    TextWrapping="WrapWithOverflow"
+                                    MinHeight="50"
+                                    MinWidth="50"
+                                    Width="{Binding ElementName=LicenseScroller, Path=ViewportWidth}"
+                                   FontSize="12"
+                                    />
+                    </ScrollViewer>
+                </Grid>
+                
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+     
 </UserControl>

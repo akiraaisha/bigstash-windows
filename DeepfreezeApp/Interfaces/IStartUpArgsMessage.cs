@@ -8,6 +8,6 @@ namespace DeepfreezeApp
 {
     public interface IStartUpArgsMessage
     {
-        string StartUpArgument { get; set; }
+        string[] StartUpArguments { get; set; }
     }
 }

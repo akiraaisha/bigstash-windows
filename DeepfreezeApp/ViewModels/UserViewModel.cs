@@ -23,6 +23,7 @@ namespace DeepfreezeApp
         private readonly IDeepfreezeClient _deepfreezeClient;
 
         private bool _isBusy = false;
+        private bool _isBusyDisconnecting = false;
         private string _errorMessage;
 
         #endregion
@@ -112,6 +113,16 @@ namespace DeepfreezeApp
             get { return this._deepfreezeClient.IsInternetConnected; }
         }
 
+        public bool IsBusyDisconnecting
+        {
+            get { return this._isBusyDisconnecting; }
+            set
+            {
+                this._isBusyDisconnecting = value;
+                NotifyOfPropertyChange(() => this.IsBusyDisconnecting);
+            }
+        }
+
         #endregion
 
         #region action_methods
@@ -159,12 +170,31 @@ namespace DeepfreezeApp
             }
         }
 
-        public void Disconnect()
+        public async Task Disconnect()
         {
+            this.IsBusyDisconnecting = true;
+
             _log.Info("User clicked Disconnect button from the preferences screen.");
-            // Finally publish a message to notify for the login change.
-            // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
-            this._eventAggregator.PublishOnBackgroundThread(IoC.Get<ILogoutMessage>());
+
+            // Delete the active authorization BigStash token.
+            try
+            {
+                await this._deepfreezeClient.DeleteTokenAsync(this._deepfreezeClient.Settings.ActiveToken);
+            }
+            catch(Exception e)
+            {
+                // If the token failed to delete, just log it.
+
+                _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
+            finally
+            {
+                this.IsBusyDisconnecting = false;
+
+                // Finally publish a message to notify for the login change.
+                // ShellViewModel is responsible for handling the message and activating the LoginViewModel.
+                this._eventAggregator.PublishOnUIThread(IoC.Get<ILogoutMessage>());
+            }
         }
 
         #endregion

@@ -61,7 +61,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About BigStash for Windows.
+        ///   Looks up a localized string similar to About BigStash.
         /// </summary>
         internal static string AboutButtonTooltip {
             get {
@@ -84,6 +84,15 @@ namespace DeepfreezeApp.Properties {
         internal static string ActiveUserHeader {
             get {
                 return ResourceManager.GetString("ActiveUserHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity.
+        /// </summary>
+        internal static string ActivityHeader {
+            get {
+                return ResourceManager.GetString("ActivityHeader", resourceCulture);
             }
         }
         
@@ -286,7 +295,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you&apos;re experiencing problems with BigStash for Windows, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
+        ///   Looks up a localized string similar to If you&apos;re experiencing problems with the BigStash application, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as &quot;BigStashLog.txt&quot;..
         /// </summary>
         internal static string DebugHelpText {
             get {
@@ -448,11 +457,20 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The new version of BigStash for Windows cannot be downloaded at this time..
+        ///   Looks up a localized string similar to The new version of BigStash cannot be downloaded at this time..
         /// </summary>
         internal static string ErrorDownloadingUpdateGenericText {
             get {
                 return ResourceManager.GetString("ErrorDownloadingUpdateGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error while fetching your activity..
+        /// </summary>
+        internal static string ErrorFetchingActivityGenericText {
+            get {
+                return ResourceManager.GetString("ErrorFetchingActivityGenericText", resourceCulture);
             }
         }
         
@@ -484,7 +502,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot check for a new version of BigStash for Windows. Please reinstall the application..
+        ///   Looks up a localized string similar to Cannot check for a new version of BigStash. Please reinstall the application..
         /// </summary>
         internal static string ErrorInvalidDeploymentExceptionGenericText {
             get {
@@ -516,6 +534,15 @@ namespace DeepfreezeApp.Properties {
         internal static string ErrorPreparingUploadGenericText {
             get {
                 return ResourceManager.GetString("ErrorPreparingUploadGenericText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occured while trying to load the necessary text file..
+        /// </summary>
+        internal static string ErrorReadingTextFileGenericText {
+            get {
+                return ResourceManager.GetString("ErrorReadingTextFileGenericText", resourceCulture);
             }
         }
         
@@ -592,6 +619,15 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to It appears the necessary file is missing from your installation..
+        /// </summary>
+        internal static string FileDoesNotExistText {
+            get {
+                return ResourceManager.GetString("FileDoesNotExistText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The following files will not be archived:.
         /// </summary>
         internal static string FollowingFilesNotArchivedText {
@@ -628,6 +664,24 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Help.
+        /// </summary>
+        internal static string HelpHeader {
+            get {
+                return ResourceManager.GetString("HelpHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to the BigStash support page..
+        /// </summary>
+        internal static string HelpHeaderTooltip {
+            get {
+                return ResourceManager.GetString("HelpHeaderTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Installing the update....
         /// </summary>
         internal static string InstallingUpdateText {
@@ -637,7 +691,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BigStash for Windows will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
+        ///   Looks up a localized string similar to BigStash will remain minimized in the tray notification area. To close it, right click the tray icon and select &quot;Exit&quot;..
         /// </summary>
         internal static string MinimizedMessageText {
             get {
@@ -660,6 +714,15 @@ namespace DeepfreezeApp.Properties {
         internal static string NameRulesFAQURLHelpText {
             get {
                 return ResourceManager.GetString("NameRulesFAQURLHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have any activity..
+        /// </summary>
+        internal static string NoActivityText {
+            get {
+                return ResourceManager.GetString("NoActivityText", resourceCulture);
             }
         }
         
@@ -1105,7 +1168,7 @@ namespace DeepfreezeApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BigStash for Windows is up to date..
+        ///   Looks up a localized string similar to BigStash is up to date..
         /// </summary>
         internal static string UpToDateText {
             get {

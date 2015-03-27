@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="BigStash"
         TitleCaps="False"
-        Icon="..\bigstash_windows_icon.ico"
+        Icon="..\bigstash-windows-icon.ico"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         GlowBrush="{DynamicResource GrayBrush7}"
@@ -25,6 +25,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/DeepfreezeApp;component/Styles/Clean.xaml" />
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <ResourceDictionary Source="/Styles/Custom.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="MyCleanWindowStyle" TargetType="{x:Type controls:MetroWindow}" BasedOn="{StaticResource CleanWindowStyleKey}" />
             
@@ -41,39 +42,6 @@
             </local:ValueConverterGroup>
             <local:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
 
-            <VisualBrush x:Key="SettingsIconVisualBrush" 
-                         Stretch="Uniform"
-                         Visual="{StaticResource appbar_settings}" 
-                         />
-            
-            <VisualBrush x:Key="AboutIconVisualBrush" 
-                         Stretch="Uniform"
-                         Visual="{StaticResource appbar_information}" 
-                         />
-
-            <VisualBrush x:Key="UpdateFoundIconVisualBrush" 
-                         Stretch="Uniform"
-                         Visual="{StaticResource appbar_arrow_up}" 
-                         />
-
-            <Style x:Key="SettingsIconStyle" TargetType="{x:Type Rectangle}">
-                <Setter Property="Fill" Value="{StaticResource SettingsIconVisualBrush}" />
-                <Setter Property="Height" Value="15" />
-                <Setter Property="Width" Value="15" />
-            </Style>
-            
-            <Style x:Key="AboutIconStyle" TargetType="{x:Type Rectangle}">
-                <Setter Property="Fill" Value="{StaticResource AboutIconVisualBrush}" />
-                <Setter Property="Height" Value="15" />
-                <Setter Property="Width" Value="15" />
-            </Style>
-
-            <Style x:Key="UpdateFoundIconStyle" TargetType="{x:Type Rectangle}">
-                <Setter Property="Fill" Value="{StaticResource UpdateFoundIconVisualBrush}" />
-                <Setter Property="Height" Value="15" />
-                <Setter Property="Width" Value="15" />
-            </Style>
-
         </ResourceDictionary>
     </Window.Resources>
     
@@ -89,36 +57,55 @@
                     Visibility="{Binding ShowRestartNeeded, Converter={StaticResource BoolToVisibilityConverter}}"
                     >
 
-                <Rectangle Style="{StaticResource UpdateFoundIconStyle}" />
+                <Rectangle Style="{DynamicResource UpdateFoundIconStyle}" />
 
             </Button>
-            
-            <Button ToolTip="{Binding PreferencesHeader}" 
+
+            <Button x:Name="OptionsButton" 
+                    ToolTip="{Binding PreferencesHeader}" 
                     FontFamily="Segoe UI Symbol"
                     FontSize="16"
-                    Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="TogglePreferencesFlyout"
+                    Style="{StaticResource MetroWindowButtonStyle}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                    cal:Message.Attach="ShowOptionsContextMenu($source)"
+                    ContextMenuService.Placement="Bottom"
+                    ContextMenuService.VerticalOffset="5"
+                    ContextMenuService.PlacementTarget="{Binding ElementName=OptionsButton}"
+                    Width="20"
                     >
                 
-                <Rectangle Style="{StaticResource SettingsIconStyle}" />
-                
+                <StackPanel Orientation="Horizontal">
+
+                    <Rectangle Style="{DynamicResource SettingsIconStyle}" />
+
+                    <TextBlock VerticalAlignment="Top"
+                               HorizontalAlignment="Center"
+                               Visibility="{Binding ActivityVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"
+                               >
+                        <Rectangle Style="{DynamicResource NewNotificationIconStyle}" />
+                    </TextBlock>
+                    
+                </StackPanel>
+
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{Binding ActivityHeader}" cal:Message.Attach="[Event Click] = [Action ToggleActivityFlyout()]">
+                            <MenuItem.Icon>
+                                <Rectangle Style="{DynamicResource NewNotificationIconStyle}"
+                                                Visibility="{Binding ActivityVM.HasNewNotifications, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="{Binding PreferencesHeader}" cal:Message.Attach="[Event Click] = [Action TogglePreferencesFlyout()]" />
+                        <MenuItem Header="{Binding HelpHeader}" 
+                                  ToolTip="{Binding HelpHeaderTooltipText}"
+                                  cal:Message.Attach="[Event Click] = [Action OpenHelp()]" />
+                        <MenuItem Header="{Binding AboutHeader}" cal:Message.Attach="[Event Click] = [Action ToggleAboutFlyout()]" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+
             </Button>
 
-            <Button ToolTip="{Binding AboutButtonTooltip}" 
-                    FontFamily="Segoe UI Symbol"
-                    FontSize="16"
-                    Style="{DynamicResource MetroWindowButtonStyle}"
-                    cal:Message.Attach="ToggleAboutFlyout"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
-                    >
-                
-                    <Rectangle Style="{StaticResource AboutIconStyle}" />
-
-            </Button>
-            
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
 
@@ -136,18 +123,28 @@
 
             </controls:Flyout>
 
-            <controls:Flyout 
-                x:Name="AboutFlyout" 
-                Header="{Binding AboutHeader}"
-                Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
-                IsModal="True"
-                Theme="Adapt"
-                >
+            <controls:Flyout x:Name="AboutFlyout" 
+                             Header="{Binding AboutHeader}"
+                             Position="Right" IsOpen="{Binding IsAboutFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
 
                 <controls:MetroContentControl cal:View.Model="{Binding AboutVM}" />
 
             </controls:Flyout>
-            
+
+            <controls:Flyout x:Name="ActivityFlyoout" 
+                             Header="{Binding ActivityHeader}"
+                             Position="Right" IsOpen="{Binding IsActivityFlyoutOpen}"
+                             IsModal="True"
+                             Theme="Adapt"
+                             >
+
+                <controls:MetroContentControl cal:View.Model="{Binding ActivityVM}" />
+
+            </controls:Flyout>
+
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
 
@@ -158,10 +155,9 @@
         </Grid.RowDefinitions>
         
         <tb:TaskbarIcon x:Name="DFTrayIcon" 
-                        IconSource="/bigstash_windows_icon.ico"
-                        ToolTipText="BigStash for Windows"
+                        IconSource="..\bigstash-windows-icon.ico"
                         MenuActivation="RightClick"
-                        cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]"
+                        cal:Message.Attach="[Event TrayLeftMouseUp] = [Action ShowShellWindow()]; [Event TrayBalloonTipClicked] = [Action ShowShellWindow()]"
                         >
 
             <tb:TaskbarIcon.ContextMenu>
@@ -175,6 +171,28 @@
                               />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
+            
+            <tb:TaskbarIcon.TrayToolTip>
+                <Border Background="#FFFFFFFF"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Padding="5,1,6,2"
+                        >
+                    <StackPanel>
+                        <TextBlock Foreground="#FF575757"
+                                   TextOptions.TextFormattingMode="Display"
+                                   Text="{Binding Data.ApplicationTitle, Source={StaticResource BindingProxy}}"
+                                   />
+                        <TextBlock Foreground="#FF575757"
+                                   TextOptions.TextFormattingMode="Display"
+                                   FontStyle="Italic"
+                                   Text="{Binding Data.TrayToolTipText, Source={StaticResource BindingProxy}}"
+                                   Visibility="{Binding Data.TrayToolTipText, Source={StaticResource BindingProxy}, Converter={StaticResource EmptyStringToInvertBoolToVisibilityConverter}}">
+                        </TextBlock>
+                    </StackPanel>
+                    
+                </Border>
+            </tb:TaskbarIcon.TrayToolTip>
 
         </tb:TaskbarIcon>
 
@@ -190,8 +208,9 @@
                                FontSize="16"
                                Margin="0 5 0 5"
                                />
+            
         </StackPanel>
-        
+
         <Grid Grid.Row="1">
 
             <TextBlock x:Name="ErrorMessage"

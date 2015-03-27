@@ -80,7 +80,7 @@ namespace DeepfreezeApp
             if (!(app == null || app.IsFirstInstance))
             {
                 app.Shutdown();
-            }    
+            }
             else
             {
                 // Else go on with normal startup.
@@ -109,15 +109,18 @@ namespace DeepfreezeApp
 //                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
 //                Properties.Settings.Default.VerboseDebugLogging = true;
 //#endif
-
-                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersion();
+#if DEBUG
+                if (!String.IsNullOrEmpty(Properties.Settings.Default.AWSEndpointDefinition))
+                    ConfigurationManager.AppSettings["AWSEndpointDefinition"] = Properties.Settings.Default.AWSEndpointDefinition;
+#endif
+                var currentVersion = SquirrelHelper.GetCurrentlyInstalledVersionString();
                 this.SetVersionForUserAgent(currentVersion);
 
-                _log.Info("Starting up a new instance of BigStash for Windows " + currentVersion + ".");
+                _log.Info("Starting up a new instance of " + Properties.Settings.Default.ApplicationFullName + " " + currentVersion + ".");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
                 _log.Info("*********                                  **********");
-                _log.Info("*********       BigStash for Windows       **********");
+                _log.Info("*********             BigStash             **********");
                 _log.Info("*********                                  **********");
                 _log.Info("*****************************************************");
                 _log.Info("*****************************************************");
@@ -125,6 +128,8 @@ namespace DeepfreezeApp
 #if DEBUG
                 _log.Debug("DEBUG MODE ON");
 #endif
+
+                CheckAndEnableVerboseDebugLogging();
 
                 // Set Application local app data folder and file paths
                 // in Application.Properties for use in this application instance.
@@ -152,11 +157,11 @@ namespace DeepfreezeApp
                     Properties.Settings.Default.BigStashUpdateMessageShown = true;
                     Properties.Settings.Default.Save();
                 }
-                
+
                 // Catch with args and forward a message with them
                 if (e.Args.Length > 0)
                 {
-                    this.CatchAndForwardArgs(e.Args[0]);
+                    this.CatchAndForwardArgs(e.Args);
                 }
 
                 base.OnStartup(sender, e);
@@ -184,12 +189,7 @@ namespace DeepfreezeApp
                     this.ResetDebugServerBaseAddress(client);
 
                     // Save preferences file.
-                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.ASCII);
-                }
-                else
-                {
-                    _log.Info("Deleting preferences.json at \"" + Properties.Settings.Default.SettingsFilePath + "\".");
-                    File.Delete(Properties.Settings.Default.SettingsFilePath);
+                    LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, client.Settings, Encoding.UTF8, true);
                 }
 
                 if (Properties.Settings.Default.SettingsUpgradeRequired)
@@ -220,7 +220,7 @@ namespace DeepfreezeApp
             // Catch with args and forward a message with them
             if (e.Args.Length > 0)
             {
-                this.CatchAndForwardArgs(e.Args[0]);
+                this.CatchAndForwardArgs(e.Args);
             }
         }
 
@@ -233,11 +233,11 @@ namespace DeepfreezeApp
             application.StartupNextInstance += OnStartupNextInstance;
         }
 
-        private void CatchAndForwardArgs(string arg)
+        private void CatchAndForwardArgs(string[] args)
         {
             var eventAggregator = IoC.Get<IEventAggregator>();
             var startUpArgsMessage = IoC.Get<IStartUpArgsMessage>();
-            startUpArgsMessage.StartUpArgument = arg;
+            startUpArgsMessage.StartUpArguments = args;
             eventAggregator.PublishOnUIThread(startUpArgsMessage);
         }
 
@@ -262,7 +262,7 @@ namespace DeepfreezeApp
         private void SetApplicationPathsProperties()
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            
+
             // %APPDATA\BigStash\
             Properties.Settings.Default.ApplicationDataFolder =
                 Path.Combine(
@@ -311,7 +311,7 @@ namespace DeepfreezeApp
 
         /// <summary>
         /// Set the deepfreeze icon in Control Panel's Programs and Features entry 
-        /// for the BigStash for Windows application.
+        /// for the BigStash application.
         /// </summary>
         private static void SetAddRemoveProgramsIcon()
         {
@@ -326,13 +326,13 @@ namespace DeepfreezeApp
 
                 Microsoft.Win32.RegistryKey uninstallKeyParentFolder = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
                 IList<string> uninstallSubKeyNames = uninstallKeyParentFolder.GetSubKeyNames().ToList();
-                
+
                 foreach (string uninstallSubKeyName in uninstallSubKeyNames)
                 {
                     Microsoft.Win32.RegistryKey subKey = uninstallKeyParentFolder.OpenSubKey(uninstallSubKeyName, true);
                     object diplayNameValue = subKey.GetValue("DisplayName");
 
-                    // if subKey points to the correct BigStash for Windows entry
+                    // if subKey points to the correct BigStash entry
                     // then update its DisplayIcon key value.
                     if (diplayNameValue != null &&
                         diplayNameValue.ToString() == Properties.Settings.Default.ApplicationFullName)
@@ -351,7 +351,7 @@ namespace DeepfreezeApp
                     }
                 }
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
             }
@@ -520,9 +520,24 @@ namespace DeepfreezeApp
                 Properties.Settings.Default.SettingsUpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+            }
+        }
+
+        private void CheckAndEnableVerboseDebugLogging()
+        {
+            string debugMode = String.Empty;
+
+            if (Properties.Settings.Default.VerboseDebugLogging)
+            {
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root.Level = log4net.Core.Level.Debug;
+                debugMode = log4net.Core.Level.Debug.DisplayName;
+
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).RaiseConfigurationChanged(EventArgs.Empty);
+
+                _log.Warn("Changed minimum logging level to " + debugMode + ".");
             }
         }
 

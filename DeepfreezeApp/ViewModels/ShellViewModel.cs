@@ -21,7 +21,7 @@ namespace DeepfreezeApp
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Screen>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,
-        IHandle<INotificationMessage>, IHandle<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
+        IHandle<INotificationMessage>, IHandleWithTask<IStartUpArgsMessage>, IHandle<IRestartNeededMessage>, IHandleWithTask<IRestartAppMessage>
     {
         #region fields
 
@@ -35,22 +35,24 @@ namespace DeepfreezeApp
         private PreferencesViewModel _preferencesVM;
         private AboutViewModel _aboutVM;
         private UploadManagerViewModel _uploadManagerVM;
+        private ActivityViewModel _activityVM;
 
         private MetroWindow _shellWindow;
         private TaskbarIcon _tray;
         private bool _isPreferencesFlyoutOpen = false;
         private bool _isAboutFlyoutOpen = false;
+        private bool _isActivityFlyoutOpen = false;
 
         private bool _isBusy = false;
         private bool _hasError = false;
         private string _busyMessage;
         private string _errorMessage;
         private bool _trayExitClicked = false;
-        private bool _minimizeBallonTipShown = false;
 
         private DispatcherTimer _connectionTimer;
         private bool _isInternetConnected = true;
         private bool _restartNeeded = false;
+        private string _trayToolTipText = default(string);
 
         #endregion
 
@@ -118,6 +120,12 @@ namespace DeepfreezeApp
             set { this._uploadManagerVM = value; NotifyOfPropertyChange(() => UploadManagerVM); }
         }
 
+        public ActivityViewModel ActivityVM
+        {
+            get { return this._activityVM; }
+            set { this._activityVM = value; NotifyOfPropertyChange(() => this.ActivityVM); }
+        }
+
         public bool IsPreferencesFlyoutOpen
         {
             get { return this._isPreferencesFlyoutOpen; }
@@ -135,6 +143,25 @@ namespace DeepfreezeApp
             }
         }
 
+        public bool IsActivityFlyoutOpen
+        {
+            get { return this._isActivityFlyoutOpen; }
+            set
+            {
+                if (!value && this.IsActivityFlyoutOpen)
+                {
+                    if (this.ActivityVM != null)
+                    {
+                        this.ActivityVM.SetAllNotificationsAsRead();
+                    }
+                    // this.ActivityVM.ForgetBeyondPageOneResults();
+                }
+
+                this._isActivityFlyoutOpen = value;
+                NotifyOfPropertyChange(() => this.IsActivityFlyoutOpen);
+            }
+        }
+
         public string PreferencesHeader
         { get { return Properties.Resources.PreferencesHeader; } }
 
@@ -143,6 +170,9 @@ namespace DeepfreezeApp
 
         public string AboutButtonTooltip
         { get { return Properties.Resources.AboutButtonTooltip; } }
+
+        public string ActivityHeader
+        { get { return Properties.Resources.ActivityHeader; } }
 
         public string ExitHeader
         { get { return Properties.Resources.ExitHeader; } }
@@ -167,6 +197,25 @@ namespace DeepfreezeApp
         public string UpdateFoundButtonTooltipText
         { get { return Properties.Resources.UpdateFoundButtonTooltipText; } }
 
+        public string HelpHeader
+        { get { return Properties.Resources.HelpHeader; } }
+
+        public string HelpHeaderTooltipText
+        { get { return Properties.Resources.HelpHeaderTooltip; } }
+
+        public string ApplicationTitle
+        { get { return Properties.Settings.Default.ApplicationFullName; } }
+
+        public string TrayToolTipText
+        {
+            get { return this._trayToolTipText; }
+            set
+            {
+                this._trayToolTipText = value;
+                NotifyOfPropertyChange(() => this.TrayToolTipText);
+            }
+        }
+
         #endregion
 
         #region action methods
@@ -176,22 +225,63 @@ namespace DeepfreezeApp
         /// </summary>
         public void TogglePreferencesFlyout()
         {
-            IsPreferencesFlyoutOpen = !IsPreferencesFlyoutOpen;
+            this.IsPreferencesFlyoutOpen = !this.IsPreferencesFlyoutOpen;
 
-            if (IsPreferencesFlyoutOpen)
+            if (this.IsPreferencesFlyoutOpen)
             {
-                IsAboutFlyoutOpen = false;
+                this.IsAboutFlyoutOpen = false;
+                this.IsActivityFlyoutOpen = false;
             }
         }
 
         public void ToggleAboutFlyout()
         {
-            IsAboutFlyoutOpen = !IsAboutFlyoutOpen;
+            this.IsAboutFlyoutOpen = !this.IsAboutFlyoutOpen;
 
-            if (IsAboutFlyoutOpen)
+            this.AboutVM.TabSelectedIndex = 0;
+
+            if (this.IsAboutFlyoutOpen)
             {
-                IsPreferencesFlyoutOpen = false;
+                this.IsPreferencesFlyoutOpen = false;
+                this.IsActivityFlyoutOpen = false;
             }
+        }
+
+        public void ToggleActivityFlyout()
+        {
+            this.IsActivityFlyoutOpen = !this.IsActivityFlyoutOpen;
+
+            if (this.IsActivityFlyoutOpen)
+            {
+                this.IsAboutFlyoutOpen = false;
+                this.IsPreferencesFlyoutOpen = false;
+
+                // When not busy (already fetching notifications),
+                // send a message to fetch the latest notifications
+                if (!this.ActivityVM.IsBusy)
+                {
+                    var fetchNotificationsMessage = IoC.Get<IFetchNotificationsMessage>();
+                    fetchNotificationsMessage.PagedResult = 1;
+                    this._eventAggregator.PublishOnUIThreadAsync(fetchNotificationsMessage);
+                }
+            }
+            else
+            {
+                
+            }
+        }
+
+        public void ShowOptionsContextMenu(object sender)
+        {
+            InstatiatePreferencesViewModel();
+            InstatiateNotificationsViewModel();
+            InstatiateAboutViewModel();
+            
+            var button = sender as System.Windows.Controls.Button;
+            button.ContextMenu.PlacementTarget = button;
+            button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            button.ContextMenu.VerticalOffset = 5;
+            button.ContextMenu.IsOpen = true;
         }
 
         public void ShowShellWindow()
@@ -212,6 +302,11 @@ namespace DeepfreezeApp
 
             if (!IsPreferencesFlyoutOpen)
                 this.TogglePreferencesFlyout();
+        }
+
+        public void OpenHelp()
+        {
+            Process.Start(Properties.Settings.Default.BigStashSupportURL);
         }
 
         public void ExitApplication()
@@ -269,7 +364,7 @@ namespace DeepfreezeApp
         /// <param name="message"></param>
         public void Handle(ILogoutMessage message)
         {
-            this.Disconnect();
+            this.Disconnect(shouldDeletePreferences: true);
         }
 
         /// <summary>
@@ -280,7 +375,14 @@ namespace DeepfreezeApp
         {
             if (message != null)
             {
-                _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, BalloonIcon.Info);
+                var icon = message.NotificationStatus == Enumerations.NotificationStatus.Error
+                    ? BalloonIcon.Error
+                    : BalloonIcon.Info;
+
+                if (!this._shellWindow.IsActive)
+                {
+                    _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, message.Message, icon);
+                }
             }
         }
 
@@ -288,23 +390,11 @@ namespace DeepfreezeApp
         /// Handle StartUpArgsMessage
         /// </summary>
         /// <param name="message"></param>
-        public void Handle(IStartUpArgsMessage message)
+        public async Task Handle(IStartUpArgsMessage message)
         {
             if (message != null)
             {
-                switch(message.StartUpArgument)
-                {
-                    case "minimized":
-                        
-                        _shellWindow.WindowState = WindowState.Minimized;
-                        _shellWindow.ShowInTaskbar = false;
-                        break;
-                    default:
-                        
-                        _shellWindow.WindowState = WindowState.Normal;
-                        _shellWindow.ShowInTaskbar = true;
-                        break;
-                }
+                await this.WorkOnStartUpArgsAsync(message.StartUpArguments).ConfigureAwait(false);
             }
         }
 
@@ -357,7 +447,7 @@ namespace DeepfreezeApp
         protected override void OnViewLoaded(object view)
         {
             var v = view as MetroWindow;
-            v.Title = Properties.Settings.Default.ApplicationName;
+            v.Title = this.ApplicationTitle;
 
             if (v != null)
             {
@@ -414,7 +504,8 @@ namespace DeepfreezeApp
                     if (!(String.IsNullOrEmpty(content) ||
                           String.IsNullOrWhiteSpace(content)))
                     {
-                        this._deepfreezeClient.Settings.ApiEndpoint = content;
+                        this._deepfreezeClient.Settings.ApiEndpoint = content
+                            .TrimEnd(Environment.NewLine.ToCharArray());
                     }
                     else
                     {
@@ -451,12 +542,21 @@ namespace DeepfreezeApp
 
                         this._deepfreezeClient.Settings.ActiveUser = user;
                         // Save preferences file here again to sync with online data (quota, display name etc.).
-                        LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8);
+                        var writeSuccess = LocalStorage.WriteJson(Properties.Settings.Default.SettingsFilePath, this._deepfreezeClient.Settings, Encoding.UTF8, true);
+
+                        if (!writeSuccess)
+                        {
+                            await this._windowManager.ShowMessageViewModelAsync("There was an error while trying to save your settings. " + 
+                                "Please make sure that you have enough free space on your hard drive.\n\n" + 
+                                "You may have to reconnect your BigStash account the next time you run the BigStash application.", "Error saving settings", 
+                                MessageBoxButton.OK);
+                        }
 
                         InstatiateArchiveViewModel();
                         InstatiatePreferencesViewModel();
                         InstatiateAboutViewModel();
                         InstatiateUploadManagerViewModel();
+                        InstatiateNotificationsViewModel();
                     }
                     else
                     {
@@ -493,6 +593,8 @@ namespace DeepfreezeApp
 
                     switch (bgex.StatusCode)
                     {
+                        // If the current token use returns unauthorized or forbidden
+                        // then mark it for deletion.
                         case System.Net.HttpStatusCode.Unauthorized:
                         case System.Net.HttpStatusCode.Forbidden:
                             HasError = false;
@@ -505,9 +607,10 @@ namespace DeepfreezeApp
             finally 
             { 
                 IsBusy = false;
-
-                base.OnActivate();
+                this.BusyMessage = null;
             }
+
+            base.OnActivate();
         }
 
         protected override void OnDeactivate(bool close)
@@ -544,9 +647,10 @@ namespace DeepfreezeApp
                     // if no user is currently connected, show a BallonTip
                     // informing the user about the application minimizing instead of exiting.
                     // Do this only one time in each application run.
-                    if (!this._minimizeBallonTipShown)
+                    if (!Properties.Settings.Default.MinimizeBallonTipShown)
                     {
-                        this._minimizeBallonTipShown = true;
+                        Properties.Settings.Default.MinimizeBallonTipShown = true;
+                        Properties.Settings.Default.Save();
                         _tray.ShowBalloonTip(Properties.Settings.Default.ApplicationFullName, Properties.Resources.MinimizedMessageText, BalloonIcon.Info);
                     }
 
@@ -571,6 +675,8 @@ namespace DeepfreezeApp
 
             bool connectionStatusChanged = this.IsInternetConnected != isConnected;
             this.IsInternetConnected = isConnected;
+
+            UpdateTrayIconToolTipWithCurrentStatus();
 
             if (connectionStatusChanged)
             {
@@ -639,7 +745,11 @@ namespace DeepfreezeApp
             {
                 PreferencesVM = IoC.Get<IPreferencesViewModel>() as PreferencesViewModel;
             }
-            this.ActivateItem(PreferencesVM);
+
+            if (!this.PreferencesVM.IsActive)
+            {
+                this.ActivateItem(PreferencesVM);
+            }
         }
 
         /// <summary>
@@ -651,7 +761,11 @@ namespace DeepfreezeApp
             {
                 AboutVM = IoC.Get<IAboutViewModel>() as AboutViewModel;
             }
-            this.ActivateItem(AboutVM);
+
+            if (!this.AboutVM.IsActive)
+            {
+                this.ActivateItem(AboutVM);
+            }
         }
 
         /// <summary>
@@ -667,6 +781,22 @@ namespace DeepfreezeApp
         }
 
         /// <summary>
+        /// Instatiate a new NotificationsViewModel and activate it.
+        /// </summary>
+        private void InstatiateNotificationsViewModel()
+        {
+            if (this.ActivityVM == null)
+            {
+                this.ActivityVM = IoC.Get<IActivityViewModel>() as ActivityViewModel;
+            }
+
+            if (!this.ActivityVM.IsActive)
+            {
+                this.ActivateItem(ActivityVM);
+            }
+        }
+
+        /// <summary>
         /// Disconnect the current user for the DeepfreezeClient. This method closes 
         /// the preferences flyout, nullifies the DeepfreezeClient's ActiveUser and ActiveToken,
         /// deletes the local preferences file and handles the closing of each viewmodel that
@@ -674,19 +804,27 @@ namespace DeepfreezeApp
         /// a new LoginViewModel so the user can try connecting again.
         /// </summary>
         /// <param name="errorMessage"></param>
-        private void Disconnect(string errorMessage = null)
+        private void Disconnect(string errorMessage = null, bool shouldDeletePreferences = false)
         {
             // Close the preferences flyout.
             if (this.IsPreferencesFlyoutOpen)
                 TogglePreferencesFlyout();
 
-            _log.Info("Disconnecting user, deleting \"" + Properties.Settings.Default.SettingsFilePath + "\".");
-
             // When logging out, we delete the the local preferences file and reset
             // DeepfreezeClient's settings to null, so no user is logged in.
             this._deepfreezeClient.Settings.ActiveUser = null;
             this._deepfreezeClient.Settings.ActiveToken = null;
-            File.Delete(Properties.Settings.Default.SettingsFilePath);
+
+            if (shouldDeletePreferences)
+            {
+                _log.Info("Disconnecting user and deleting preferences file.");
+                File.Delete(Properties.Settings.Default.SettingsFilePath);
+            }
+            else
+            {
+                _log.Info("Disconnecting user. Preferences file won't get deleted.");
+            }
+            
 
             NotifyOfPropertyChange(() => IsLoggedIn);
 
@@ -738,6 +876,160 @@ namespace DeepfreezeApp
             {
                 _log.Error("Settings migration failed. Default settings will be used if the next instance is an update.");
                 return null;
+            }
+        }
+
+        private async Task WorkOnStartUpArgsAsync(string[] startUpArgs)
+        {
+            if (startUpArgs.Length == 0)
+            {
+                return;
+            }
+
+            _log.Debug("StarUp arguments arrived.");
+
+            var args = startUpArgs.ToList();
+
+            // Check for minimized argument.
+            if (args.Contains("-m"))
+            {
+                _log.Debug("Got Argument: minimized");
+
+                _shellWindow.WindowState = WindowState.Minimized;
+                _shellWindow.ShowInTaskbar = false;
+            }
+            else
+            {
+                _shellWindow.WindowState = WindowState.Normal;
+                _shellWindow.ShowInTaskbar = true;
+            }
+
+            // Check for -u argument. If it's followed by --fromfile,
+            // then the 2nd next argument should be the path of a file
+            // containing all selected file paths. Else, the next argument
+            // should be string containing at least one path in its value,
+            // delimited by the character '|'.
+            if (args.Contains("-u"))
+            {
+                _log.Debug("Got Argument: -u");
+
+                var indexOfU = args.IndexOf("-u");
+
+                IList<string> paths;
+
+                // If the next argument is --fromfile, then the following path is the path of the file
+                // containing all paths from the user's selection.
+                if (args[indexOfU + 1] == "--fromfile")
+                {
+                    var selectionFile = args[indexOfU + 2];
+
+                    _log.Debug("Got Argument: --fromfile '" + selectionFile +"'");
+
+                    if (!File.Exists(selectionFile))
+                    {
+                        MessageBox.Show("Could not get the files you selected to include in the archive.");
+                        return;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var res = await Utilities.ReadPathsFromSelectionFileAsync(selectionFile).ConfigureAwait(false);
+                            paths = res.ToList();
+
+                            _log.Debug("Successfully read paths from file.");
+
+                            File.Delete(selectionFile);
+                            _log.Debug("Deleted file: '" + selectionFile + "'");
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    _log.Debug("Got Argument: -u (without --fromfile");
+
+                    try
+                    {
+                        var pathsArg = args[indexOfU + 1];
+
+                        if (String.IsNullOrEmpty(pathsArg))
+                        {
+                            throw new IndexOutOfRangeException("Paths argument was null or empty.");
+                        }
+
+                        paths = new List<string>();
+                        foreach (var path in pathsArg.Split('|'))
+                        {
+                            paths.Add(path);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
+
+                        if (e is IndexOutOfRangeException)
+                        {
+                            MessageBox.Show("You didn't select any files to archive.");
+                        }
+
+                        return;
+                    }
+                }
+
+                while(this.ArchiveVM == null || !this.ArchiveVM.IsActive)
+                {
+                    await Task.Delay(500).ConfigureAwait(false);
+                }
+
+                var createArchiveMessage = IoC.Get<ICreateArchiveMessage>();
+                createArchiveMessage.Paths = paths.AsEnumerable();
+                await this._eventAggregator.PublishOnUIThreadAsync(createArchiveMessage);
+            }
+        }
+
+        private void UpdateTrayIconToolTipWithCurrentStatus()
+        {
+            if (!this.IsInternetConnected)
+            {
+                this.TrayToolTipText = "Connecting";
+                return;
+            }
+
+            if (this.UploadManagerVM == null ||
+                !this.UploadManagerVM.IsActive)
+            {
+                return;
+            }
+
+            if (this.UploadManagerVM.PendingUploads.Count > 0)
+            {
+                var uploadingCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Uploading)
+                    .Count();
+
+                var pausedCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Paused)
+                    .Count();
+
+                var errorCount = this.UploadManagerVM.PendingUploads
+                    .Where(x => x.OperationStatus == Enumerations.Status.Error)
+                    .Count();
+
+                var sb = new StringBuilder();
+                sb.Append(String.Format("Uploading: {0} - ", uploadingCount));
+                sb.Append(String.Format("Paused: {0} - ", pausedCount));
+                sb.Append(String.Format("Errors: {0}", errorCount));
+
+                this.TrayToolTipText = sb.ToString();
+            }
+            else
+            {
+                this.TrayToolTipText = null;
             }
         }
 
