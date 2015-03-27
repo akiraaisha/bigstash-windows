@@ -215,7 +215,7 @@ namespace DeepfreezeApp
                     onAppUpdate: v =>
                     {
                         _log.Warn(Utilities.GetCallerName() + ": Update in progress.");
-
+                        
                         mgr.CreateShortcutForThisExe();
                         CreateOrUpdateCustomRegistryEntries(mgr.RootAppDirectory, v.ToString());
                         RegisterShellExtension(mgr.RootAppDirectory);
@@ -395,6 +395,43 @@ namespace DeepfreezeApp
         public static string GetRootAppDirectoryName()
         {
             return new DirectoryInfo(GetRootAppDirectory()).Name;
+        }
+
+        /// <summary>
+        /// Try to remove the older (<=1.4.1.5) 'BigStash For Windows' shortcut.
+        /// </summary>
+        public static void TryRenameOldNameShortcut()
+        {
+            _log.Debug("Trying to locate and rename old name shortcut file.");
+
+            try
+            {
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var oldShortcutPath = Path.Combine(desktopPath, "BigStash for Windows.lnk");
+
+                if (!File.Exists(oldShortcutPath))
+                {
+                    return;
+                }
+
+                _log.Debug("Found old name shortcut file at '" + oldShortcutPath + "'.");
+
+                var newShortcutPath = Path.Combine(desktopPath, 
+                    Properties.Settings.Default.ApplicationFullName + ".lnk");
+
+                File.Move(oldShortcutPath, newShortcutPath);
+
+                _log.Debug("Renamed old name shortcut file at '" + oldShortcutPath + "' to '" +
+                newShortcutPath + "'.");
+
+                RefreshWindowsExplorer();
+            }
+            catch (Exception e)
+            {
+                // If we still can't do anything about it, well let it rest.
+                _log.Error(Utilities.GetCallerName() + " error while renaming old name shortcut.", e);
+                return;
+            }
         }
 
         #region private_methods
@@ -658,7 +695,7 @@ namespace DeepfreezeApp
         /// Call a batch file to rename the app version directory after the uninstall exits.
         /// </summary>
         /// <param name="rootAppDirectory"></param>
-        public static void CallRenameInUseDirToOld(string path, string newName)
+        private static void CallRenameInUseDirToOld(string path, string newName)
         {
             var pid = Process.GetCurrentProcess().Id;
             StringBuilder sb = new StringBuilder();
@@ -697,6 +734,13 @@ namespace DeepfreezeApp
             p.Start();
         }
 
+        [System.Runtime.InteropServices.DllImport("Shell32.dll")]
+        private static extern int SHChangeNotify(int eventId, int flags, IntPtr item1, IntPtr item2);
+
+        private static void RefreshWindowsExplorer()
+        {
+            SHChangeNotify(0x8000000, 0x1000, IntPtr.Zero, IntPtr.Zero);
+        }
         #endregion
     }
 }
