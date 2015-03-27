@@ -100,7 +100,8 @@ namespace DeepfreezeApp
 
                 // Change default ClickOnce icon in Programs and Features entry,
                 // if it's not already set.
-                SetAddRemoveProgramsIcon();
+                // SetAddRemoveProgramsIcon();
+                SquirrelHelper.TryRenameOldNameShortcut();
 
                 log4net.Config.XmlConfigurator.Configure(new FileInfo("Log4Net.config"));
 
