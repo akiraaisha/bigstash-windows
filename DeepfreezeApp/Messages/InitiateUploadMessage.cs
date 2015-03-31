@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 
-using DeepfreezeModel;
+using BigStash.Model;
 
 namespace BigStash.WPF
 {

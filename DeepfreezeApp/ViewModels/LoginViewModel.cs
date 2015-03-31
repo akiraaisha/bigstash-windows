@@ -11,7 +11,7 @@ using Caliburn.Micro;
 
 using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
-using DeepfreezeModel;
+using BigStash.Model;
 using System.Windows.Input;
 using System.Windows;
 

@@ -11,7 +11,7 @@ using System.Windows.Threading;
 using System.Diagnostics;
 using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
-using DeepfreezeModel;
+using BigStash.Model;
 using Caliburn.Micro;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;

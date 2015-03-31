@@ -9,7 +9,7 @@ using System.Windows.Threading;
 using System.Diagnostics;
 
 using Caliburn.Micro;
-using DeepfreezeModel;
+using BigStash.Model;
 using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
 

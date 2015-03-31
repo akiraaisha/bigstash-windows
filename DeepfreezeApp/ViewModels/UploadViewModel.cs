@@ -14,7 +14,7 @@ using Caliburn.Micro;
 
 using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
-using DeepfreezeModel;
+using BigStash.Model;
 
 using Amazon.S3;
 using Amazon.S3.Model;

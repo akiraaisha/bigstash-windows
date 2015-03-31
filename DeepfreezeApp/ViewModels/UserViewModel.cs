@@ -7,7 +7,7 @@ using System.ComponentModel.Composition;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
-using DeepfreezeModel;
+using BigStash.Model;
 using System.IO;
 
 namespace BigStash.WPF

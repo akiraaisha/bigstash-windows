@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 
-using DeepfreezeModel;
+using BigStash.Model;
 using Newtonsoft.Json;
 
 namespace BigStash.WPF

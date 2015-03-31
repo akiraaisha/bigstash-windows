@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DeepfreezeModel;
+using BigStash.Model;
 
 namespace DeepfreezeSDK
 {

@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 using Caliburn.Micro;
 using DeepfreezeSDK;
-using DeepfreezeModel;
+using BigStash.Model;
 using DeepfreezeSDK.Exceptions;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;

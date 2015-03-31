@@ -10,7 +10,7 @@ namespace BigStash.WPF
     [Export(typeof(IUploadActionMessage))]
     public class UploadActionMessage : IUploadActionMessage
     {
-        public DeepfreezeModel.Enumerations.UploadAction UploadAction { get; set; }
+        public BigStash.Model.Enumerations.UploadAction UploadAction { get; set; }
 
         public UploadViewModel UploadVM { get; set; }
     }

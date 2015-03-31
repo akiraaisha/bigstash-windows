@@ -11,7 +11,7 @@ using System.IO;
 using System.Runtime;
 using System.Runtime.InteropServices;
 
-using DeepfreezeModel;
+using BigStash.Model;
 using DeepfreezeSDK.Exceptions;
 using DeepfreezeSDK.Retry;
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-using DeepfreezeModel;
+using BigStash.Model;
 
 namespace DeepfreezeSDK
 {
