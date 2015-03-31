@@ -160,3 +160,9 @@ $RECYCLE.BIN/
 *_i.c
 *_i.h
 *_p.c
+/BigStashExt/BigStashExtps.def
+/BigStashExt/dlldata.c
+/extensions
+
+# Our custom nuspec files for various builds
+/BigStashWindowsBeta.1.4.2.9.nuspec

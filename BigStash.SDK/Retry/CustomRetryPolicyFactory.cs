@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
+
+namespace BigStash.SDK.Retry
+{
+    public static class CustomRetryPolicyFactory
+    {
+        /// <summary>
+        /// Create an Exponential Backoff RetryPolicy using 
+        /// a HttpTransientErrorDetectionStrategy detection strategy.
+        /// </summary>
+        /// <returns></returns>
+        public static RetryPolicy MakeHttpRetryPolicy(int retryCount)
+        {
+            var strategy = new HttpTransientErrorDetectionStrategy();
+            return Exponential(strategy, retryCount);
+        }
+
+        /// <summary>
+        /// Create an exponential backoff retry policy given a detection strategy.
+        /// </summary>
+        /// <param name="strategy"></param>
+        /// <returns></returns>
+        private static RetryPolicy Exponential(ITransientErrorDetectionStrategy strategy, int retryCount)
+        {
+            if (retryCount == 0)
+                return RetryPolicy.NoRetry;
+
+            if (retryCount == 1)
+            {
+                var retryPolicy = new RetryPolicy(strategy, 1);
+                retryPolicy.RetryStrategy.FastFirstRetry = true;
+
+                return retryPolicy;
+            }
+            
+            var minBackoff = TimeSpan.FromSeconds(1);
+            var maxBackoff = TimeSpan.FromSeconds(10);
+            var deltaBackoff = TimeSpan.FromSeconds(5);
+
+            // if retryCount is equal to Int16.MaxValue (32767)
+            // then increase the backoff intervals.
+            if (retryCount == Int16.MaxValue)
+            {
+                minBackoff = TimeSpan.FromSeconds(1);
+                maxBackoff = TimeSpan.FromSeconds(300);
+                deltaBackoff = TimeSpan.FromSeconds(10);
+            }
+
+            // 30 60 120 240
+
+            var exponentialBackoff = new ExponentialBackoff(retryCount, minBackoff, maxBackoff, deltaBackoff);
+
+            return new RetryPolicy(strategy, exponentialBackoff);
+        }
+    }
+}
