@@ -18,9 +18,9 @@ using log4net;
 namespace BigStash.SDK
 {
     [Export(typeof(IBigStashS3Client))]
-    public class DeepfreezeS3Client : IBigStashS3Client
+    public class BigStashS3Client : IBigStashS3Client
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(BigStashS3Client));
 
         protected static readonly long PART_SIZE = 5 * 1024 * 1024;
         protected static readonly int MAX_PARALLEL_ALLOWED = Environment.ProcessorCount - 1;
@@ -31,7 +31,7 @@ namespace BigStash.SDK
 
         public bool IsUploading = false;
 
-        public DeepfreezeS3Client()
+        public BigStashS3Client()
         { }
 
         /// <summary>

@@ -58,7 +58,7 @@ namespace BigStash.WPF
 
         private long _totalProgress = 0; // this is updated when a file completes upload and not while uploading.
 
-        private DeepfreezeS3Client _s3Client = new DeepfreezeS3Client();
+        private BigStashS3Client _s3Client = new BigStashS3Client();
         private S3Info _s3Info = new S3Info();
 
         private CancellationTokenSource _cts;
