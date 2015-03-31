@@ -10,9 +10,9 @@ using System.Windows.Documents;
 using System.Diagnostics;
 
 using Caliburn.Micro;
-using DeepfreezeSDK;
+using BigStash.SDK;
 using BigStash.Model;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK.Exceptions;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;

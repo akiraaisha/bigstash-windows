@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using BigStash.Model;
 
-namespace DeepfreezeSDK
+namespace BigStash.SDK
 {
     public interface IDeepfreezeClient
     {

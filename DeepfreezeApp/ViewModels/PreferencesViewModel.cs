@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 
 using Caliburn.Micro;
-using DeepfreezeSDK;
+using BigStash.SDK;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;

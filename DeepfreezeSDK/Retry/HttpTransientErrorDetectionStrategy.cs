@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK.Exceptions;
 
-namespace DeepfreezeSDK.Retry
+namespace BigStash.SDK.Retry
 {
     public class HttpTransientErrorDetectionStrategy : ITransientErrorDetectionStrategy
     {

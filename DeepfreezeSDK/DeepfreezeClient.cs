@@ -12,14 +12,14 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 
 using BigStash.Model;
-using DeepfreezeSDK.Exceptions;
-using DeepfreezeSDK.Retry;
+using BigStash.SDK.Exceptions;
+using BigStash.SDK.Retry;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using log4net;
 
-namespace DeepfreezeSDK
+namespace BigStash.SDK
 {
     [Export(typeof(IDeepfreezeClient))]
     public class DeepfreezeClient : IDeepfreezeClient
@@ -718,7 +718,7 @@ namespace DeepfreezeSDK
 
             _log.Error(errorMsg.ToString(), innerException);
 
-            var errorType = DeepfreezeSDK.Exceptions.ErrorType.NotSet;
+            var errorType = BigStash.SDK.Exceptions.ErrorType.NotSet;
 
             // If the InnerException is thrown by HttpClient.SendAsync() then
             // the error type should be ErrorType.Service.

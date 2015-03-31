@@ -15,7 +15,7 @@ using System.IO;
 using Amazon.Runtime;
 using log4net;
 
-namespace DeepfreezeSDK
+namespace BigStash.SDK
 {
     [Export(typeof(IDeepfreezeS3Client))]
     public class DeepfreezeS3Client : IDeepfreezeS3Client

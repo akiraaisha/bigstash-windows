@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 using BigStash.Model;
 
-namespace DeepfreezeSDK
+namespace BigStash.SDK
 {
     public class Settings
     {

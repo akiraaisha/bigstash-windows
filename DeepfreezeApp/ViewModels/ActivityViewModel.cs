@@ -10,8 +10,8 @@ using System.Diagnostics;
 
 using Caliburn.Micro;
 using BigStash.Model;
-using DeepfreezeSDK;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK;
+using BigStash.SDK.Exceptions;
 
 namespace BigStash.WPF
 {

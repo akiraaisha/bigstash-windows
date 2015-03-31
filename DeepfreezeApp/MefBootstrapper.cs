@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 using Newtonsoft.Json;
 using Caliburn.Micro;
-using DeepfreezeSDK;
+using BigStash.SDK;
 using BigStash.Model;
 using Custom.Windows;
 using System.Configuration;

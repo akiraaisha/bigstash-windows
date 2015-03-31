@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Windows;
 
 using Caliburn.Micro;
-using DeepfreezeSDK;
+using BigStash.SDK;
 using Custom.Windows;
 using System.Windows.Controls;
 

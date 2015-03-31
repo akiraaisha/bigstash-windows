@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
-namespace DeepfreezeSDK.Retry
+namespace BigStash.SDK.Retry
 {
     public static class CustomRetryPolicyFactory
     {

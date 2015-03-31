@@ -12,8 +12,8 @@ using System.IO;
 
 using Caliburn.Micro;
 
-using DeepfreezeSDK;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK;
+using BigStash.SDK.Exceptions;
 using BigStash.Model;
 
 using Amazon.S3;
@@ -1497,7 +1497,7 @@ namespace BigStash.WPF
 
                 // throw an exception if the manifest isn't uploaded
                 // and the amazon s3 client didn't throw an exception.
-                throw new BigStashException("Unsuccessful manifest upload.", DeepfreezeSDK.Exceptions.ErrorType.Client);
+                throw new BigStashException("Unsuccessful manifest upload.", BigStash.SDK.Exceptions.ErrorType.Client);
             }
             catch(Exception e)
             {

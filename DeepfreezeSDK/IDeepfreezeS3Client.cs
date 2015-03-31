@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeepfreezeSDK
+namespace BigStash.SDK
 {
     interface IDeepfreezeS3Client
     {

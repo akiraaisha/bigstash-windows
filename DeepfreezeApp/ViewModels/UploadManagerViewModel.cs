@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 
 using Caliburn.Micro;
-using DeepfreezeSDK;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK;
+using BigStash.SDK.Exceptions;
 using BigStash.Model;
 using System.IO;
 using Newtonsoft.Json;

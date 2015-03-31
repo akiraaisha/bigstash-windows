@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeepfreezeSDK.Exceptions
+namespace BigStash.SDK.Exceptions
 {
     public static class BigStashExceptionHelper
     {

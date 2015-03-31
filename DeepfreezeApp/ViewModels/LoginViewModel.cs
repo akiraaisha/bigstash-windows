@@ -9,8 +9,8 @@ using System.Diagnostics;
 
 using Caliburn.Micro;
 
-using DeepfreezeSDK;
-using DeepfreezeSDK.Exceptions;
+using BigStash.SDK;
+using BigStash.SDK.Exceptions;
 using BigStash.Model;
 using System.Windows.Input;
 using System.Windows;
