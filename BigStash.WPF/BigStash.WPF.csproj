@@ -294,11 +294,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DeepfreezeModel\BigStash.Model.csproj">
+    <ProjectReference Include="..\BigStash.Model\BigStash.Model.csproj">
       <Project>{fb8a4bdf-7d68-4b2f-9fe1-aa8483251006}</Project>
       <Name>BigStash.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DeepfreezeSDK\BigStash.SDK.csproj">
+    <ProjectReference Include="..\BigStash.SDK\BigStash.SDK.csproj">
       <Project>{cd89c9cb-f3a9-4d52-8f8a-c8472043d634}</Project>
       <Name>BigStash.SDK</Name>
     </ProjectReference>
