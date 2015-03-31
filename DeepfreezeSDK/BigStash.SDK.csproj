@@ -71,7 +71,7 @@
     <Compile Include="Retry\RetryDelegatingHanlder.cs" />
     <Compile Include="BigStashClient\BigStashClientSettings.cs" />
     <Compile Include="HelperMethods.cs" />
-    <Compile Include="BigStashS3Client\IDeepfreezeS3Client.cs" />
+    <Compile Include="BigStashS3Client\IBigStashS3Client.cs" />
     <Compile Include="BigStashClient\IBigStashClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
