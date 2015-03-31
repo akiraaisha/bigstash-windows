@@ -21,8 +21,8 @@ using log4net;
 
 namespace BigStash.SDK
 {
-    [Export(typeof(IDeepfreezeClient))]
-    public class DeepfreezeClient : IDeepfreezeClient
+    [Export(typeof(IBigStashClient))]
+    public class DeepfreezeClient : IBigStashClient
     {
         #region fields
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeClient));

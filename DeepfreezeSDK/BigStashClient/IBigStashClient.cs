@@ -9,7 +9,7 @@ using BigStash.Model;
 
 namespace BigStash.SDK
 {
-    public interface IDeepfreezeClient
+    public interface IBigStashClient
     {
         Settings Settings { get; set; }
 
