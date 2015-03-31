@@ -84,7 +84,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DeepfreezeModel\BigStash.Model.csproj">
+    <ProjectReference Include="..\BigStash.Model\BigStash.Model.csproj">
       <Project>{fb8a4bdf-7d68-4b2f-9fe1-aa8483251006}</Project>
       <Name>BigStash.Model</Name>
     </ProjectReference>
