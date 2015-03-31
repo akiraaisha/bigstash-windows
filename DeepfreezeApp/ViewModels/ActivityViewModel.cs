@@ -13,7 +13,7 @@ using DeepfreezeModel;
 using DeepfreezeSDK;
 using DeepfreezeSDK.Exceptions;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IActivityViewModel))]
     public class ActivityViewModel : Screen, IActivityViewModel, IHandleWithTask<IFetchNotificationsMessage>

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IInternetConnectivityMessage))]
     public class InternetConnectivityMessage : IInternetConnectivityMessage

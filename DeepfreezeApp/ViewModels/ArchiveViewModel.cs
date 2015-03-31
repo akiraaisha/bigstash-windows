@@ -18,7 +18,7 @@ using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;
 using System.Threading;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IArchiveViewModel))]
     public class ArchiveViewModel : Screen, IArchiveViewModel, IHandle<IInternetConnectivityMessage>,

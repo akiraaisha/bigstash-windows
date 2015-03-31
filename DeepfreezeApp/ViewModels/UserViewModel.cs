@@ -10,7 +10,7 @@ using DeepfreezeSDK;
 using DeepfreezeModel;
 using System.IO;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IUserViewModel))]
     public class UserViewModel : Screen, IUserViewModel, IHandleWithTask<IRefreshUserMessage>,

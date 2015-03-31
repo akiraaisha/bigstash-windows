@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MahApps.Metro.Controls;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public interface IShell
     {

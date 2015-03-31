@@ -11,7 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class HyperLinkConverter : IMultiValueConverter
     {

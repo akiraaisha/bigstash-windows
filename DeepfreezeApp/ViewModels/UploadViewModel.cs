@@ -21,7 +21,7 @@ using Amazon.S3.Model;
 using Amazon.Runtime;
 using System.Diagnostics;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IUploadViewModel))]
     public class UploadViewModel : Screen, IUploadViewModel, IHandleWithTask<IUploadActionMessage>,

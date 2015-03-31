@@ -7,7 +7,7 @@ using System.ComponentModel.Composition;
 using System.Windows;
 using Caliburn.Micro;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [PartCreationPolicy(CreationPolicy.NonShared)]
     [Export(typeof(IMessageBoxViewModel))]

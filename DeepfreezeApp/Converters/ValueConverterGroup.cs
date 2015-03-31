@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class ValueConverterGroup : List<IValueConverter>, IValueConverter
     {

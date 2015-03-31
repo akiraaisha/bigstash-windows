@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 
-namespace DeepfreezeApp.Messages
+namespace BigStash.WPF.Messages
 {
     [Export(typeof(IStartUpArgsMessage))]
     public class StartUpArgsMessage : IStartUpArgsMessage

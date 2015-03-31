@@ -12,7 +12,7 @@ using System.Security.Cryptography;
 using DeepfreezeModel;
 using Newtonsoft.Json;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public static class Utilities
     {

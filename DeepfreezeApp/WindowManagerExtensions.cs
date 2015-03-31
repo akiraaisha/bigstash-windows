@@ -8,7 +8,7 @@ using System.Dynamic;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public static class WindowManagerExtensions
     {

@@ -7,7 +7,7 @@ using System.ComponentModel.Composition;
 
 using DeepfreezeModel;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(INotificationMessage))]
     public class NotificationMessage : INotificationMessage

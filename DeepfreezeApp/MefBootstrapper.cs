@@ -17,7 +17,7 @@ using DeepfreezeModel;
 using Custom.Windows;
 using System.Configuration;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class MefBootstrapper : BootstrapperBase
     {

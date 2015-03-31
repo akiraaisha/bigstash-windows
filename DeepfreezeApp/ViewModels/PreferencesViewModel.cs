@@ -11,7 +11,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IPreferencesViewModel))]
     public class PreferencesViewModel : Conductor<Screen>.Collection.AllActive, IPreferencesViewModel

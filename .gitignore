@@ -160,3 +160,9 @@ $RECYCLE.BIN/
 *_i.c
 *_i.h
 *_p.c
+/extensions
+/DeepfreezeApp/Properties/app.manifest
+/DeepfreezeApp/NotepadHelper.cs
+/DeepfreezeApp/Log4Net.config
+/DeepfreezeSDK/Log4Net.config
+/BigStashWindowsBeta.1.4.2.9.nuspec

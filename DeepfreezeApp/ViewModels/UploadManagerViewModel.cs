@@ -12,7 +12,7 @@ using DeepfreezeModel;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IUploadManagerViewModel))]
     public class UploadManagerViewModel : Conductor<Screen>.Collection.AllActive, IUploadManagerViewModel,

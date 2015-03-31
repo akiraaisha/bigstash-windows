@@ -15,7 +15,7 @@ using DeepfreezeModel;
 using System.Windows.Input;
 using System.Windows;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(ILoginViewModel))]
     public class LoginViewModel : Screen, ILoginViewModel, IHandle<IInternetConnectivityMessage>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class BoolToVisibility : IValueConverter
     {

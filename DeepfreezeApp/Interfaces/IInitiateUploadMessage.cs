@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using DeepfreezeModel;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public interface IInitiateUploadMessage
     {

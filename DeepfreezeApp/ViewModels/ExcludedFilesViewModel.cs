@@ -11,7 +11,7 @@ using System.Diagnostics;
 using MahApps.Metro.Controls.Dialogs;
 using log4net;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [PartCreationPolicy(CreationPolicy.NonShared)]
     [Export(typeof(IExcludedFilesViewModel))]

@@ -17,7 +17,7 @@ using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IShell))]
     public class ShellViewModel : Conductor<Screen>.Collection.AllActive, IShell, IHandle<ILoginSuccessMessage>, IHandle<ILogoutMessage>,

@@ -17,7 +17,7 @@ using Custom.Windows;
 using System.Windows.Controls;
 
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     [Export(typeof(IAboutViewModel))]
     public class AboutViewModel : Conductor<Screen>.Collection.AllActive, IAboutViewModel, IHandle<IInternetConnectivityMessage>

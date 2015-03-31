@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class BindingProxy : Freezable
     {

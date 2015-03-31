@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 using DeepfreezeModel;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public class StatusToRemoveButtonVisibility : IValueConverter
     {

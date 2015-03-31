@@ -11,7 +11,7 @@ using System.Reflection;
 using System.IO;
 using System.Configuration;
 
-namespace DeepfreezeApp
+namespace BigStash.WPF
 {
     public static class SquirrelHelper
     {
