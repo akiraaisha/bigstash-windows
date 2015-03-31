@@ -22,7 +22,7 @@ namespace BigStash.WPF
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ActivityViewModel));
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
 
         private BindableCollection<Notification> _notifications = new BindableCollection<Notification>();
         private string _errorMessage;
@@ -42,7 +42,7 @@ namespace BigStash.WPF
         #region constructor
 
         [ImportingConstructor]
-        public ActivityViewModel(IDeepfreezeClient deepfreezeClient, IEventAggregator eventAggregator)
+        public ActivityViewModel(IBigStashClient deepfreezeClient, IEventAggregator eventAggregator)
         {
             this._deepfreezeClient = deepfreezeClient;
             this._eventAggregator = eventAggregator;

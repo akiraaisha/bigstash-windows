@@ -43,7 +43,7 @@ namespace BigStash.WPF
 
             batch.AddExportedValue<IWindowManager>(new WindowManager());
             batch.AddExportedValue<IEventAggregator>(new EventAggregator());
-            batch.AddExportedValue<IDeepfreezeClient>(new DeepfreezeClient());
+            batch.AddExportedValue<IBigStashClient>(new BigStashClient());
             batch.AddExportedValue(container);
             batch.AddExportedValue(catalog);
 
@@ -179,7 +179,7 @@ namespace BigStash.WPF
                 // make sure to save one final time the application wide settings.
                 Properties.Settings.Default.Save();
 
-                var client = IoC.Get<IDeepfreezeClient>();
+                var client = IoC.Get<IBigStashClient>();
 
                 if (client.IsLogged())
                 {
@@ -359,14 +359,14 @@ namespace BigStash.WPF
         }
 
         [Conditional("DEBUG")]
-        private void ResetDebugServerBaseAddress(IDeepfreezeClient client)
+        private void ResetDebugServerBaseAddress(IBigStashClient client)
         {
             client.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
         }
 
         private void SetVersionForUserAgent(string version)
         {
-            var client = IoC.Get<IDeepfreezeClient>();
+            var client = IoC.Get<IBigStashClient>();
             client.ApplicationVersion = version;
         }
 

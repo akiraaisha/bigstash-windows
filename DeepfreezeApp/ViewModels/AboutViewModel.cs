@@ -26,7 +26,7 @@ namespace BigStash.WPF
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(AboutViewModel));
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
 
         private bool _isOpen;
         private bool _isBusy = false;
@@ -57,7 +57,7 @@ namespace BigStash.WPF
         public AboutViewModel() { }
 
         [ImportingConstructor]
-        public AboutViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient)
+        public AboutViewModel(IEventAggregator eventAggregator, IBigStashClient deepfreezeClient)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;

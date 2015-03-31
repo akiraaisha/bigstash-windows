@@ -38,7 +38,7 @@ namespace BigStash.WPF
         private const int MAX_BACKOFF_INTERVAL = 1200; // in seconds
 
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
         private readonly IUploadManagerViewModel _uploadManager;
 
         private bool _isBusy = false;
@@ -83,7 +83,7 @@ namespace BigStash.WPF
         #region constructor
 
         [ImportingConstructor]
-        public UploadViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient, IUploadManagerViewModel uploadManager)
+        public UploadViewModel(IEventAggregator eventAggregator, IBigStashClient deepfreezeClient, IUploadManagerViewModel uploadManager)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;

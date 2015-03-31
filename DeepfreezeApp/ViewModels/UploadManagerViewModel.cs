@@ -22,7 +22,7 @@ namespace BigStash.WPF
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(UploadManagerViewModel));
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
 
         private bool _isBusy = true;
         private IList<LocalUpload> _localUploads = new List<LocalUpload>();
@@ -53,7 +53,7 @@ namespace BigStash.WPF
 
         #region constructor
         [ImportingConstructor]
-        public UploadManagerViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient)
+        public UploadManagerViewModel(IEventAggregator eventAggregator, IBigStashClient deepfreezeClient)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;

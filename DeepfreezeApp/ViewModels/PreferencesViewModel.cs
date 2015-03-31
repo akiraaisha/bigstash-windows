@@ -21,7 +21,7 @@ namespace BigStash.WPF
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger((System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
 
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
 
         private IUserViewModel _userVM = IoC.Get<IUserViewModel>();
 
@@ -33,7 +33,7 @@ namespace BigStash.WPF
         #region constructors
         public PreferencesViewModel() { }
 
-        public PreferencesViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient)
+        public PreferencesViewModel(IEventAggregator eventAggregator, IBigStashClient deepfreezeClient)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;

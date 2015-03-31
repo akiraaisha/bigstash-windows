@@ -28,7 +28,7 @@ namespace BigStash.WPF
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ArchiveViewModel));
         private readonly IEventAggregator _eventAggregator;
-        private readonly IDeepfreezeClient _deepfreezeClient;
+        private readonly IBigStashClient _deepfreezeClient;
         private static readonly long PART_SIZE = 5 * 1024 * 1024; // in bytes.
         private static readonly long MAX_ALLOWED_FILE_SIZE = PART_SIZE * 10000; // max parts is 10000, so max size is part size * 10000.
 
@@ -68,7 +68,7 @@ namespace BigStash.WPF
 
         #region constructor
         [ImportingConstructor]
-        public ArchiveViewModel(IEventAggregator eventAggregator, IDeepfreezeClient deepfreezeClient)
+        public ArchiveViewModel(IEventAggregator eventAggregator, IBigStashClient deepfreezeClient)
         {
             this._eventAggregator = eventAggregator;
             this._deepfreezeClient = deepfreezeClient;

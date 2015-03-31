@@ -22,10 +22,10 @@ using log4net;
 namespace BigStash.SDK
 {
     [Export(typeof(IBigStashClient))]
-    public class DeepfreezeClient : IBigStashClient
+    public class BigStashClient : IBigStashClient
     {
         #region fields
-        private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeClient));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(BigStashClient));
 
         // strings representing http methods names in lower case;
         private readonly string GET = "GET";
@@ -77,7 +77,7 @@ namespace BigStash.SDK
 
         #region constructors
 
-        public DeepfreezeClient() { }
+        public BigStashClient() { }
 
         #endregion
 
