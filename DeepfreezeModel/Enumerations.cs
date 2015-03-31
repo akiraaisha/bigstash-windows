@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeepfreezeModel
+namespace BigStash.Model
 {
     public class Enumerations
     {

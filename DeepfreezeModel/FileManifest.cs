@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace DeepfreezeModel
+namespace BigStash.Model
 {
     public class FileManifest
     {

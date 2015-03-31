@@ -7,8 +7,8 @@
     <ProjectGuid>{FB8A4BDF-7D68-4B2F-9FE1-AA8483251006}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DeepfreezeModel</RootNamespace>
-    <AssemblyName>DeepfreezeModel</AssemblyName>
+    <RootNamespace>BigStash.Model</RootNamespace>
+    <AssemblyName>BigStash.Model</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

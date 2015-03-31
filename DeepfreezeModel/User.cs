@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeepfreezeModel
+namespace BigStash.Model
 {
     public class User
     {

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace DeepfreezeModel
+namespace BigStash.Model
 {
     [DataContract]
     public class S3Info
