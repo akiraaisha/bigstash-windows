@@ -62,7 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BigStashS3Client\DeepfreezeS3Client.cs" />
+    <Compile Include="BigStashS3Client\BigStashS3Client.cs" />
     <Compile Include="BigStashClient\BigStashClient.cs" />
     <Compile Include="Exceptions\BigStashException.cs" />
     <Compile Include="Exceptions\BigStashExceptionHelper.cs" />
