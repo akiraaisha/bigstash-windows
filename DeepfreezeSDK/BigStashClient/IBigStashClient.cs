@@ -11,7 +11,7 @@ namespace BigStash.SDK
 {
     public interface IBigStashClient
     {
-        Settings Settings { get; set; }
+        BigStashClientSettings Settings { get; set; }
 
         /// <summary>
         /// Check if DeepfreezeClient has a Settings property instatiated,

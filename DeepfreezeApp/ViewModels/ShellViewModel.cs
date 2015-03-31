@@ -475,12 +475,12 @@ namespace BigStash.WPF
 
                     if (!(String.IsNullOrEmpty(content) || String.IsNullOrWhiteSpace(content)))
                     {
-                        this._deepfreezeClient.Settings = JsonConvert.DeserializeObject<Settings>(content);
+                        this._deepfreezeClient.Settings = JsonConvert.DeserializeObject<BigStashClientSettings>(content);
                     }
                     else
                     {
                         _log.Warn("Preferences is null. Use default server address: \"" + Properties.Settings.Default.ServerBaseAddress + "\".");
-                        var settings = new Settings();
+                        var settings = new BigStashClientSettings();
                         this._deepfreezeClient.Settings = settings;
                     }
                 }
@@ -488,7 +488,7 @@ namespace BigStash.WPF
                 {
                     _log.Info("Preferences.json doesn't exist. The client is disconnected.");
 
-                    var settings = new Settings();
+                    var settings = new BigStashClientSettings();
                     this._deepfreezeClient.Settings = settings;
                 }
 
@@ -574,7 +574,7 @@ namespace BigStash.WPF
                 _log.Error(Utilities.GetCallerName() + " threw " + e.GetType().ToString() + " with message \"" + e.Message + "\".");
 
                 // The preferences file format seems to be invalid.
-                var settings = new Settings();
+                var settings = new BigStashClientSettings();
                 this._deepfreezeClient.Settings = settings;
                 this._deepfreezeClient.Settings.ApiEndpoint = Properties.Settings.Default.ServerBaseAddress;
 

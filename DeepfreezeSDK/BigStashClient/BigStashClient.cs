@@ -52,7 +52,7 @@ namespace BigStash.SDK
         /// <summary>
         /// The Settings object holding the connected user, api token and endpoint.
         /// </summary>
-        public Settings Settings { get; set; }
+        public BigStashClientSettings Settings { get; set; }
 
         /// <summary>
         /// Indicating whether an active internet connection is available or not.

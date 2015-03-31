@@ -11,7 +11,7 @@ using BigStash.Model;
 
 namespace BigStash.SDK
 {
-    public class Settings
+    public class BigStashClientSettings
     {
         /// <summary>
         /// Current active Deepfreeze user.
