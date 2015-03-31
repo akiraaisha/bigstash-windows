@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepfreezeSDK", "DeepfreezeSDK\DeepfreezeSDK.csproj", "{CD89C9CB-F3A9-4D52-8F8A-C8472043D634}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigStash.SDK", "DeepfreezeSDK\BigStash.SDK.csproj", "{CD89C9CB-F3A9-4D52-8F8A-C8472043D634}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigStash.Model", "DeepfreezeModel\BigStash.Model.csproj", "{FB8A4BDF-7D68-4B2F-9FE1-AA8483251006}"
 EndProject
