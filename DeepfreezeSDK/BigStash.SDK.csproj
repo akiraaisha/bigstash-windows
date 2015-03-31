@@ -69,7 +69,7 @@
     <Compile Include="Retry\CustomRetryPolicyFactory.cs" />
     <Compile Include="Retry\HttpTransientErrorDetectionStrategy.cs" />
     <Compile Include="Retry\RetryDelegatingHanlder.cs" />
-    <Compile Include="BigStashClient\Settings.cs" />
+    <Compile Include="BigStashClient\BigStashClientSettings.cs" />
     <Compile Include="HelperMethods.cs" />
     <Compile Include="BigStashS3Client\IDeepfreezeS3Client.cs" />
     <Compile Include="BigStashClient\IBigStashClient.cs" />
