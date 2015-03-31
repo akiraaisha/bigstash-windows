@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigStash.SDK
 {
-    interface IDeepfreezeS3Client
+    interface IBigStashS3Client
     {
     }
 }

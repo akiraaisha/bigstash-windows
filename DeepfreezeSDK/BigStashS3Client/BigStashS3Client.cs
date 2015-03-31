@@ -17,8 +17,8 @@ using log4net;
 
 namespace BigStash.SDK
 {
-    [Export(typeof(IDeepfreezeS3Client))]
-    public class DeepfreezeS3Client : IDeepfreezeS3Client
+    [Export(typeof(IBigStashS3Client))]
+    public class DeepfreezeS3Client : IBigStashS3Client
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DeepfreezeS3Client));
 
