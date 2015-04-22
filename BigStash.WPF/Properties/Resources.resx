@@ -1,0 +1,560 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutButtonTooltip" xml:space="preserve">
+    <value>About BigStash</value>
+    <comment>Used for about button tooltip</comment>
+  </data>
+  <data name="AboutHeader" xml:space="preserve">
+    <value>About</value>
+    <comment>Used for about flyout header.</comment>
+  </data>
+  <data name="ActiveUserHeader" xml:space="preserve">
+    <value>BigStash Account</value>
+    <comment>Used for active user header in preferences.</comment>
+  </data>
+  <data name="ArchiveTitleHelperText" xml:space="preserve">
+    <value>Enter a title for your new Archive.</value>
+    <comment>Used for archive title textbox's TextBoxHelper Text.</comment>
+  </data>
+  <data name="CalculatingTotalArchiveSizeText" xml:space="preserve">
+    <value>Calculating total archive size...</value>
+  </data>
+  <data name="CancelButtonContent" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Used for cancel button content.</comment>
+  </data>
+  <data name="CheckForUpdateAutomaticText" xml:space="preserve">
+    <value>Automatically check for updates.</value>
+  </data>
+  <data name="CheckForUpdateText" xml:space="preserve">
+    <value>Check for update</value>
+    <comment>Used for check for update button.</comment>
+  </data>
+  <data name="CheckForUpdateEnabledTooltipText" xml:space="preserve">
+    <value>Check for application updates and install them.</value>
+  </data>
+  <data name="ChooseFolderText" xml:space="preserve">
+    <value>or choose a folder</value>
+    <comment>Used for choose folder textblock text.</comment>
+  </data>
+  <data name="CompletedNotificationText" xml:space="preserve">
+    <value>was successfully frozen.</value>
+  </data>
+  <data name="ConnectButtonContent" xml:space="preserve">
+    <value>Connect</value>
+    <comment>Used for connect button content.</comment>
+  </data>
+  <data name="ConnectHeaderText" xml:space="preserve">
+    <value>Connect to your BigStash Account</value>
+  </data>
+  <data name="ConnectionLostMessage" xml:space="preserve">
+    <value>Internet Connection lost. Pausing active uploads...</value>
+  </data>
+  <data name="ConnectionRestoredMessage" xml:space="preserve">
+    <value>Internet Connection restored. Resuming auto-paused uploads...</value>
+  </data>
+  <data name="CreatingArchiveText" xml:space="preserve">
+    <value>Creating new archive</value>
+  </data>
+  <data name="DebugButtonContent" xml:space="preserve">
+    <value>Open Log</value>
+  </data>
+  <data name="DebugHelpText" xml:space="preserve">
+    <value>If you're experiencing problems with the BigStash application, we might ask you to provide a copy of the log. Clicking the button saves the log file on your Desktop as "BigStashLog.txt".</value>
+  </data>
+  <data name="DeleteButtonContent" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DisconnectButtonContent" xml:space="preserve">
+    <value>Disconnect</value>
+    <comment>Used for disconnect button content.</comment>
+  </data>
+  <data name="DragAndDropText" xml:space="preserve">
+    <value>Drag files here to start uploading a new archive</value>
+    <comment>Used for drag and drop textblock text.</comment>
+  </data>
+  <data name="EmptyFolderSelection" xml:space="preserve">
+    <value>The folder you selected is empty.</value>
+    <comment>Used for exception message when the user selects an empty folder to archive.</comment>
+  </data>
+  <data name="ExitHeader" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="ForgotPasswordText" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
+  <data name="ForgotPasswordURL" xml:space="preserve">
+    <value>https://www.bigstash.co/password_reset/</value>
+  </data>
+  <data name="FreeText" xml:space="preserve">
+    <value> Free / </value>
+  </data>
+  <data name="MinimizedMessageText" xml:space="preserve">
+    <value>BigStash will remain minimized in the tray notification area. To close it, right click the tray icon and select "Exit".</value>
+  </data>
+  <data name="NoInternetConnectionMessage" xml:space="preserve">
+    <value>No internet connection found. Please ensure you are connected to a network with Internet access.</value>
+  </data>
+  <data name="NoPendingUploadsHeaderText" xml:space="preserve">
+    <value>Your pending uploads list is empty.</value>
+  </data>
+  <data name="PasswordError" xml:space="preserve">
+    <value>Please fill your password.</value>
+    <comment>Used for empty password textblock text.</comment>
+  </data>
+  <data name="PasswordTextboxHelper" xml:space="preserve">
+    <value>Password</value>
+    <comment>Used for password login passwordbox.</comment>
+  </data>
+  <data name="PauseButtonContent" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="PercentageOfText" xml:space="preserve">
+    <value>% of </value>
+  </data>
+  <data name="PreferencesHeader" xml:space="preserve">
+    <value>Preferences</value>
+    <comment>Used for preferences flyout header.</comment>
+  </data>
+  <data name="QuotaHeader" xml:space="preserve">
+    <value>Storage</value>
+    <comment>Used for quota header in preferences.</comment>
+  </data>
+  <data name="RemoveButtonContent" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="RestartNeededText" xml:space="preserve">
+    <value>Restart to install updates.</value>
+  </data>
+  <data name="ResumeButtonContent" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="SetPasswordText" xml:space="preserve">
+    <value>Don't know your password?</value>
+  </data>
+  <data name="SetPasswordURL" xml:space="preserve">
+    <value>https://www.bigstash.co/account/</value>
+  </data>
+  <data name="StatusCompletedText" xml:space="preserve">
+    <value>Archived</value>
+  </data>
+  <data name="StatusErrorNotificationText" xml:space="preserve">
+    <value>There was an error freezing Archive</value>
+  </data>
+  <data name="StatusErrorText" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="StatusPausedText" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="StatusPendingText" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="StatusUploadedText" xml:space="preserve">
+    <value>Uploaded. Waiting for server verification.</value>
+  </data>
+  <data name="StatusUploadingText" xml:space="preserve">
+    <value>Uploading</value>
+  </data>
+  <data name="TotalArchiveSizeText" xml:space="preserve">
+    <value>Total Archive Size: </value>
+    <comment>Used for archive size textblock text.</comment>
+  </data>
+  <data name="TotalArchivesText" xml:space="preserve">
+    <value>Total Archives: </value>
+  </data>
+  <data name="TotalText" xml:space="preserve">
+    <value> Total</value>
+  </data>
+  <data name="TotalUploadsText" xml:space="preserve">
+    <value>Total Uploads: </value>
+  </data>
+  <data name="UnauthorizedExceptionMessage" xml:space="preserve">
+    <value>Invalid email or password.</value>
+    <comment>Used for informing the user about wrong username/password combination.</comment>
+  </data>
+  <data name="UploadButtonContent" xml:space="preserve">
+    <value>Upload</value>
+    <comment>Used for upload button content.</comment>
+  </data>
+  <data name="UploadedNotificationText" xml:space="preserve">
+    <value>was successfully uploaded.</value>
+  </data>
+  <data name="UpToDateText" xml:space="preserve">
+    <value>BigStash is up to date.</value>
+  </data>
+  <data name="UsedText" xml:space="preserve">
+    <value> Used / </value>
+  </data>
+  <data name="UsernameError" xml:space="preserve">
+    <value>Please fill your email.</value>
+    <comment>Used for empty username/email textblock text.</comment>
+  </data>
+  <data name="UsernameTextboxHelper" xml:space="preserve">
+    <value>someone@example.com</value>
+    <comment>Used for username login textbox.</comment>
+  </data>
+  <data name="VersionHeaderText" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="DeleteArchiveFromDashboardGenericText" xml:space="preserve">
+    <value>Please delete the archive using the BigStash website Dashboard.</value>
+    <comment>Used for displaying a friendly message if there's an error while creating an upload and the returned upload is null.</comment>
+  </data>
+  <data name="ErrorCalculatingS3UploadSizeText" xml:space="preserve">
+    <value>There was an error calculating the total upload progress.</value>
+    <comment>Used for displaying a friendly message if there's an error while calculating the total uploaded size in S3 in the preparing upload phase.</comment>
+  </data>
+  <data name="ErrorCreatingUploadGenericText" xml:space="preserve">
+    <value>There was an error while creating your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while creating an upload.</comment>
+  </data>
+  <data name="ErrorDeletingUploadGenericText" xml:space="preserve">
+    <value>There was an error while deleting your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while deleting an upload.</comment>
+  </data>
+  <data name="ErrorPreparingUploadGenericText" xml:space="preserve">
+    <value>There was an error while preparing your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while preparing an upload (happends once each time the app is started to prepare all the uploads showing in the app, completed or not).</comment>
+  </data>
+  <data name="ErrorRefreshingProgressGenericText" xml:space="preserve">
+    <value>There was an error while checking your upload's progress.</value>
+    <comment>Used for displaying a friendly message if there's an error while refreshing the upload's progress.</comment>
+  </data>
+  <data name="ErrorRemovingUploadGenericText" xml:space="preserve">
+    <value>There was an error while removing your upload from the application.</value>
+    <comment>Used for displaying a friendly message if there's an error while removing an upload.</comment>
+  </data>
+  <data name="ErrorUploadingGenericText" xml:space="preserve">
+    <value>There was an error with your upload.</value>
+    <comment>Used for displaying a friendly message if there's an error while uploading.</comment>
+  </data>
+  <data name="ErrorAddingFilesGenericText" xml:space="preserve">
+    <value>There was an error adding your file(s) for upload.</value>
+    <comment>Used for displaying a user friendly message if there's an error while adding files to upload via drag n' drop (maybe the user has no right to read the file(s)).</comment>
+  </data>
+  <data name="ErrorCheckingForUpdateWithoutInternetGenericText" xml:space="preserve">
+    <value>Can't check for updates without an active Internet connection.</value>
+    <comment>Used for displaying a user friendly message if the client tries to check for update without an internet connection.</comment>
+  </data>
+  <data name="ErrorChoosingFolderGenericText" xml:space="preserve">
+    <value>There was an error loading your folder for upload.</value>
+    <comment>Used for displaying a user friendly message if there's an error while choosing a folder to upload (maybe the user has no right to read the folder).</comment>
+  </data>
+  <data name="ErrorCreatingArchiveGenericText" xml:space="preserve">
+    <value>There was an error while creating your archive.</value>
+    <comment>Used for displaying a user friendly message if there's an error while creating a new archive (after sending the relevant DF API request).</comment>
+  </data>
+  <data name="ErrorDownloadingUpdateGenericText" xml:space="preserve">
+    <value>The new version of BigStash cannot be downloaded at this time.</value>
+    <comment>Used for displaying a user friendly message if the client's update cannot be downloaded (maybe the host server is unavailable or the update file is missing).</comment>
+  </data>
+  <data name="ErrorInvalidDeploymentExceptionGenericText" xml:space="preserve">
+    <value>Cannot check for a new version of BigStash. Please reinstall the application.</value>
+    <comment>Used for displaying a user friendly message if the client installation is not a valid network installation (i.e. the user somehow installed not a valid production setup application) and the check for update fails.</comment>
+  </data>
+  <data name="ErrorInvalidOperationCheckingForUpdateGenericText" xml:space="preserve">
+    <value>This application cannot be updated. It is likely not a ClickOnce application.</value>
+    <comment>Similar to ErrorInvalidDeploymentExceptionGenericText.</comment>
+  </data>
+  <data name="ErrorRefreshingUserStatsGenericText" xml:space="preserve">
+    <value>There was an error while refreshing your account information.</value>
+    <comment>Used for displaying a user friendly message if there's an error while getting the user account's information (after sending the relevant DF API request).</comment>
+  </data>
+  <data name="ErrorConnectingGenericText" xml:space="preserve">
+    <value>There was an error while trying to connect your account.</value>
+    <comment>Used for displaying a user friendly message if there's an error while trying to log in the user account.</comment>
+  </data>
+  <data name="ErrorConnectingWithoutInternetText" xml:space="preserve">
+    <value>Can't connect your account without an active Internet connection.</value>
+    <comment>Used for displaying a user friendly message if there user tries to log in without an active internet connection.</comment>
+  </data>
+  <data name="ErrorInitializingClientUploadsListGenericText" xml:space="preserve">
+    <value>There was an error while initializing your uploads.</value>
+    <comment>Used for displaying a user friendly message if there's an error while loading the local client data for the uploads list (maybe the local data files are corrupt).</comment>
+  </data>
+  <data name="ErrorInitializingShellViewModelGenericText" xml:space="preserve">
+    <value>There was an error while initializing the application.</value>
+    <comment>Used for displaying a user friendly message if there's an error while initializing the application (loading local user account data).</comment>
+  </data>
+  <data name="ErrorNotEnoughSpaceGenericText" xml:space="preserve">
+    <value>Your remaining BigStash storage is not sufficient for the size of this archive. Consider buying more storage.</value>
+    <comment>Used for displaying a user friendly message if the user tries to upload an archive but there's not enough space in her BigStash account.</comment>
+  </data>
+  <data name="CheckingForUpdateText" xml:space="preserve">
+    <value>Checking for update...</value>
+  </data>
+  <data name="DeleteButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't delete your upload without an active Internet connection.</value>
+  </data>
+  <data name="DowloadingUpdateText" xml:space="preserve">
+    <value>Downloading the update... </value>
+  </data>
+  <data name="ResumeButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't resume your upload without an active Internet connection.</value>
+  </data>
+  <data name="UpdateCompletedText" xml:space="preserve">
+    <value>Update completed successfully. Click the icon above to restart.</value>
+  </data>
+  <data name="UpdateVersionInfoOutdatedText" xml:space="preserve">
+    <value>Version information is outdated.</value>
+  </data>
+  <data name="UpdatingToLatestVersionText" xml:space="preserve">
+    <value>Updating to latest version... </value>
+  </data>
+  <data name="CheckForUpdateDisabledTooltipText" xml:space="preserve">
+    <value>You can't check for update without an Internet connection.</value>
+  </data>
+  <data name="RefreshButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't refresh your storage information without an active Internet connection.</value>
+  </data>
+  <data name="RefreshButtonEnabledTooltipText" xml:space="preserve">
+    <value>Refresh your storage information.</value>
+  </data>
+  <data name="UploadButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't create your archive and start uploading it without an active Internet connection.</value>
+  </data>
+  <data name="UploadButtonEnabledTooltipText" xml:space="preserve">
+    <value>Create your archive and start uploading it.</value>
+  </data>
+  <data name="ConnectButtonDisabledTooltipText" xml:space="preserve">
+    <value>You can't connect your account without an active Internet connection.</value>
+  </data>
+  <data name="NameRulesFAQURLHelpText" xml:space="preserve">
+    <value>Click to open the BigStash FAQ website page.</value>
+  </data>
+  <data name="ExcludedFilesTitle" xml:space="preserve">
+    <value>Excluded files from new archive </value>
+  </data>
+  <data name="AppDataDirExplanationText" xml:space="preserve">
+    <value>application-specific data</value>
+  </data>
+  <data name="ClickCancelToCancelText" xml:space="preserve">
+    <value>or, if you don't want us to do this, click cancel to abandon the archive creation.</value>
+  </data>
+  <data name="ClickSaveToExportFileListText" xml:space="preserve">
+    <value>Click save to receive the full list as a text file.</value>
+  </data>
+  <data name="ExcludedFilesTextFileParagraph" xml:space="preserve">
+    <value>The following files will not be archived. You can read our FAQ about why some files are not archived here</value>
+  </data>
+  <data name="FollowingFilesNotArchivedText" xml:space="preserve">
+    <value>The following files will not be archived:</value>
+  </data>
+  <data name="RestrictedSelectionWarningFifthPartText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="RestrictedSelectionWarningFirstPartText" xml:space="preserve">
+    <value>Your selection includes the following folders</value>
+  </data>
+  <data name="RestrictedSelectionWarningFourthPartText" xml:space="preserve">
+    <value>Tip: You can just create a compressed file and archive it with us.</value>
+  </data>
+  <data name="RestrictedSelectionWarningSecondPartText" xml:space="preserve">
+    <value>which are system folders and cannot be archived safely using this program:</value>
+  </data>
+  <data name="RestrictedSelectionWarningThirdPartText" xml:space="preserve">
+    <value>We will go ahead and try to create the archive without</value>
+  </data>
+  <data name="ThisFolderText" xml:space="preserve">
+    <value>this folder</value>
+  </data>
+  <data name="ThoseFoldersText" xml:space="preserve">
+    <value>these folders</value>
+  </data>
+  <data name="WarningTitleText" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="WhyFilesWereExcludedShortText" xml:space="preserve">
+    <value>(Why?)</value>
+  </data>
+  <data name="WindowsDirExplanationText" xml:space="preserve">
+    <value>Windows system files</value>
+  </data>
+  <data name="PreviousSessionNoLongerValidText" xml:space="preserve">
+    <value>Your previous session is no longer valid. Please connect again.</value>
+  </data>
+  <data name="NoCompletedUploadsHeaderText" xml:space="preserve">
+    <value>Your completed uploads list is empty.</value>
+  </data>
+  <data name="ClearAllButtonContent" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="ClearAllCompletedButtonHelpText" xml:space="preserve">
+    <value>Click to remove all your completed uploads.</value>
+  </data>
+  <data name="FetchUploadTakingTooLongText" xml:space="preserve">
+    <value>Status refresh is taking too long. We're still trying...</value>
+  </data>
+  <data name="WaitingForCompletedStatusText" xml:space="preserve">
+    <value>Waiting for the service to verify your files.</value>
+  </data>
+  <data name="ErrorCheckingForUpdateGenericText" xml:space="preserve">
+    <value>There was an error while checking for updates.</value>
+  </data>
+  <data name="NoUpdatesFoundText" xml:space="preserve">
+    <value>No updates found.</value>
+  </data>
+  <data name="UpdateFoundText" xml:space="preserve">
+    <value>There are updates to be installed. Click to download and install them.</value>
+  </data>
+  <data name="InstallingUpdateText" xml:space="preserve">
+    <value>Installing the update...</value>
+  </data>
+  <data name="UpdateFoundButtonTooltipText" xml:space="preserve">
+    <value>A new software update is available.</value>
+  </data>
+  <data name="ErrorInitializingUploadLogText" xml:space="preserve">
+    <value>There was an error while initializing your upload. Please export the log file for more information using the "Open Log" button in the About screen and contact the BigStash team attaching the exported log file in your conversation.</value>
+  </data>
+  <data name="SecondText" xml:space="preserve">
+    <value>second</value>
+  </data>
+  <data name="WaitingToResumeText" xml:space="preserve">
+    <value>Resuming in</value>
+  </data>
+  <data name="StopWaitingtoResumeButtonContent" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="MinuteText" xml:space="preserve">
+    <value>minute</value>
+  </data>
+  <data name="ActivityHeader" xml:space="preserve">
+    <value>Activity</value>
+  </data>
+  <data name="ErrorFetchingActivityGenericText" xml:space="preserve">
+    <value>There was an error while fetching your activity.</value>
+  </data>
+  <data name="NoActivityText" xml:space="preserve">
+    <value>You don't have any activity.</value>
+  </data>
+  <data name="ErrorReadingTextFileGenericText" xml:space="preserve">
+    <value>An error occured while trying to load the necessary text file.</value>
+  </data>
+  <data name="FileDoesNotExistText" xml:space="preserve">
+    <value>It appears the necessary file is missing from your installation.</value>
+  </data>
+  <data name="HelpHeader" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="HelpHeaderTooltip" xml:space="preserve">
+    <value>Go to the BigStash support page.</value>
+  </data>
+</root>

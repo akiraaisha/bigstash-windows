@@ -1,0 +1,109 @@
+﻿<Window x:Class="BigStash.WPF.ExcludedFilesView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:local="clr-namespace:BigStash.WPF"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        Style="{DynamicResource ModalDialogStyle}"
+        SizeToContent="Height"
+        MinHeight="200"
+        WindowStartupLocation="CenterOwner"
+        >
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:BoolToVisibility x:Key="BoolToVisibilityConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/DeepfreezeApp;component/Styles/Modal.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Width="{Binding BodyWidth}" 
+            MaxWidth="1024"
+            HorizontalAlignment="Center" 
+            BorderThickness="0"
+            >
+
+        <Grid>
+
+            <StackPanel>
+
+                <Label 
+                       Style="{StaticResource HeaderLabelStyle}"
+                       HorizontalAlignment="Stretch"
+                       Margin="0 10 0 5"
+                       >
+
+                    <TextBlock Text="{Binding Title}" 
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis" 
+                               LineStackingStrategy="MaxHeight"
+                               MaxHeight="70"
+                               HorizontalAlignment="Stretch"
+                               />
+                </Label>
+
+                <Label x:Name="TopMessageText"
+                       Style="{StaticResource DescriptionHeaderStyle}"
+                       HorizontalAlignment="Stretch"
+                       />
+
+                <Label Style="{StaticResource DescriptionHeaderStyle}"
+                       HorizontalAlignment="Stretch"
+                       >
+                    <TextBlock Text="{Binding WhyText}"
+                               Cursor="Hand"
+                               TextDecorations="Underline"
+                               Foreground="Blue"
+                               cal:Message.Attach="[Event MouseLeftButtonUp] = [Action OpenNameRulesFAQPage()]"
+                               />
+                </Label>
+
+                <TextBox x:Name="ExcludedFilesText"
+                         Height="Auto"
+                         MaxHeight="200"
+                         IsReadOnly="True"
+                         Width="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         VerticalScrollBarVisibility="Auto"
+                         Margin="0 10 0 10"
+                         />
+
+                <Label Style="{StaticResource DescriptionHeaderStyle}"
+                       HorizontalAlignment="Stretch"
+                       >
+                    <TextBlock x:Name="BottomMessageText" 
+                               TextWrapping="Wrap"
+                               />
+                </Label> 
+
+                <WrapPanel HorizontalAlignment="Right"
+                           Margin="0 10 10 20"
+                           >
+                    
+                    <Button x:Name="Save" 
+                            Content="Save" 
+                            IsDefault="True"
+                            Width="70"
+                            Style="{DynamicResource AccentedSquareButtonStyleCI}"
+                            Margin="0 0 5 0"
+                            />
+
+                    <Button Content="Close" 
+                            Width="70"
+                            Style="{DynamicResource SquareButtonStyleCI}"
+                            Margin="5 0 0 0"
+                            cal:Message.Attach="[Event Click] = [Action Close()]"
+                            />
+
+                </WrapPanel>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</Window>
